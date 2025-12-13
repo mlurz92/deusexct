@@ -1,231 +1,231 @@
-(()=>{"use strict";
-const V="3";
-const SHELL=`dexct_shell_v${V}`;
-const RT=`dexct_rt_v${V}`;
-const ORIGIN=self.location.origin;
-const SHELL_URLS=["./","./index.html","./player.html","./app.css","./app.js","./manifest.webmanifest","./catalog.json","./Cover/00-Albumcover.jpg"];
+"use strict";
+const VER="v3";
+const CACHE=`dexct-cache-${VER}`;
+const CORE=[
+  "./",
+  "./index.html",
+  "./player.html",
+  "./app.css",
+  "./app.js",
+  "./catalog.json",
+  "./manifest.webmanifest",
+  "./Cover/00-Albumcover.jpg"
+].map(p=>new URL(p,self.registration.scope).toString());
 
-const toAbs=(u)=>new URL(u,self.location).toString();
-const isSameOrigin=(u)=>{try{return new URL(u,self.location).origin===ORIGIN}catch{return false}};
 const uniq=(arr)=>{
   const s=new Set();
   const out=[];
-  for(const v of arr||[]){
-    const a=toAbs(v);
-    if(!s.has(a)){s.add(a);out.push(a)}
+  for(const x of arr){
+    const v=String(x||"");
+    if(!v) continue;
+    if(!s.has(v)){ s.add(v); out.push(v); }
   }
   return out;
 };
+
 const postAll=async(msg)=>{
-  const cs=await self.clients.matchAll({type:"window",includeUncontrolled:true});
-  for(const c of cs) try{c.postMessage(msg)}catch{}
-};
-const openShell=()=>caches.open(SHELL);
-const openRT=()=>caches.open(RT);
-
-self.addEventListener("install",(e)=>{
-  e.waitUntil((async()=>{
-    const c=await openShell();
-    await c.addAll(SHELL_URLS.map(toAbs));
-    await self.skipWaiting();
-  })());
-});
-
-self.addEventListener("activate",(e)=>{
-  e.waitUntil((async()=>{
-    const keys=await caches.keys();
-    await Promise.all(keys.map(k=>{
-      const keep=(k===SHELL||k===RT);
-      const known=(k.startsWith("dexct_shell_v")||k.startsWith("dexct_rt_v"));
-      return (!keep && known) ? caches.delete(k) : Promise.resolve();
-    }));
-    await self.clients.claim();
-  })());
-});
-
-const rangeParse=(range,size)=>{
-  if(!range) return null;
-  const m=/bytes=(\d*)-(\d*)/i.exec(range);
-  if(!m) return null;
-  let start=m[1]?parseInt(m[1],10):NaN;
-  let end=m[2]?parseInt(m[2],10):NaN;
-  if(Number.isNaN(start)&&Number.isNaN(end)) return null;
-  if(Number.isNaN(start)){
-    const suf=end;
-    if(!isFinite(suf)||suf<=0) return null;
-    start=Math.max(0,size-suf);
-    end=size-1;
-  }else if(Number.isNaN(end)){
-    end=size-1;
-  }
-  start=Math.max(0,start);
-  end=Math.min(size-1,end);
-  if(end<start) return null;
-  return {start,end};
-};
-
-const respondRange=async(req,res)=>{
   try{
-    const ab=await res.arrayBuffer();
-    const u8=new Uint8Array(ab);
-    const r=rangeParse(req.headers.get("range"),u8.length);
-    if(!r) return res;
-    const chunk=u8.slice(r.start,r.end+1);
-    const h=new Headers();
-    const ct=res.headers.get("content-type")||"application/octet-stream";
-    h.set("Content-Type",ct);
-    h.set("Accept-Ranges","bytes");
-    h.set("Content-Range",`bytes ${r.start}-${r.end}/${u8.length}`);
-    h.set("Content-Length",String(chunk.byteLength));
-    return new Response(chunk,{status:206,statusText:"Partial Content",headers:h});
+    const cs=await self.clients.matchAll({type:"window",includeUncontrolled:true});
+    for(const c of cs) try{ c.postMessage(msg); }catch{}
+  }catch{}
+};
+
+const extOf=(u)=>{
+  const p=u.pathname||"";
+  const i=p.lastIndexOf(".");
+  return i>=0?p.slice(i+1).toLowerCase():"";
+};
+
+const guessType=(u,fromHeaders)=>{
+  const h=fromHeaders||"";
+  if(h) return h;
+  const e=extOf(u);
+  if(e==="mp3") return "audio/mpeg";
+  if(e==="mp4") return "video/mp4";
+  if(e==="lrc") return "text/plain; charset=utf-8";
+  if(e==="json") return "application/json; charset=utf-8";
+  if(e==="css") return "text/css; charset=utf-8";
+  if(e==="js") return "application/javascript; charset=utf-8";
+  if(e==="webmanifest") return "application/manifest+json; charset=utf-8";
+  if(e==="jpg"||e==="jpeg") return "image/jpeg";
+  if(e==="png") return "image/png";
+  if(e==="webp") return "image/webp";
+  if(e==="svg") return "image/svg+xml; charset=utf-8";
+  if(e==="html") return "text/html; charset=utf-8";
+  return "application/octet-stream";
+};
+
+const cachePutSafe=async(cache,req,res)=>{
+  try{
+    if(!res || !res.ok) return false;
+    const cc=res.headers.get("Cache-Control")||"";
+    if(/\bno-store\b/i.test(cc)) return false;
+    await cache.put(req,res);
+    return true;
   }catch{
-    return res;
+    return false;
   }
 };
 
-const fetchAndMaybeCache=async(req,cacheKey,cacheIt)=>{
-  const res=await fetch(req);
-  if(cacheIt && res && res.ok){
-    try{
-      const c=await openRT();
-      await c.put(cacheKey||req,res.clone());
-    }catch{}
+const fetchSafe=async(req)=>{
+  try{
+    const r=await fetch(req);
+    return r;
+  }catch{
+    return null;
   }
-  return res;
 };
-
-const navFallback=async(req)=>{
-  const u=new URL(req.url);
-  const isPlayer=u.pathname.toLowerCase().endsWith("player.html");
-  const c=await openShell();
-  const hit=await c.match(req,{ignoreSearch:false});
-  if(hit) return hit;
-  const fb=await c.match(toAbs(isPlayer?"./player.html":"./index.html"),{ignoreSearch:true});
-  return fb||new Response("",{status:503});
-};
-
-const shouldAutoCache=(req)=>{
-  const u=new URL(req.url);
-  const p=u.pathname.toLowerCase();
-  if(p.endsWith(".mp3")||p.endsWith(".mp4")) return false;
-  if(p.endsWith(".jpg")||p.endsWith(".jpeg")||p.endsWith(".png")||p.endsWith(".webp")) return true;
-  if(p.endsWith(".css")||p.endsWith(".js")||p.endsWith(".json")||p.endsWith(".lrc")||p.endsWith(".webmanifest")||p.endsWith(".svg")) return true;
-  if(u.pathname.endsWith("/")||p.endsWith("index.html")||p.endsWith("player.html")) return true;
-  return false;
-};
-
-self.addEventListener("fetch",(e)=>{
-  const req=e.request;
-  if(req.method!=="GET") return;
-  const url=req.url;
-  if(!isSameOrigin(url)) return;
-
-  if(req.mode==="navigate"){
-    e.respondWith((async()=>{
-      try{
-        const res=await fetch(req);
-        try{
-          const c=await openShell();
-          if(res && res.ok) await c.put(req,res.clone());
-        }catch{}
-        return res;
-      }catch{
-        return await navFallback(req);
-      }
-    })());
-    return;
-  }
-
-  e.respondWith((async()=>{
-    const u=new URL(url);
-    const p=u.pathname.toLowerCase();
-    const isMedia=(p.endsWith(".mp3")||p.endsWith(".mp4"));
-    const hasRange=!!req.headers.get("range");
-
-    const rt=await openRT().catch(()=>null);
-    const sh=await openShell().catch(()=>null);
-
-    let hit=null;
-    if(rt) hit=await rt.match(req,{ignoreSearch:false}).catch(()=>null);
-    if(!hit && sh) hit=await sh.match(req,{ignoreSearch:false}).catch(()=>null);
-
-    if(hit){
-      if(hasRange) return await respondRange(req,hit.clone());
-      return hit;
-    }
-
-    if(isMedia){
-      try{
-        const res=await fetch(req);
-        return res;
-      }catch{
-        const sh2=await openShell().catch(()=>null);
-        if(sh2){
-          const fb=await sh2.match(toAbs("./index.html"),{ignoreSearch:true}).catch(()=>null);
-          if(fb) return fb;
-        }
-        return new Response("",{status:504});
-      }
-    }
-
-    try{
-      const cacheIt=shouldAutoCache(req);
-      const res=await fetchAndMaybeCache(req,req,cacheIt);
-      return res;
-    }catch{
-      if(sh){
-        const fb=await sh.match(req,{ignoreSearch:true}).catch(()=>null);
-        if(fb) return fb;
-      }
-      return new Response("",{status:504});
-    }
-  })());
-});
 
 const cacheAll=async(urls)=>{
-  const list=uniq((urls||[]).filter(isSameOrigin));
-  if(!list.length){
-    await postAll({type:"CACHE_DONE",cached:false});
-    return;
-  }
-  const c=await openRT();
+  const list=uniq([...(CORE||[]),...(urls||[])]).filter(u=>{
+    try{ return new URL(u).origin===self.location.origin; }catch{ return false; }
+  });
+  const cache=await caches.open(CACHE);
   let ok=0;
   for(let i=0;i<list.length;i++){
     const u=list[i];
-    const name=(()=>{try{return decodeURIComponent(new URL(u).pathname.split("/").pop()||"")||"…"}catch{return "…"}})();
-    await postAll({type:"CACHE_PROGRESS",label:`${i+1}/${list.length} · ${name}`});
+    await postAll({type:"CACHE_PROGRESS",label:`${i+1}/${list.length}`});
     try{
-      const req=new Request(u,{cache:"reload"});
-      const res=await fetch(req);
+      const req=new Request(u,{method:"GET",cache:"reload",credentials:"same-origin",mode:"same-origin"});
+      const res=await fetchSafe(req);
       if(res && res.ok){
-        await c.put(req,res.clone());
-        ok++;
+        const put=await cachePutSafe(cache,req,res.clone());
+        if(put) ok++;
       }
     }catch{}
   }
   await postAll({type:"CACHE_DONE",cached:ok>0});
 };
 
-const clearRT=async()=>{
-  const keys=await caches.keys();
-  await Promise.all(keys.filter(k=>k.startsWith("dexct_rt_v")).map(k=>caches.delete(k)));
+const clearCache=async()=>{
+  try{ await caches.delete(CACHE); }catch{}
   await postAll({type:"CACHE_DONE",cached:false});
 };
 
+self.addEventListener("install",(e)=>{
+  e.waitUntil((async()=>{
+    try{
+      const cache=await caches.open(CACHE);
+      for(const u of CORE){
+        try{
+          const req=new Request(u,{method:"GET",cache:"reload",credentials:"same-origin",mode:"same-origin"});
+          const res=await fetchSafe(req);
+          if(res && res.ok) await cachePutSafe(cache,req,res.clone());
+        }catch{}
+      }
+    }catch{}
+    try{ await self.skipWaiting(); }catch{}
+  })());
+});
+
+self.addEventListener("activate",(e)=>{
+  e.waitUntil((async()=>{
+    try{
+      const keys=await caches.keys();
+      await Promise.all(keys.map(k=>k===CACHE?null:caches.delete(k)));
+    }catch{}
+    try{ await self.clients.claim(); }catch{}
+  })());
+});
+
 self.addEventListener("message",(e)=>{
   const d=e.data||{};
-  const t=d.type||"";
+  const t=String(d.type||"");
   if(t==="CACHE_ALL"){
     const urls=Array.isArray(d.urls)?d.urls:[];
     e.waitUntil(cacheAll(urls));
     return;
   }
   if(t==="CLEAR_CACHE"){
-    e.waitUntil(clearRT());
+    e.waitUntil(clearCache());
     return;
   }
-  if(t==="PING"){
-    e.waitUntil(postAll({type:"PONG"}));
-  }
 });
-})();
+
+const respondRangeFromCache=async(req)=>{
+  const range=req.headers.get("range");
+  if(!range) return null;
+  const m=/bytes\s*=\s*(\d*)\s*-\s*(\d*)/i.exec(range);
+  if(!m) return null;
+  const startRaw=m[1],endRaw=m[2];
+  const url=req.url;
+  const cache=await caches.open(CACHE);
+  const full=await cache.match(url,{ignoreVary:true});
+  if(!full) return null;
+  let buf;
+  try{ buf=await full.arrayBuffer(); }catch{ return null; }
+  const len=buf.byteLength;
+  let start=startRaw?parseInt(startRaw,10):0;
+  let end=endRaw?parseInt(endRaw,10):(len-1);
+  if(!isFinite(start)) start=0;
+  if(!isFinite(end)) end=len-1;
+  start=Math.max(0,Math.min(start,len-1));
+  end=Math.max(start,Math.min(end,len-1));
+  const chunk=buf.slice(start,end+1);
+  const u=new URL(url);
+  const ct=guessType(u,full.headers.get("Content-Type")||"");
+  const h=new Headers();
+  h.set("Content-Type",ct);
+  h.set("Accept-Ranges","bytes");
+  h.set("Content-Range",`bytes ${start}-${end}/${len}`);
+  h.set("Content-Length",String(chunk.byteLength));
+  const etag=full.headers.get("ETag");
+  if(etag) h.set("ETag",etag);
+  const lm=full.headers.get("Last-Modified");
+  if(lm) h.set("Last-Modified",lm);
+  return new Response(chunk,{status:206,statusText:"Partial Content",headers:h});
+};
+
+const navResponse=async(req)=>{
+  const cache=await caches.open(CACHE);
+  const net=await fetchSafe(req);
+  if(net && net.ok){
+    cachePutSafe(cache,req,net.clone());
+    return net;
+  }
+  const cached=await cache.match(req,{ignoreSearch:false});
+  if(cached) return cached;
+  const fallback=await cache.match(new URL("./index.html",self.registration.scope).toString(),{ignoreSearch:true});
+  if(fallback) return fallback;
+  return new Response("Offline",{status:503,headers:{"Content-Type":"text/plain; charset=utf-8"}});
+};
+
+const assetResponse=async(req)=>{
+  const url=new URL(req.url);
+  const cache=await caches.open(CACHE);
+  const cached=await cache.match(req,{ignoreSearch:false,ignoreVary:true});
+  if(cached) return cached;
+  const net=await fetchSafe(req);
+  if(net && net.ok){
+    const e=extOf(url);
+    if(e && ["js","css","json","webmanifest","jpg","jpeg","png","webp","svg","mp3","mp4","lrc","html"].includes(e)){
+      cachePutSafe(cache,req,net.clone());
+    }
+    return net;
+  }
+  const fallback=await cache.match(url.toString(),{ignoreSearch:true,ignoreVary:true});
+  if(fallback) return fallback;
+  return new Response("Offline",{status:503,headers:{"Content-Type":"text/plain; charset=utf-8"}});
+};
+
+self.addEventListener("fetch",(e)=>{
+  const req=e.request;
+  if(req.method!=="GET") return;
+  const url=new URL(req.url);
+  if(url.origin!==self.location.origin) return;
+  if(req.headers.has("range")){
+    e.respondWith((async()=>{
+      const fromCache=await respondRangeFromCache(req);
+      if(fromCache) return fromCache;
+      const net=await fetchSafe(req);
+      if(net) return net;
+      return new Response("",{status:416,headers:{"Content-Type":"text/plain; charset=utf-8"}});
+    })());
+    return;
+  }
+  if(req.mode==="navigate" || (req.headers.get("accept")||"").includes("text/html")){
+    e.respondWith(navResponse(req));
+    return;
+  }
+  e.respondWith(assetResponse(req));
+});
