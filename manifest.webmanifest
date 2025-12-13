@@ -1,82 +1,82 @@
 {
-  "name": "Deus ex CT",
+  "name": "Deus ex CT · Album Player",
   "short_name": "Deus ex CT",
-  "description": "Deus ex CT · Album Player mit Playlist, Audio/Video-Modus, Karaoke-Lyrics (aktuelle Zeile) sowie Download von Album (MP3) und einzelnen Lyrics-Videos.",
-  "id": "./",
-  "start_url": "./index.html",
+  "description": "Deus ex CT – moderner Album-Player mit Playlist, Audio/Video-Modus, Deep-Links pro Track und Karaoke-Lyrics (eine Zeile).",
+  "id": "./index.html",
   "scope": "./",
+  "start_url": "./index.html",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui", "browser"],
-  "orientation": "portrait-primary",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui", "browser"],
+  "orientation": "any",
+  "lang": "de-DE",
+  "dir": "ltr",
   "theme_color": "#050712",
   "background_color": "#050712",
   "categories": ["music", "entertainment", "multimedia"],
-  "lang": "de",
-  "dir": "ltr",
   "prefer_related_applications": false,
   "icons": [
     {
       "src": "./Cover/00-Albumcover.jpg",
-      "sizes": "512x512",
+      "sizes": "any",
       "type": "image/jpeg",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "./Cover/00-Albumcover.jpg",
-      "sizes": "192x192",
+      "sizes": "any",
       "type": "image/jpeg",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [
     {
-      "name": "Play",
-      "short_name": "Play",
-      "description": "Startet die Wiedergabe.",
-      "url": "./index.html#play",
+      "name": "Start",
+      "short_name": "Start",
+      "description": "Startseite öffnen",
+      "url": "./index.html",
       "icons": [
         {
           "src": "./Cover/00-Albumcover.jpg",
-          "sizes": "192x192",
+          "sizes": "any",
           "type": "image/jpeg"
         }
       ]
     },
     {
-      "name": "Songs",
-      "short_name": "Songs",
-      "description": "Öffnet die Playlist.",
-      "url": "./index.html#songs",
+      "name": "Player (Audio)",
+      "short_name": "Audio",
+      "description": "Player im Audio-Modus öffnen",
+      "url": "./player.html?mode=audio",
       "icons": [
         {
           "src": "./Cover/00-Albumcover.jpg",
-          "sizes": "192x192",
+          "sizes": "any",
           "type": "image/jpeg"
         }
       ]
     },
     {
-      "name": "Suche",
-      "short_name": "Suche",
-      "description": "Öffnet die Suche.",
-      "url": "./index.html#search",
-      "icons": [
-        {
-          "src": "./Cover/00-Albumcover.jpg",
-          "sizes": "192x192",
-          "type": "image/jpeg"
-        }
-      ]
-    },
-    {
-      "name": "Video",
+      "name": "Player (Video)",
       "short_name": "Video",
-      "description": "Schaltet auf Lyrics-Video.",
-      "url": "./index.html#video",
+      "description": "Player im Video-Modus öffnen",
+      "url": "./player.html?mode=video",
       "icons": [
         {
           "src": "./Cover/00-Albumcover.jpg",
-          "sizes": "192x192",
+          "sizes": "any",
+          "type": "image/jpeg"
+        }
+      ]
+    },
+    {
+      "name": "Track 01",
+      "short_name": "Track 01",
+      "description": "Direkt zu Track 01",
+      "url": "./player.html?track=01&mode=audio",
+      "icons": [
+        {
+          "src": "./Cover/00-Albumcover.jpg",
+          "sizes": "any",
           "type": "image/jpeg"
         }
       ]
