@@ -1,0 +1,51 @@
+{
+  "name": "Deus ex CT · Album Player",
+  "short_name": "Deus ex CT",
+  "id": "./",
+  "start_url": "./index.html",
+  "scope": "./",
+  "description": "Responsive WebApp zur Präsentation des Albums Deus ex CT mit Playlist, Audio-Player, Lyrics (LRC-Sync), Lyrics-Video und Download-Funktionen.",
+  "lang": "de",
+  "dir": "ltr",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "orientation": "any",
+  "theme_color": "#0b0f1a",
+  "background_color": "#050712",
+  "categories": ["music", "entertainment", "multimedia"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "./Cover/00-Albumcover.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "./Cover/00-Albumcover.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "./Cover/00-Albumcover.jpg",
+      "sizes": "1024x1024",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Player öffnen",
+      "short_name": "Player",
+      "url": "./index.html",
+      "icons": [
+        {
+          "src": "./Cover/00-Albumcover.jpg",
+          "sizes": "192x192",
+          "type": "image/jpeg"
+        }
+      ]
+    }
+  ]
+}
