@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#050712">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="format-detection" content="telephone=no">
+  <title>Deus ex CT · Player</title>
+
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./Cover/00-Albumcover.jpg">
+  <link rel="apple-touch-icon" href="./Cover/00-Albumcover.jpg">
+  <link rel="preload" as="image" href="./Cover/00-Albumcover.jpg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="./app.css">
+
+  <script>document.documentElement.classList.add("js")</script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+</head>
+
+<body data-page="player" data-mode="audio" data-lyrics="on" data-lyrics-size="lg">
+  <div id="boot" aria-hidden="true">
+    <div class="bootCard" role="status" aria-live="polite">
+      <div class="bootArt"><img src="./Cover/00-Albumcover.jpg" alt="Deus ex CT"></div>
+      <div class="bootTxt">
+        <div class="bootTitle">Deus ex CT</div>
+        <div class="bootSub">Player wird geladen…</div>
+      </div>
+      <div class="bootSpin"></div>
+    </div>
+  </div>
+
+  <div class="app">
+    <header class="topbar" role="banner">
+      <div class="brand">
+        <a class="brandCover" href="./index.html" aria-label="Zur Startseite">
+          <img src="./Cover/00-Albumcover.jpg" alt="Deus ex CT Albumcover" loading="eager" decoding="async">
+        </a>
+        <div class="brandMeta">
+          <div class="brandTitle">Deus ex CT</div>
+          <div id="brandSub" class="brandSub">Player · Deep-Links · Karaoke Lyrics</div>
+        </div>
+      </div>
+
+      <div class="topActions" aria-label="Aktionen">
+        <button id="openSongs" class="pillBtn" type="button" aria-label="Songs öffnen">
+          <i class="fa-solid fa-music" aria-hidden="true"></i>
+          <span class="lbl">Songs</span>
+        </button>
+
+        <button id="downloadAlbum" class="pillBtn" type="button" aria-label="Album als MP3 herunterladen">
+          <i class="fa-solid fa-download" aria-hidden="true"></i>
+          <span class="lbl">Album</span>
+        </button>
+
+        <button id="modeToggle" class="pillBtn" type="button" aria-label="Audio/Video umschalten">
+          <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+          <span class="lbl" id="modeLabel">Audio</span>
+        </button>
+
+        <button id="openSettings" class="iconBtn" type="button" aria-label="Einstellungen öffnen">
+          <i class="fa-solid fa-gear" aria-hidden="true"></i>
+        </button>
+      </div>
+    </header>
+
+    <main class="main" role="main">
+      <section class="library" aria-label="Playlist">
+        <div class="libraryHead">
+          <div class="libraryTitle">Playlist</div>
+          <div id="libraryMeta" class="libraryMeta">Alle Songs</div>
+        </div>
+        <div id="list" class="list" role="listbox" aria-label="Songliste" tabindex="0"></div>
+      </section>
+
+      <section class="stage" aria-label="Player Bereich">
+        <section class="hero" aria-label="Player">
+          <div class="heroBg" aria-hidden="true"></div>
+
+          <div class="now" id="nowTop">
+            <div class="artWrap" aria-label="Cover">
+              <div class="artGlow" aria-hidden="true"></div>
+              <img id="art" class="art" src="./Cover/00-Albumcover.jpg" alt="Cover" loading="eager" decoding="async">
+            </div>
+
+            <div class="nowMeta">
+              <div class="nowTitleRow">
+                <div id="nowTitle" class="nowTitle">Deus ex CT</div>
+                <div class="nowBadges" aria-label="Status">
+                  <span id="badgeMode" class="badge">Audio</span>
+                  <span id="badgeTrack" class="badge">#01/12</span>
+                </div>
+              </div>
+
+              <div id="nowSub" class="nowSub">Bereit</div>
+
+              <div class="transport" aria-label="Transport">
+                <button id="shuffle" class="circleBtn" type="button" aria-label="Shuffle">
+                  <i class="fa-solid fa-shuffle" aria-hidden="true"></i>
+                </button>
+
+                <button id="prev" class="circleBtn" type="button" aria-label="Vorheriger Track">
+                  <i class="fa-solid fa-backward-step" aria-hidden="true"></i>
+                </button>
+
+                <button id="play" class="circleBtn primary" type="button" aria-label="Play">
+                  <i id="playIcon" class="fa-solid fa-play" aria-hidden="true"></i>
+                </button>
+
+                <button id="next" class="circleBtn" type="button" aria-label="Nächster Track">
+                  <i class="fa-solid fa-forward-step" aria-hidden="true"></i>
+                </button>
+
+                <button id="repeat" class="chipBtn" type="button" aria-label="Repeat">
+                  <i class="fa-solid fa-repeat" aria-hidden="true"></i>
+                  <span id="repeatLabel">Off</span>
+                </button>
+
+                <div class="spacer"></div>
+
+                <button id="copyLink" class="chipBtn" type="button" aria-label="Track-Link kopieren">
+                  <i class="fa-solid fa-link" aria-hidden="true"></i>
+                  <span>Link</span>
+                </button>
+
+                <button id="downloadTrack" class="chipBtn" type="button" aria-label="MP3 herunterladen">
+                  <i class="fa-solid fa-file-arrow-down" aria-hidden="true"></i>
+                  <span>MP3</span>
+                </button>
+
+                <button id="downloadVideo" class="chipBtn" type="button" aria-label="Lyrics-Video herunterladen">
+                  <i class="fa-solid fa-film" aria-hidden="true"></i>
+                  <span>Video</span>
+                </button>
+
+                <button id="downloadLrc" class="chipBtn" type="button" aria-label="LRC herunterladen">
+                  <i class="fa-solid fa-scroll" aria-hidden="true"></i>
+                  <span>LRC</span>
+                </button>
+              </div>
+
+              <div class="timeline" aria-label="Timeline">
+                <div id="tCur" class="time">0:00</div>
+                <input id="seek" class="seek" type="range" min="0" max="1000" step="1" value="0" aria-label="Seek">
+                <div id="tDur" class="time">—:—</div>
+              </div>
+
+              <div class="fine" aria-label="Feinsteuerung">
+                <div class="vol" aria-label="Lautstärke">
+                  <i class="fa-solid fa-volume-high" aria-hidden="true"></i>
+                  <input id="vol" class="volRange" type="range" min="0" max="1" step="0.01" value="0.9" aria-label="Volume">
+                </div>
+
+                <button id="jumpBack" class="miniBtn" type="button" aria-label="10 Sekunden zurück">
+                  <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+                  <span>-10s</span>
+                </button>
+
+                <button id="jumpFwd" class="miniBtn" type="button" aria-label="10 Sekunden vor">
+                  <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+                  <span>+10s</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mediaPane" aria-label="Medien">
+            <video id="video" class="video" playsinline webkit-playsinline preload="metadata"></video>
+            <audio id="audio" preload="metadata"></audio>
+          </div>
+        </section>
+
+        <section class="lyrics" aria-label="Lyrics">
+          <div class="lyricsHead">
+            <div class="lyricsTitle">Lyrics</div>
+            <div class="lyricsActions">
+              <button id="lyricsSize" class="iconBtn" type="button" aria-label="Textgröße">
+                <i class="fa-solid fa-text-height" aria-hidden="true"></i>
+              </button>
+              <button id="lyricsClose" class="iconBtn" type="button" aria-label="Lyrics ausblenden">
+                <i class="fa-solid fa-eye-slash" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+          <div id="lyricsBody" class="lyricsBody" aria-live="polite" aria-label="Aktuelle Lyrics Zeile"></div>
+        </section>
+      </section>
+    </main>
+
+    <div id="toastHost" class="toastHost" aria-live="polite" aria-atomic="true"></div>
+  </div>
+
+  <div id="songsSheet" class="sheet" hidden>
+    <div class="sheetBackdrop" data-close="1" aria-hidden="true"></div>
+    <div class="sheetPanel wide" role="dialog" aria-modal="true" aria-label="Songs">
+      <div class="sheetTop">
+        <div class="sheetTitle">Songs</div>
+        <button class="iconBtn" type="button" data-close="1" aria-label="Schließen">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="sheetBody">
+        <div class="libraryHead">
+          <div class="libraryTitle">Playlist</div>
+          <div id="songsMeta" class="libraryMeta">Alle Songs</div>
+        </div>
+        <div id="songsList" class="list" role="listbox" aria-label="Songliste (Sheet)" tabindex="0"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="albumSheet" class="sheet" hidden>
+    <div class="sheetBackdrop" data-close="1" aria-hidden="true"></div>
+    <div class="sheetPanel wide" role="dialog" aria-modal="true" aria-label="Album">
+      <div class="sheetTop">
+        <div class="sheetTitle">Album</div>
+        <button class="iconBtn" type="button" data-close="1" aria-label="Schließen">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="sheetBody">
+        <div class="albumBody">
+          <div class="albumGrid">
+            <div class="albumArt">
+              <img src="./Cover/00-Albumcover.jpg" alt="Deus ex CT Albumcover" loading="eager" decoding="async">
+            </div>
+            <div class="albumText">
+              <div class="albumH">Deus ex CT</div>
+              <div class="albumP">Playlist-Player mit Audio/Video-Modus, Karaoke-Lyrics (immer genau eine Zeile) und Download-Funktionen für Album & einzelne Lyrics-Videos. Deep-Link pro Track: <span style="font-weight:900;opacity:.9">player.html?track=03</span>.</div>
+              <div class="albumBtns">
+                <button id="albumDownload2" class="miniBtn" type="button" aria-label="Album als MP3 herunterladen">
+                  <i class="fa-solid fa-download" aria-hidden="true"></i>
+                  <span>Album MP3</span>
+                </button>
+                <a class="miniBtn" href="./index.html" aria-label="Zur Startseite">
+                  <i class="fa-solid fa-house" aria-hidden="true"></i>
+                  <span>Start</span>
+                </a>
+              </div>
+              <div id="albumStatus" class="albumSmall">Bereit</div>
+            </div>
+          </div>
+
+          <div id="albumProgress" class="albumProgress" hidden>
+            <div class="progRow">
+              <div id="progLbl" class="progLbl">…</div>
+              <div id="progPct" class="progPct">0%</div>
+            </div>
+            <div class="progBar" aria-hidden="true">
+              <div id="progFill" class="progFill"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="settingsSheet" class="sheet" hidden>
+    <div class="sheetBackdrop" data-close="1" aria-hidden="true"></div>
+    <div class="sheetPanel" role="dialog" aria-modal="true" aria-label="Einstellungen">
+      <div class="sheetTop">
+        <div class="sheetTitle">Einstellungen</div>
+        <button class="iconBtn" type="button" data-close="1" aria-label="Schließen">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="sheetBody">
+        <div class="setRow" aria-label="Modus">
+          <div>
+            <div class="setKey">Modus</div>
+            <div class="setVal">Audio oder Video</div>
+          </div>
+          <div class="seg" role="tablist" aria-label="Modus Auswahl">
+            <button id="setAudio" class="segBtn active" type="button" role="tab" aria-selected="true">Audio</button>
+            <button id="setVideo" class="segBtn" type="button" role="tab" aria-selected="false">Video</button>
+          </div>
+        </div>
+
+        <div class="setRow" aria-label="Auto-Play">
+          <div>
+            <div class="setKey">Auto-Play</div>
+            <div id="autoPlayLbl" class="setVal">Aus</div>
+          </div>
+          <label class="toggle" aria-label="Auto-Play Toggle">
+            <input id="autoPlay" type="checkbox">
+            <span class="knob" aria-hidden="true"></span>
+          </label>
+        </div>
+
+        <div class="setRow" aria-label="Offline Cache">
+          <div>
+            <div class="setKey">Offline Cache</div>
+            <div id="cacheLbl" class="setVal">Einrichten</div>
+          </div>
+          <button id="cacheBtn" class="miniBtn" type="button" aria-label="Offline Cache einrichten oder löschen">
+            <i class="fa-solid fa-cloud-arrow-down" aria-hidden="true"></i>
+            <span>Cache</span>
+          </button>
+        </div>
+
+        <div class="albumSmall">Hinweis: Offline Cache funktioniert zuverlässig über HTTPS oder localhost.</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
