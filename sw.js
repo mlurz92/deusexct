@@ -1,5 +1,5 @@
 (()=>{"use strict";
-const VER="20251213_1";
+const VER="20251213_2";
 const CORE=`dexct_v${VER}`;
 const RT=`dexct_rt${VER}`;
 const CORE_URLS=[
@@ -14,18 +14,12 @@ const CORE_URLS=[
 
 const sameOrigin=u=>{try{return new URL(u).origin===self.location.origin}catch{return false}};
 const isHTML=req=>req.mode==="navigate"||((req.headers.get("accept")||"").includes("text/html"));
-const isMedia=(u)=>{
-  const p=u.pathname.toLowerCase();
-  return p.endsWith(".mp3")||p.endsWith(".mp4")||p.endsWith(".m4a")||p.endsWith(".webm")||p.endsWith(".wav");
-};
+const isMedia=u=>{const p=u.pathname.toLowerCase();return p.endsWith(".mp3")||p.endsWith(".mp4")||p.endsWith(".m4a")||p.endsWith(".webm")||p.endsWith(".wav")};
 const isLrc=u=>u.pathname.toLowerCase().endsWith(".lrc");
-const isImage=u=>{
-  const p=u.pathname.toLowerCase();
-  return p.endsWith(".jpg")||p.endsWith(".jpeg")||p.endsWith(".png")||p.endsWith(".webp")||p.endsWith(".gif")||p.endsWith(".avif")||p.endsWith(".svg");
-};
+const isImage=u=>{const p=u.pathname.toLowerCase();return p.endsWith(".jpg")||p.endsWith(".jpeg")||p.endsWith(".png")||p.endsWith(".webp")||p.endsWith(".gif")||p.endsWith(".avif")||p.endsWith(".svg")};
 const isAppAsset=u=>{
   const p=u.pathname;
-  return p.endsWith("/app.js")||p.endsWith("/app.css")||p.endsWith("/manifest.webmanifest")||p.endsWith("/index.html")||p.endsWith("/player.html")||p.endsWith("/sw.js")||p.endsWith("/Cover/00-Albumcover.jpg");
+  return p.endsWith("/app.js")||p.endsWith("/app.css")||p.endsWith("/manifest.webmanifest")||p.endsWith("/index.html")||p.endsWith("/player.html")||p.endsWith("/sw.js")||p.endsWith("/Cover/00-Albumcover.jpg")||p==="/"||p.endsWith("/WebApp/")||p.endsWith("/WebApp");
 };
 
 const broadcast=async(msg)=>{
@@ -53,7 +47,7 @@ const cleanup=async()=>{
   }));
 };
 
-const rangeParse=(h)=>{
+const rangeParse=h=>{
   if(!h) return null;
   const m=/bytes=(\d+)-(\d+)?/i.exec(h);
   if(!m) return null;
@@ -65,8 +59,7 @@ const rangeParse=(h)=>{
 };
 
 const rangeFromCache=async(req,cacheName)=>{
-  const range=req.headers.get("range");
-  const r=rangeParse(range);
+  const r=rangeParse(req.headers.get("range"));
   if(!r) return null;
   const cache=await caches.open(cacheName);
   const full=await cache.match(req.url,{ignoreVary:true});
@@ -75,28 +68,21 @@ const rangeFromCache=async(req,cacheName)=>{
   const size=buf.byteLength;
   const start=Math.min(r.s,size);
   const end=r.e===null?size-1:Math.min(r.e,size-1);
-  if(start>size-1) return new Response(null,{status:416,headers:{
-    "Content-Range":`bytes */${size}`
-  }});
+  if(start>size-1) return new Response(null,{status:416,headers:{"Content-Range":`bytes */${size}`}});
   const sliced=buf.slice(start,end+1);
   const headers=new Headers(full.headers);
   headers.set("Content-Range",`bytes ${start}-${end}/${size}`);
   headers.set("Content-Length",String(sliced.byteLength));
   headers.set("Accept-Ranges","bytes");
   if(!headers.get("Content-Type")){
-    const u=new URL(req.url);
-    const p=u.pathname.toLowerCase();
+    const p=new URL(req.url).pathname.toLowerCase();
     if(p.endsWith(".mp4")) headers.set("Content-Type","video/mp4");
     else if(p.endsWith(".mp3")) headers.set("Content-Type","audio/mpeg");
   }
   return new Response(sliced,{status:206,headers});
 };
 
-const fetchNet=async(req,opts)=>{
-  const o=opts||{};
-  const r=await fetch(req,o);
-  return r;
-};
+const fetchNet=async(req,opts)=>await fetch(req,opts||{});
 
 self.addEventListener("install",e=>{
   e.waitUntil((async()=>{
@@ -111,6 +97,15 @@ self.addEventListener("install",e=>{
 self.addEventListener("activate",e=>{
   e.waitUntil((async()=>{
     await cleanup();
+    try{
+      const c=await caches.open(CORE);
+      await Promise.all(CORE_URLS.map(async u=>{
+        try{
+          const r=await fetchNet(new Request(u,{cache:"reload"}));
+          if(r&&r.ok) await putSafe(c,new Request(u),r.clone());
+        }catch{}
+      }));
+    }catch{}
     try{await self.clients.claim()}catch{}
   })());
 });
@@ -125,6 +120,7 @@ self.addEventListener("message",e=>{
     const id=++jobId;
     jobAbort=false;
     e.waitUntil((async()=>{
+      let ok=true;
       try{
         const cache=await caches.open(CORE);
         const total=Math.max(1,urls.length);
@@ -132,20 +128,17 @@ self.addEventListener("message",e=>{
         for(const u of urls){
           if(jobAbort||id!==jobId) throw new Error("aborted");
           done++;
-          const pct=done/total;
-          await broadcast({type:"CACHE_PROGRESS",pct,label:`Caching ${done}/${total}`});
+          await broadcast({type:"CACHE_PROGRESS",pct:done/total,label:`Caching ${done}/${total}`});
           try{
             const req=new Request(u,{cache:"reload"});
             const res=await fetchNet(req);
-            if(res && res.ok){
-              await putSafe(cache,req,res.clone());
-            }
-          }catch{}
+            if(res && res.ok) await putSafe(cache,req,res.clone());
+          }catch{ok=false}
         }
-        await broadcast({type:"CACHE_DONE",cached:true});
       }catch{
-        await broadcast({type:"CACHE_DONE",cached:true});
+        ok=false;
       }
+      if(id===jobId) await broadcast({type:"CACHE_DONE",cached:ok});
     })());
   }
   if(d && d.type==="CLEAR_CACHE"){
@@ -182,28 +175,39 @@ self.addEventListener("fetch",e=>{
     }
 
     if(isHTML(req)){
-      const cache=await caches.open(CORE);
+      const core=await caches.open(CORE);
+      const shellPath=(url.pathname==="/"||url.pathname.endsWith("/"))?"./index.html":url.pathname;
+      const shellReq=new Request(shellPath);
       try{
         const net=await fetchNet(req);
         if(net && net.ok){
-          await putSafe(cache,req,net.clone());
+          try{
+            const p=url.pathname;
+            if(p==="/"||p.endsWith("/")){
+              await putSafe(core,new Request("./index.html"),net.clone());
+            }else if(p.endsWith(".html")){
+              await putSafe(core,new Request(p),net.clone());
+            }else{
+              await putSafe(core,req,net.clone());
+            }
+          }catch{}
           return net;
         }
-        const hit=await cache.match(req,{ignoreSearch:false});
+        const hit=await core.match(shellReq,{ignoreSearch:true}) || await core.match(req,{ignoreSearch:true});
         if(hit) return hit;
-        const fallback=await cache.match("./index.html");
-        if(fallback) return fallback;
+        const fb=await core.match("./index.html");
+        if(fb) return fb;
         return net;
       }catch{
-        const hit=await cache.match(req,{ignoreSearch:false});
+        const hit=await core.match(shellReq,{ignoreSearch:true}) || await core.match(req,{ignoreSearch:true});
         if(hit) return hit;
-        const fallback=await cache.match("./index.html");
-        if(fallback) return fallback;
+        const fb=await core.match("./index.html");
+        if(fb) return fb;
         return new Response("",{status:504,headers:{"Content-Type":"text/plain"}});
       }
     }
 
-    const cacheFirst = isAppAsset(url) || isImage(url) || isLrc(url) || isMedia(url);
+    const cacheFirst=isAppAsset(url)||isImage(url)||isLrc(url)||isMedia(url);
     if(cacheFirst){
       const core=await caches.open(CORE);
       const rt=await caches.open(RT);
@@ -212,7 +216,8 @@ self.addEventListener("fetch",e=>{
       try{
         const net=await fetchNet(req);
         if(net && net.ok){
-          await putSafe(isAppAsset(url)||isImage(url)||isLrc(url)?core:rt,req,net.clone());
+          const target=(isAppAsset(url)||isImage(url)||isLrc(url))?core:rt;
+          await putSafe(target,req,net.clone());
         }
         return net;
       }catch{
