@@ -15,288 +15,486 @@
   <link rel="icon" href="./Cover/00-Albumcover.jpg">
   <link rel="apple-touch-icon" href="./Cover/00-Albumcover.jpg">
   <link rel="preload" as="image" href="./Cover/00-Albumcover.jpg">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="./app.css">
 
-  <script>document.documentElement.classList.add("js")</script>
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <style>
+    .homeMain{
+      width:100%;
+      max-width:calc(var(--maxw) + 2*var(--pad));
+      padding:calc(var(--pad) + env(safe-area-inset-top)) calc(var(--pad) + env(safe-area-inset-right)) calc(var(--pad) + env(safe-area-inset-bottom)) calc(var(--pad) + env(safe-area-inset-left));
+      display:flex;
+      flex-direction:column;
+      gap:var(--gap);
+      align-items:stretch;
+    }
+    .homeHero{
+      position:relative;
+      border-radius:var(--r22);
+      border:1px solid var(--stroke);
+      background:linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      transform:translateZ(0);
+      contain:layout paint style;
+    }
+    .homeHeroBg{
+      position:absolute;
+      inset:-2px;
+      background:radial-gradient(900px 520px at 18% 20%, rgba(98,167,255,.26), transparent 55%),radial-gradient(840px 520px at 76% 22%, rgba(255,120,160,.18), transparent 60%),radial-gradient(520px 320px at 55% 86%, rgba(116,255,190,.10), transparent 55%),linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.06));
+      filter:saturate(1.05);
+      opacity:.92;
+      transform:translateZ(0);
+    }
+    @media (prefers-color-scheme: light){
+      .homeHeroBg{
+        background:radial-gradient(900px 520px at 18% 20%, rgba(98,167,255,.22), transparent 55%),radial-gradient(840px 520px at 76% 22%, rgba(255,120,160,.14), transparent 60%),radial-gradient(520px 320px at 55% 86%, rgba(116,255,190,.10), transparent 55%),linear-gradient(180deg, rgba(255,255,255,.52), rgba(255,255,255,.22));
+        opacity:1;
+      }
+    }
+    .homeHeroInner{
+      position:relative;
+      z-index:2;
+      padding:18px;
+      display:grid;
+      grid-template-columns:minmax(240px, 340px) 1fr;
+      gap:16px;
+      align-items:center;
+    }
+    .homeCover{
+      border-radius:24px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow:0 24px 70px rgba(0,0,0,.45);
+      transform:translateZ(0);
+      background:rgba(255,255,255,.04);
+    }
+    .homeCover img{width:100%;height:auto;display:block;object-fit:cover}
+    .homeMeta{min-width:0;display:flex;flex-direction:column;gap:12px}
+    .homeTitle{
+      font-family:var(--fontTitle);
+      font-weight:700;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-size:clamp(18px, 2.6vw, 30px);
+      line-height:1.1;
+      margin:0;
+    }
+    .homeLead{font-size:13px;color:var(--muted);line-height:1.65;margin:0;max-width:72ch}
+    .homeCtas{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .homeCtas a{display:inline-flex;align-items:center;gap:10px}
+    .homePrimary{
+      height:44px;
+      padding:0 16px;
+      border-radius:16px;
+      border:1px solid rgba(98,167,255,.28);
+      background:linear-gradient(135deg, rgba(98,167,255,.22), rgba(255,120,160,.14));
+      box-shadow:0 18px 54px rgba(0,0,0,.28);
+      font-size:13px;
+      font-weight:900;
+      letter-spacing:.01em;
+      transform:translateZ(0);
+      transition:transform var(--dur) var(--ease), filter var(--dur) var(--ease), border-color var(--dur) var(--ease);
+      color:var(--fg);
+      cursor:pointer;
+      user-select:none;
+    }
+    .homePrimary:hover{filter:saturate(1.06);border-color:rgba(98,167,255,.36)}
+    .homePrimary:active{transform:translateZ(0) scale(.985)}
+    .homeGhost{
+      height:44px;
+      padding:0 14px;
+      border-radius:16px;
+      border:1px solid var(--stroke);
+      background:linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      box-shadow:0 14px 46px rgba(0,0,0,.16);
+      font-size:13px;
+      font-weight:900;
+      letter-spacing:.01em;
+      transform:translateZ(0);
+      transition:transform var(--dur) var(--ease), border-color var(--dur) var(--ease);
+      color:var(--fg);
+      cursor:pointer;
+      user-select:none;
+    }
+    .homeGhost:hover{border-color:var(--stroke2)}
+    .homeGhost:active{transform:translateZ(0) scale(.985)}
+    .homeHint{font-size:12px;color:var(--muted2);margin:0}
+    .homeGrid{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0, 1fr));
+      gap:var(--gap);
+      align-items:stretch;
+    }
+    .homeCard{
+      border-radius:var(--r22);
+      border:1px solid var(--stroke);
+      background:linear-gradient(135deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+      box-shadow:var(--shadow2);
+      overflow:hidden;
+      transform:translateZ(0);
+      contain:layout paint style;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+    }
+    .homeCardHead{
+      padding:14px 16px;
+      border-bottom:1px solid rgba(255,255,255,.07);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    @media (prefers-color-scheme: light){
+      .homeCardHead{border-bottom:1px solid rgba(10,18,40,.08)}
+    }
+    .homeCardTitle{font-size:14px;font-weight:900;letter-spacing:.02em}
+    .homeCardSub{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .trackGrid{
+      padding:12px;
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0, 1fr));
+      gap:10px;
+    }
+    .tCard{
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.05);
+      padding:10px;
+      display:grid;
+      grid-template-columns:54px 1fr;
+      gap:10px;
+      align-items:center;
+      transform:translateZ(0);
+    }
+    @media (prefers-color-scheme: light){
+      .tCard{border:1px solid rgba(10,18,40,.10);background:rgba(10,18,40,.04)}
+    }
+    .tImg{width:54px;height:54px;border-radius:16px;overflow:hidden;border:1px solid var(--stroke);background:rgba(255,255,255,.04)}
+    .tImg img{width:100%;height:100%;object-fit:cover}
+    .tMeta{min-width:0;display:flex;flex-direction:column;gap:6px}
+    .tTitle{font-size:12px;font-weight:900;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .tBtns{display:flex;gap:8px;flex-wrap:wrap}
+    .tBtn{
+      height:34px;
+      padding:0 10px;
+      border-radius:14px;
+      border:1px solid var(--stroke);
+      background:linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      color:var(--fg);
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      font-weight:900;
+      letter-spacing:.01em;
+      transform:translateZ(0);
+      transition:transform var(--dur) var(--ease), border-color var(--dur) var(--ease);
+      user-select:none;
+    }
+    .tBtn:hover{border-color:var(--stroke2)}
+    .tBtn:active{transform:translateZ(0) scale(.985)}
+    .tBtn i{font-size:12px;opacity:.92}
+    .homeFooter{
+      margin-top:2px;
+      font-size:12px;
+      color:var(--muted2);
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      padding:0 2px;
+    }
+    .homeFooter a{color:var(--fg);opacity:.9}
+    @media (max-width: 980px){
+      .homeHeroInner{grid-template-columns:1fr}
+      .homeCover{max-width:340px;justify-self:center}
+      .homeGrid{grid-template-columns:1fr}
+      .trackGrid{grid-template-columns:1fr}
+    }
+  </style>
 </head>
 
 <body>
-  <div id="boot" aria-hidden="true">
-    <div class="bootCard" role="status" aria-live="polite">
-      <div class="bootArt"><img src="./Cover/00-Albumcover.jpg" alt="Deus ex CT"></div>
-      <div class="bootTxt">
-        <div class="bootTitle">Deus ex CT</div>
-        <div class="bootSub">Player wird geladen…</div>
-      </div>
-      <div class="bootSpin"></div>
-    </div>
-  </div>
-
   <div class="app">
     <header class="topbar" role="banner">
       <div class="brand">
-        <button id="openAlbum" class="brandCover" type="button" aria-label="Album öffnen">
+        <a class="brandCover" href="./index.html" aria-label="Startseite">
           <img src="./Cover/00-Albumcover.jpg" alt="Deus ex CT Albumcover" loading="eager" decoding="async">
-        </button>
+        </a>
         <div class="brandMeta">
           <div class="brandTitle">Deus ex CT</div>
-          <div class="brandSub">Album Player · Audio/Video · Lyrics</div>
+          <div class="brandSub">Start · Player · Deep Links</div>
         </div>
-      </div>
-
-      <div class="searchWrap" role="search" aria-label="Song Suche">
-        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-        <input id="search" class="search" type="search" placeholder="Search…" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Song suchen">
-        <button id="clearSearch" class="iconBtn" type="button" aria-label="Suche leeren">
-          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-        </button>
       </div>
 
       <div class="topActions" aria-label="Aktionen">
-        <button id="downloadAlbum" class="pillBtn" type="button" aria-label="Album als MP3 herunterladen">
+        <a class="pillBtn" href="./player.html?mode=audio" aria-label="Player öffnen (Audio)">
+          <i class="fa-solid fa-play" aria-hidden="true"></i>
+          <span class="lbl">Player</span>
+        </a>
+        <a class="pillBtn" href="./player.html?mode=video" aria-label="Player öffnen (Video)">
+          <i class="fa-solid fa-film" aria-hidden="true"></i>
+          <span class="lbl">Video</span>
+        </a>
+        <a class="iconBtn" href="./player.html?album=1" aria-label="Album Download & Optionen">
           <i class="fa-solid fa-download" aria-hidden="true"></i>
-          <span class="lbl">Album</span>
-        </button>
-
-        <button id="modeToggle" class="pillBtn" type="button" aria-label="Audio/Video umschalten">
-          <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
-          <span class="lbl" id="modeLabel">Audio</span>
-        </button>
-
-        <button id="openSettings" class="iconBtn" type="button" aria-label="Einstellungen öffnen">
-          <i class="fa-solid fa-gear" aria-hidden="true"></i>
-        </button>
+        </a>
       </div>
     </header>
 
-    <main class="main" role="main">
-      <section class="library" aria-label="Playlist">
-        <div class="libraryHead">
-          <div class="libraryTitle">Playlist</div>
-          <div id="libraryMeta" class="libraryMeta">Alle Songs</div>
+    <main class="homeMain" role="main">
+      <section class="homeHero" aria-label="Start">
+        <div class="homeHeroBg" aria-hidden="true"></div>
+        <div class="homeHeroInner">
+          <div class="homeCover" aria-label="Albumcover">
+            <img src="./Cover/00-Albumcover.jpg" alt="Deus ex CT Albumcover" loading="eager" decoding="async">
+          </div>
+          <div class="homeMeta">
+            <h1 class="homeTitle">Deus ex CT</h1>
+            <p class="homeLead">Wähle, was du machen möchtest: Album hören (Audio), Lyrics-Videos ansehen (Video), oder direkt per Link zu einem Track springen. Lyrics im Player sind als Karaoke-Anzeige ausgelegt: immer exakt eine Zeile – die aktuelle im Song.</p>
+            <div class="homeCtas" aria-label="Start Aktionen">
+              <a class="homePrimary" href="./player.html?mode=audio" aria-label="Album hören (Audio)">
+                <i class="fa-solid fa-headphones" aria-hidden="true"></i>
+                <span>Album hören</span>
+              </a>
+              <a class="homePrimary" href="./player.html?mode=video" aria-label="Lyrics-Videos ansehen">
+                <i class="fa-solid fa-clapperboard" aria-hidden="true"></i>
+                <span>Lyrics-Videos</span>
+              </a>
+              <a class="homeGhost" href="./player.html?album=1" aria-label="Album herunterladen">
+                <i class="fa-solid fa-download" aria-hidden="true"></i>
+                <span>Album Download</span>
+              </a>
+              <a class="homeGhost" href="./player.html?track=01&mode=audio" aria-label="Bei Track 01 starten">
+                <i class="fa-solid fa-flag-checkered" aria-hidden="true"></i>
+                <span>Start Track 01</span>
+              </a>
+            </div>
+            <p class="homeHint">Deep-Link Format: <span style="opacity:.9;font-weight:800">player.html?track=03</span> (optional <span style="opacity:.9;font-weight:800">&amp;mode=video</span>).</p>
+          </div>
         </div>
-        <div id="list" class="list" role="listbox" aria-label="Songliste" tabindex="0"></div>
       </section>
 
-      <section class="stage" aria-label="Player Bereich">
-        <section class="hero" aria-label="Player">
-          <div class="heroBg" aria-hidden="true"></div>
-
-          <div class="now">
-            <div class="artWrap" aria-label="Cover">
-              <div class="artGlow" aria-hidden="true"></div>
-              <img id="art" class="art" src="./Cover/00-Albumcover.jpg" alt="Cover" loading="eager" decoding="async">
+      <section class="homeGrid" aria-label="Auswahl">
+        <section class="homeCard" aria-label="Direkt zu Track">
+          <div class="homeCardHead">
+            <div>
+              <div class="homeCardTitle">Direkt zu Track</div>
+              <div class="homeCardSub">Audio oder Video – eigener Link pro Track</div>
             </div>
+            <div class="badge">12 Tracks</div>
+          </div>
 
-            <div class="nowMeta">
-              <div class="nowTitleRow">
-                <div id="nowTitle" class="nowTitle">Deus ex CT</div>
-                <div class="nowBadges" aria-label="Status">
-                  <span id="badgeMode" class="badge">Audio</span>
-                  <span id="badgeTrack" class="badge">#01/12</span>
-                </div>
-              </div>
-              <div id="nowSub" class="nowSub">Bereit</div>
-
-              <div class="transport" aria-label="Transport">
-                <button id="shuffle" class="circleBtn" type="button" aria-label="Shuffle">
-                  <i class="fa-solid fa-shuffle" aria-hidden="true"></i>
-                </button>
-
-                <button id="prev" class="circleBtn" type="button" aria-label="Vorheriger Track">
-                  <i class="fa-solid fa-backward-step" aria-hidden="true"></i>
-                </button>
-
-                <button id="play" class="circleBtn primary" type="button" aria-label="Play">
-                  <i id="playIcon" class="fa-solid fa-play" aria-hidden="true"></i>
-                </button>
-
-                <button id="next" class="circleBtn" type="button" aria-label="Nächster Track">
-                  <i class="fa-solid fa-forward-step" aria-hidden="true"></i>
-                </button>
-
-                <button id="repeat" class="chipBtn" type="button" aria-label="Repeat">
-                  <i class="fa-solid fa-repeat" aria-hidden="true"></i>
-                  <span id="repeatLabel">Off</span>
-                </button>
-
-                <div class="spacer"></div>
-
-                <button id="toggleLyrics" class="chipBtn" type="button" aria-label="Lyrics ein/aus">
-                  <i class="fa-regular fa-closed-captioning" aria-hidden="true"></i>
-                  <span>Lyrics</span>
-                </button>
-
-                <button id="downloadTrack" class="chipBtn" type="button" aria-label="MP3 herunterladen">
-                  <i class="fa-solid fa-file-arrow-down" aria-hidden="true"></i>
-                  <span>MP3</span>
-                </button>
-
-                <button id="downloadVideo" class="chipBtn" type="button" aria-label="Lyrics-Video herunterladen">
-                  <i class="fa-solid fa-film" aria-hidden="true"></i>
-                  <span>Video</span>
-                </button>
-
-                <button id="downloadLrc" class="chipBtn" type="button" aria-label="LRC herunterladen">
-                  <i class="fa-solid fa-scroll" aria-hidden="true"></i>
-                  <span>LRC</span>
-                </button>
-              </div>
-
-              <div class="timeline" aria-label="Timeline">
-                <div id="tCur" class="time">0:00</div>
-                <input id="seek" class="seek" type="range" min="0" max="1000" step="1" value="0" aria-label="Seek">
-                <div id="tDur" class="time">—:—</div>
-              </div>
-
-              <div class="fine" aria-label="Feinsteuerung">
-                <div class="vol" aria-label="Lautstärke">
-                  <i class="fa-solid fa-volume-high" aria-hidden="true"></i>
-                  <input id="vol" class="volRange" type="range" min="0" max="1" step="0.01" value="0.9" aria-label="Volume">
+          <div class="trackGrid" aria-label="Track Links">
+            <div class="tCard">
+              <div class="tImg"><img src="./Cover/01-Oberarzt_Dr_med_Placzek.jpg" alt="Oberarzt Dr. med. Placzek" loading="lazy" decoding="async"></div>
+              <div class="tMeta">
+                <div class="tTitle">01 · Oberarzt Dr. med. Placzek</div>
+                <div class="tBtns">
+                  <a class="tBtn" href="./player.html?track=01&mode=audio" aria-label="Track 01 Audio"><i class="fa-solid fa-headphones" aria-hidden="true"></i><span>Audio</span></a>
+                  <a class="tBtn" href="./player.html?track=01&mode=video" aria-label="Track 01 Video"><i class="fa-solid fa-film" aria-hidden="true"></i><span>Video</span></a>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div class="mediaPane" aria-label="Medien">
-            <video id="video" class="video" playsinline webkit-playsinline preload="metadata"></video>
-            <audio id="audio" preload="metadata"></audio>
-          </div>
-        </section>
+            <div class="tCard">
+              <div class="tImg"><img src="./Cover/02-Oberarzt_der_Herzen.jpg" alt="Oberarzt der Herzen" loading="lazy" decoding="async"></div>
+              <div class="tMeta">
+                <div class="tTitle">02 · Oberarzt der Herzen</div>
+                <div class="tBtns">
+                  <a class="tBtn" href="./player.html?track=02&mode=audio" aria-label="Track 02 Audio"><i class="fa-solid fa-headphones" aria-hidden="true"></i><span>Audio</span></a>
+                  <a class="tBtn" href="./player.html?track=02&mode=video" aria-label="Track 02 Video"><i class="fa-solid fa-film" aria-hidden="true"></i><span>Video</span></a>
+                </div>
+              </div>
+            </div>
 
-        <section class="lyrics" aria-label="Lyrics">
-          <div class="lyricsHead">
-            <div class="lyricsTitle">Lyrics</div>
-            <div class="lyricsActions">
-              <button id="lyricsFollow" class="iconBtn" type="button" aria-label="Auto-Follow">
-                <i class="fa-solid fa-location-crosshairs" aria-hidden="true"></i>
-              </button>
-              <button id="lyricsSize" class="iconBtn" type="button" aria-label="Textgröße">
-                <i class="fa-solid fa-text-height" aria-hidden="true"></i>
-              </button>
-              <button id="lyricsClose" class="iconBtn" type="button" aria-label="Lyrics schließen">
-                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-              </button>
+            <div class="tCard">
+              <div class="tImg"><img src="./Cover/03-Vier-Eins-Neun-Zwei.jpg" alt="Vier-Eins-Neun-Zwei" loading="lazy" decoding="async"></div>
+              <div class="tMeta">
+                <div class="tTitle">03 · Vier-Eins-Neun-Zwei</div>
+                <div class="tBtns">
+                  <a class="tBtn" href="./player.html?track=03&mode=audio" aria-label="Track 03 Audio"><i class="fa-solid fa-headphones" aria-hidden="true"></i><span>Audio</span></a>
+                  <a class="tBtn" href="./player.html?track=03&mode=video" aria-label="Track 03 Video"><i class="fa-solid fa-film" aria-hidden="true"></i><span>Video</span></a>
+                </div>
+              </div>
+            </div>
+
+            <div class="tCard">
+              <div class="tImg"><img src="./Cover/04-Pilot_im_Pixelmeer.jpg" alt="Pilot im Pixelmeer" loading="lazy" decoding="async"></div>
+              <div class="tMeta">
+                <div class="tTitle">04 · Pilot im Pixelmeer</div>
+                <div class="tBtns">
+                  <a class="tBtn" href="./player.html?track=04&mode=audio" aria-label="Track 04 Audio"><i class="fa-solid fa-headphones" aria-hidden="true"></i><span>Audio</span></a>
+                  <a class="tBtn" href="./player.html?track=04&mode=video" aria-label="Track 04 Video"><i class="fa-solid fa-film" aria-hidden="true"></i><span>Video</span></a>
+                </div>
+              </div>
+            </div>
+
+            <div class="tCard">
+              <div class="tImg"><img src="./Cover/05-Drei_Gebote.jpg" alt="Drei Gebote" loading="lazy" decoding="async"></div>
+              <div class="tMeta">
+                <div class="tTitle">05 · Drei Gebote</div>
+                <div class="tBtns">
+                  <a class="tBtn" href="./player.html?track=05&mode=audio" aria-label="Track 05 Audio"><i class="fa-solid fa-headphones" aria-hidden="true"></i><span>Audio</span></a>
+                  <a class="tBtn" href="./player.html?track=05&mode=video" aria-label="Track 05 Video"><i class="fa-solid fa-film" aria-hidden="true"></i><span>Video</span></a>
+                </div>
+              </div>
+            </div>
+
+            <div class="tCard">
+              <div class="tImg"><img src="./Cover/06-Kunst_der_Diagnostik.jpg" alt="Kunst der Diagnostik" loading="lazy" decoding="async"></div>
+              <div class="tMeta">
+                <div class="tTitle">06 · Kunst der Diagnostik</div>
+                <div class="tBtns">
+                  <a class="tBtn" href="./player.html?track=06&mode=audio" aria-label="Track 06 Audio"><i class="fa-solid fa-headphones" aria-hidden="true"></i><span>Audio</span></a>
+                  <a class="tBtn" href="./player.html?track=06&mode=video" aria-label="Track 06 Video"><i class="fa-solid fa-film" aria-hidden="true"></i><span>Video</span></a>
+                </div>
+              </div>
+            </div>
+
+            <div class="tCard">
+              <div class="tImg"><img src="./Cover/07-Mit_harter_Hand_und_Charme.jpg" alt="Mit harter Hand und Charme" loading="lazy" decoding="async"></div>
+              <div class="tMeta">
+                <div class="tTitle">07 · Mit harter Hand und Charme</div>
+                <div class="tBtns">
+                  <a class="tBtn" href="./player.html?track=07&mode=audio" aria-label="Track 07 Audio"><i class="fa-solid fa-headphones" aria-hidden="true"></i><span>Audio</span></a>
+                  <a class="tBtn" href="./player.html?track=07&mode=video" aria-label="Track 07 Video"><i class="fa-solid fa-film" aria-hidden="true"></i><span>Video</span></a>
+                </div>
+              </div>
+            </div>
+
+            <div class="tCard">
+              <div class="tImg"><img src="./Cover/08-Durch_Feuer_und_Eis.jpg" alt="Durch Feuer und Eis" loading="lazy" decoding="async"></div>
+              <div class="tMeta">
+                <div class="tTitle">08 · Durch Feuer und Eis</div>
+                <div class="tBtns">
+                  <a class="tBtn" href="./player.html?track=08&mode=audio" aria-label="Track 08 Audio"><i class="fa-solid fa-headphones" aria-hidden="true"></i><span>Audio</span></a>
+                  <a class="tBtn" href="./player.html?track=08&mode=video" aria-label="Track 08 Video"><i class="fa-solid fa-film" aria-hidden="true"></i><span>Video</span></a>
+                </div>
+              </div>
+            </div>
+
+            <div class="tCard">
+              <div class="tImg"><img src="./Cover/09-Held_und_Idol.jpg" alt="Held und Idol" loading="lazy" decoding="async"></div>
+              <div class="tMeta">
+                <div class="tTitle">09 · Held und Idol</div>
+                <div class="tBtns">
+                  <a class="tBtn" href="./player.html?track=09&mode=audio" aria-label="Track 09 Audio"><i class="fa-solid fa-headphones" aria-hidden="true"></i><span>Audio</span></a>
+                  <a class="tBtn" href="./player.html?track=09&mode=video" aria-label="Track 09 Video"><i class="fa-solid fa-film" aria-hidden="true"></i><span>Video</span></a>
+                </div>
+              </div>
+            </div>
+
+            <div class="tCard">
+              <div class="tImg"><img src="./Cover/10-Messerscharf_und_Legendär.jpg" alt="Messerscharf und Legendär" loading="lazy" decoding="async"></div>
+              <div class="tMeta">
+                <div class="tTitle">10 · Messerscharf und Legendär</div>
+                <div class="tBtns">
+                  <a class="tBtn" href="./player.html?track=10&mode=audio" aria-label="Track 10 Audio"><i class="fa-solid fa-headphones" aria-hidden="true"></i><span>Audio</span></a>
+                  <a class="tBtn" href="./player.html?track=10&mode=video" aria-label="Track 10 Video"><i class="fa-solid fa-film" aria-hidden="true"></i><span>Video</span></a>
+                </div>
+              </div>
+            </div>
+
+            <div class="tCard">
+              <div class="tImg"><img src="./Cover/11-Oberärztlicher_Glanz.jpg" alt="Oberärztlicher Glanz" loading="lazy" decoding="async"></div>
+              <div class="tMeta">
+                <div class="tTitle">11 · Oberärztlicher Glanz</div>
+                <div class="tBtns">
+                  <a class="tBtn" href="./player.html?track=11&mode=audio" aria-label="Track 11 Audio"><i class="fa-solid fa-headphones" aria-hidden="true"></i><span>Audio</span></a>
+                  <a class="tBtn" href="./player.html?track=11&mode=video" aria-label="Track 11 Video"><i class="fa-solid fa-film" aria-hidden="true"></i><span>Video</span></a>
+                </div>
+              </div>
+            </div>
+
+            <div class="tCard">
+              <div class="tImg"><img src="./Cover/12-Götterdämmerung.jpg" alt="Götterdämmerung" loading="lazy" decoding="async"></div>
+              <div class="tMeta">
+                <div class="tTitle">12 · Götterdämmerung</div>
+                <div class="tBtns">
+                  <a class="tBtn" href="./player.html?track=12&mode=audio" aria-label="Track 12 Audio"><i class="fa-solid fa-headphones" aria-hidden="true"></i><span>Audio</span></a>
+                  <a class="tBtn" href="./player.html?track=12&mode=video" aria-label="Track 12 Video"><i class="fa-solid fa-film" aria-hidden="true"></i><span>Video</span></a>
+                </div>
+              </div>
             </div>
           </div>
-          <div id="lyricsBody" class="lyricsBody" aria-live="polite" aria-label="Lyrics Inhalt"></div>
+        </section>
+
+        <section class="homeCard" aria-label="Hinweise">
+          <div class="homeCardHead">
+            <div>
+              <div class="homeCardTitle">Hinweise</div>
+              <div class="homeCardSub">Installierbar · Offline · Downloads</div>
+            </div>
+            <div class="badge">PWA</div>
+          </div>
+          <div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+            <div class="setRow" style="margin:0">
+              <div>
+                <div class="setKey">Direktlink</div>
+                <div class="setVal">player.html?track=07&amp;mode=video</div>
+              </div>
+            </div>
+            <div class="setRow" style="margin:0">
+              <div>
+                <div class="setKey">Downloads</div>
+                <div class="setVal">Album MP3 + Videos einzeln</div>
+              </div>
+            </div>
+            <div class="setRow" style="margin:0">
+              <div>
+                <div class="setKey">Offline</div>
+                <div class="setVal">Cache im Player aktivierbar</div>
+              </div>
+            </div>
+            <div class="albumSmall">Der Player selbst wird als eigene Seite geladen, damit Deep-Links sauber teilbar sind.</div>
+          </div>
+        </section>
+
+        <section class="homeCard" aria-label="Schnellstart">
+          <div class="homeCardHead">
+            <div>
+              <div class="homeCardTitle">Schnellstart</div>
+              <div class="homeCardSub">Audio oder Video sofort</div>
+            </div>
+            <div class="badge">Start</div>
+          </div>
+          <div style="padding:14px 16px;display:flex;flex-direction:column;gap:12px">
+            <a class="homePrimary" href="./player.html?mode=audio" aria-label="Album hören (Audio)">
+              <i class="fa-solid fa-headphones" aria-hidden="true"></i>
+              <span>Album hören</span>
+            </a>
+            <a class="homePrimary" href="./player.html?mode=video" aria-label="Lyrics-Videos ansehen (Video)">
+              <i class="fa-solid fa-clapperboard" aria-hidden="true"></i>
+              <span>Lyrics-Videos</span>
+            </a>
+            <a class="homeGhost" href="./player.html?album=1" aria-label="Album Download">
+              <i class="fa-solid fa-download" aria-hidden="true"></i>
+              <span>Album Download</span>
+            </a>
+            <div class="albumSmall">Wenn du die WebApp installierst, startet sie auf dieser Startseite.</div>
+          </div>
         </section>
       </section>
+
+      <div class="homeFooter" aria-label="Footer">
+        <div>Deus ex CT · Startseite</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <a href="./player.html?mode=audio" aria-label="Zum Player">Player</a>
+          <a href="./player.html?track=01&mode=audio" aria-label="Track 01">Track 01</a>
+          <a href="./player.html?track=12&mode=video" aria-label="Track 12 Video">Track 12 Video</a>
+        </div>
+      </div>
     </main>
-
-    <div id="toastHost" class="toastHost" aria-live="polite" aria-atomic="true"></div>
   </div>
-
-  <div id="albumSheet" class="sheet" hidden>
-    <div class="sheetBackdrop" data-close="1" aria-hidden="true"></div>
-    <div class="sheetPanel wide" role="dialog" aria-modal="true" aria-label="Album">
-      <div class="sheetTop">
-        <div class="sheetTitle">Album</div>
-        <button class="iconBtn" type="button" data-close="1" aria-label="Schließen">
-          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-        </button>
-      </div>
-      <div class="sheetBody">
-        <div class="albumBody">
-          <div class="albumGrid">
-            <div class="albumArt">
-              <img src="./Cover/00-Albumcover.jpg" alt="Deus ex CT Albumcover" loading="eager" decoding="async">
-            </div>
-            <div class="albumText">
-              <div class="albumH">Deus ex CT</div>
-              <div class="albumP">Playlist-Player mit Audio/Video-Modus, Karaoke-Lyrics (fokussiert auf die aktuelle Zeile) und Download-Funktionen für Album & einzelne Lyrics-Videos.</div>
-              <div class="albumBtns">
-                <button id="albumDownload2" class="miniBtn" type="button" aria-label="Album als MP3 herunterladen">
-                  <i class="fa-solid fa-download" aria-hidden="true"></i>
-                  <span>Album MP3</span>
-                </button>
-                <button id="openSettings2" class="miniBtn" type="button" aria-label="Einstellungen öffnen">
-                  <i class="fa-solid fa-gear" aria-hidden="true"></i>
-                  <span>Einstellungen</span>
-                </button>
-              </div>
-              <div id="albumStatus" class="albumSmall">Bereit</div>
-            </div>
-          </div>
-
-          <div id="albumProgress" class="albumProgress" hidden>
-            <div class="progRow">
-              <div id="progLbl" class="progLbl">…</div>
-              <div id="progPct" class="progPct">0%</div>
-            </div>
-            <div class="progBar" aria-hidden="true">
-              <div id="progFill" class="progFill"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="settingsSheet" class="sheet" hidden>
-    <div class="sheetBackdrop" data-close="1" aria-hidden="true"></div>
-    <div class="sheetPanel" role="dialog" aria-modal="true" aria-label="Einstellungen">
-      <div class="sheetTop">
-        <div class="sheetTitle">Einstellungen</div>
-        <button class="iconBtn" type="button" data-close="1" aria-label="Schließen">
-          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-        </button>
-      </div>
-      <div class="sheetBody">
-        <div class="setRow" aria-label="Modus">
-          <div>
-            <div class="setKey">Modus</div>
-            <div class="setVal">Audio oder Video</div>
-          </div>
-          <div class="seg" role="tablist" aria-label="Modus Auswahl">
-            <button id="setAudio" class="segBtn active" type="button" role="tab" aria-selected="true">Audio</button>
-            <button id="setVideo" class="segBtn" type="button" role="tab" aria-selected="false">Video</button>
-          </div>
-        </div>
-
-        <div class="setRow" aria-label="Auto-Play">
-          <div>
-            <div class="setKey">Auto-Play</div>
-            <div id="autoPlayLbl" class="setVal">Aus</div>
-          </div>
-          <label class="toggle" aria-label="Auto-Play Toggle">
-            <input id="autoPlay" type="checkbox">
-            <span class="knob" aria-hidden="true"></span>
-          </label>
-        </div>
-
-        <div class="setRow" aria-label="Auto-Follow">
-          <div>
-            <div class="setKey">Auto-Follow</div>
-            <div id="autoFollowLbl" class="setVal">An</div>
-          </div>
-          <label class="toggle" aria-label="Auto-Follow Toggle">
-            <input id="autoFollow" type="checkbox" checked>
-            <span class="knob" aria-hidden="true"></span>
-          </label>
-        </div>
-
-        <div class="setRow" aria-label="Offline Cache">
-          <div>
-            <div class="setKey">Offline Cache</div>
-            <div id="cacheLbl" class="setVal">Einrichten</div>
-          </div>
-          <button id="cacheBtn" class="miniBtn" type="button" aria-label="Offline Cache einrichten oder löschen">
-            <i class="fa-solid fa-cloud-arrow-down" aria-hidden="true"></i>
-            <span>Cache</span>
-          </button>
-        </div>
-
-        <div class="albumSmall">Hinweis: Offline Cache funktioniert zuverlässig über HTTPS oder localhost.</div>
-      </div>
-    </div>
-  </div>
-
-  <script src="./app.js" defer></script>
 </body>
 </html>
