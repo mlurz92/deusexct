@@ -33,10 +33,10 @@
     <header class="topbar">
       <div>
         <div class="brand">
-          <span class="brandCover"><img src="./Cover/00-Albumcover.jpg" alt="Deus ex CT Albumcover" decoding="async"></span>
+          <span class="brandCover"><img id="brandCoverImg" src="./Cover/00-Albumcover.jpg" alt="Deus ex CT Albumcover" decoding="async"></span>
           <div class="brandMeta">
-            <div class="brandTitle">Deus ex CT</div>
-            <div class="brandSub">Start · Album WebApp</div>
+            <div class="brandTitle" id="brandTitle">Deus ex CT</div>
+            <div class="brandSub" id="brandSub">Start · Album WebApp</div>
           </div>
         </div>
         <div class="topActions">
@@ -51,17 +51,17 @@
         <div class="homeHeroBg"></div>
         <div class="homeHeroInner">
           <div class="homeCover">
-            <img src="./Cover/00-Albumcover.jpg" alt="Deus ex CT Albumcover" decoding="async">
+            <img id="homeCoverImg" src="./Cover/00-Albumcover.jpg" alt="Deus ex CT Albumcover" decoding="async">
           </div>
           <div class="homeMeta">
-            <h1 class="homeTitle">Deus ex CT</h1>
-            <p class="homeLead">Wähle, wie du das Album erleben möchtest: als Audio-Playlist, als Lyrics-Video-Playlist oder direkt per Track-Deep-Link. Lyrics werden im Player als Karaoke-Einzeiler synchron angezeigt.</p>
+            <h1 class="homeTitle" id="homeTitle">Deus ex CT</h1>
+            <p class="homeLead" id="homeLead">Wähle, wie du das Album erleben möchtest: als Audio-Playlist, als Lyrics-Video-Playlist oder direkt per Track-Deep-Link. Lyrics werden im Player als Karaoke-Einzeiler synchron angezeigt.</p>
             <div class="homeCtas">
               <a href="./player.html?mode=audio#play" class="homePrimary" aria-label="Audio Player starten"><i class="fa-solid fa-play"></i><span>Audio starten</span></a>
               <a href="./player.html?mode=video#play" class="homeGhost" aria-label="Video Player starten"><i class="fa-solid fa-play"></i><span>Video starten</span></a>
               <a href="./player.html?album=1" class="homeGhost" aria-label="Album MP3 Download"><i class="fa-solid fa-download"></i><span>Album MP3</span></a>
             </div>
-            <p class="homeHint">Deep-Link Beispiel: <span style="font-weight:900">player.html?track=01&amp;mode=audio</span></p>
+            <p class="homeHint" id="homeHint">Deep-Link Beispiel: <span style="font-weight:900">player.html?track=01&amp;mode=audio</span></p>
           </div>
         </div>
       </section>
@@ -71,11 +71,21 @@
           <div class="homeCardHead">
             <div>
               <div class="homeCardTitle">Tracks</div>
-              <div class="homeCardSub">Deep-Links & Schnellstart</div>
+              <div class="homeCardSub" id="tracksSub">Deep-Links & Schnellstart</div>
             </div>
             <a class="pillBtn" href="./player.html" aria-label="Playlist öffnen"><i class="fa-solid fa-list"></i><span class="lbl">Playlist</span></a>
           </div>
-          <div class="trackGrid" id="trackGrid" role="list"></div>
+          <div class="trackGrid" id="trackGrid" role="list" aria-label="Trackliste">
+            <div class="tCard" role="listitem" style="opacity:.9">
+              <div class="tImg"><img src="./Cover/00-Albumcover.jpg" alt="Lade Tracks" decoding="async"></div>
+              <div class="tMeta">
+                <div class="tTitle">Lade Trackliste …</div>
+                <div class="tBtns">
+                  <span class="tBtn" style="pointer-events:none;opacity:.7"><i class="fa-solid fa-circle-notch fa-spin"></i><span>Bitte warten</span></span>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
 
         <section class="homeCard" aria-label="Funktionen">
@@ -146,7 +156,7 @@
       </section>
 
       <footer class="homeFooter" aria-label="Footer">
-        <span>Deus ex CT · Album WebApp</span>
+        <span id="footLeft">Deus ex CT · Album WebApp</span>
         <span style="opacity:.9;display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end">
           <a href="./player.html" aria-label="Player öffnen">Player</a>
           <a href="./player.html?mode=video" aria-label="Player Video öffnen">Video</a>
@@ -157,73 +167,160 @@
   </div>
 
   <script>
-    (()=>{
-      const TRACKS=[
-        {n:1,t:"Oberarzt Dr. med. Placzek",b:"01-Oberarzt_Dr_med_Placzek",c:"01-Oberarzt_Dr_med_Placzek.jpg"},
-        {n:2,t:"Oberarzt der Herzen",b:"02-Oberarzt_der_Herzen",c:"02-Oberarzt_der_Herzen.jpg"},
-        {n:3,t:"Vier-Eins-Neun-Zwei",b:"03-Vier-Eins-Neun-Zwei",c:"03-Vier-Eins-Neun-Zwei.jpg"},
-        {n:4,t:"Pilot im Pixelmeer",b:"04-Pilot_im_Pixelmeer",c:"04-Pilot_im_Pixelmeer.jpg"},
-        {n:5,t:"Drei Gebote",b:"05-Drei_Gebote",c:"05-Drei_Gebote.jpg"},
-        {n:6,t:"Kunst der Diagnostik",b:"06-Kunst_der_Diagnostik",c:"06-Kunst_der_Diagnostik.jpg"},
-        {n:7,t:"Mit harter Hand und Charme",b:"07-Mit_harter_Hand_und_Charme",c:"07-Mit_harter_Hand_und_Charme.jpg"},
-        {n:8,t:"Durch Feuer und Eis",b:"08-Durch_Feuer_und_Eis",c:"08-Durch_Feuer_und_Eis.jpg"},
-        {n:9,t:"Held und Idol",b:"09-Held_und_Idol",c:"09-Held_und_Idol.jpg"},
-        {n:10,t:"Messerscharf und Legendär",b:"10-Messerscharf_und_Legendär",c:"10-Messerscharf_und_Legendär.jpg"},
-        {n:11,t:"Oberärztlicher Glanz",b:"11-Oberärztlicher_Glanz",c:"11-Oberärztlicher_Glanz.jpg"},
-        {n:12,t:"Götterdämmerung",b:"12-Götterdämmerung",c:"12-Gätterdämmerung.jpg"}
-      ].map(x=>({
-        ...x,
-        id:String(x.n).padStart(2,"0"),
-        cover:`./Cover/${x.c}`,
-        mp4:`./Music_Videos/${x.b}.mp4`,
-        lrc:`./Songs/lrc/${x.b}.lrc`
-      }));
-      const host=document.getElementById("trackGrid");
-      if(!host) return;
-      const mk=(tag,cls)=>{const e=document.createElement(tag);if(cls)e.className=cls;return e};
-      const frag=document.createDocumentFragment();
-      for(const tr of TRACKS){
-        const card=mk("div","tCard");
-        card.setAttribute("role","listitem");
-        const imgWrap=mk("div","tImg");
-        const img=new Image();
-        img.decoding="async";
-        img.loading="lazy";
-        img.src=tr.cover;
-        img.alt=tr.t;
-        img.onerror=()=>{img.onerror=null;img.src="./Cover/00-Albumcover.jpg"};
+    (() => {
+      const CAT = "./catalog.json";
+      const FALLBACK_COVER = "./Cover/00-Albumcover.jpg";
+      const $ = (s, r=document) => r.querySelector(s);
+      const mk = (t, c) => { const e = document.createElement(t); if (c) e.className = c; return e; };
+      const esc = (s) => String(s ?? "").replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+      const safeName = (s) => String(s ?? "track").replace(/[\u0000-\u001f<>:"/\\|?*\u007f]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 120) || "track";
+      const withTimeout = async (p, ms) => {
+        const ac = new AbortController();
+        const t = setTimeout(() => ac.abort(), ms);
+        try { return await p(ac.signal); } finally { clearTimeout(t); }
+      };
+
+      const setCover = (src) => {
+        const a = src || FALLBACK_COVER;
+        const bi = $("#brandCoverImg");
+        const hi = $("#homeCoverImg");
+        if (bi) bi.src = a;
+        if (hi) hi.src = a;
+        const fix = (img) => {
+          if (!img) return;
+          img.onerror = () => { img.onerror = null; img.src = FALLBACK_COVER; };
+        };
+        fix(bi); fix(hi);
+      };
+
+      const renderTracks = (tracks) => {
+        const host = $("#trackGrid");
+        if (!host) return;
+        host.textContent = "";
+        const frag = document.createDocumentFragment();
+
+        for (const tr of tracks) {
+          const id = String(tr.id ?? tr.n ?? "").padStart(2, "0").slice(-2);
+          const title = String(tr.title ?? tr.t ?? `Track ${id}`);
+          const cover = tr.cover || FALLBACK_COVER;
+          const mp4 = tr.video || tr.mp4 || "";
+          const lrc = tr.lrc || "";
+          const card = mk("div", "tCard");
+          card.setAttribute("role", "listitem");
+
+          const imgWrap = mk("div", "tImg");
+          const img = new Image();
+          img.decoding = "async";
+          img.loading = "lazy";
+          img.src = cover;
+          img.alt = title;
+          img.onerror = () => { img.onerror = null; img.src = FALLBACK_COVER; };
+          imgWrap.appendChild(img);
+
+          const meta = mk("div", "tMeta");
+          const ttl = mk("div", "tTitle");
+          ttl.textContent = `${id} · ${title}`;
+
+          const btns = mk("div", "tBtns");
+
+          const a1 = mk("a", "tBtn");
+          a1.href = `./player.html?track=${encodeURIComponent(id)}&mode=audio#play`;
+          a1.setAttribute("aria-label", `Audio starten: ${title}`);
+          a1.innerHTML = `<i class="fa-solid fa-headphones"></i><span>Audio</span>`;
+
+          const a2 = mk("a", "tBtn");
+          a2.href = `./player.html?track=${encodeURIComponent(id)}&mode=video#play`;
+          a2.setAttribute("aria-label", `Video starten: ${title}`);
+          a2.innerHTML = `<i class="fa-solid fa-film"></i><span>Video</span>`;
+
+          const a3 = mk("a", "tBtn");
+          a3.href = mp4 || `./player.html?track=${encodeURIComponent(id)}&mode=video`;
+          a3.setAttribute("download", `${id}-${safeName(title)}.mp4`);
+          a3.setAttribute("aria-label", `MP4 laden: ${title}`);
+          a3.innerHTML = `<i class="fa-solid fa-download"></i><span>MP4</span>`;
+          if (!mp4) a3.style.opacity = ".55";
+
+          const a4 = mk("a", "tBtn");
+          a4.href = lrc || `./player.html?track=${encodeURIComponent(id)}`;
+          a4.setAttribute("download", `${id}-${safeName(title)}.lrc`);
+          a4.setAttribute("aria-label", `LRC laden: ${title}`);
+          a4.innerHTML = `<i class="fa-solid fa-file-lines"></i><span>LRC</span>`;
+          if (!lrc) a4.style.opacity = ".55";
+
+          btns.append(a1, a2, a3, a4);
+          meta.append(ttl, btns);
+          card.append(imgWrap, meta);
+          frag.appendChild(card);
+        }
+
+        host.appendChild(frag);
+      };
+
+      const setMeta = (album, tracks) => {
+        const at = String(album?.title || "Deus ex CT");
+        $("#brandTitle") && ($("#brandTitle").textContent = at);
+        $("#homeTitle") && ($("#homeTitle").textContent = at);
+        $("#footLeft") && ($("#footLeft").textContent = `${at} · Album WebApp`);
+        const sub = tracks?.length ? `${tracks.length} Tracks · Deep-Links & Schnellstart` : "Deep-Links & Schnellstart";
+        $("#tracksSub") && ($("#tracksSub").textContent = sub);
+        $("#brandSub") && ($("#brandSub").textContent = "Start · Album WebApp");
+        document.title = `${at} · Start`;
+        const hint = $("#homeHint");
+        if (hint) hint.innerHTML = `Deep-Link Beispiel: <span style="font-weight:900">player.html?track=01&amp;mode=audio</span>`;
+        if (album?.cover) setCover(album.cover);
+      };
+
+      const showError = () => {
+        const host = $("#trackGrid");
+        if (!host) return;
+        host.textContent = "";
+        const card = mk("div", "tCard");
+        card.setAttribute("role", "listitem");
+        const imgWrap = mk("div", "tImg");
+        const img = new Image();
+        img.decoding = "async";
+        img.src = FALLBACK_COVER;
+        img.alt = "Fehler";
         imgWrap.appendChild(img);
-        const meta=mk("div","tMeta");
-        const title=mk("div","tTitle");
-        title.textContent=`${tr.id} · ${tr.t}`;
-        const btns=mk("div","tBtns");
-        const a1=mk("a","tBtn");
-        a1.href=`./player.html?track=${tr.id}&mode=audio#play`;
-        a1.setAttribute("aria-label",`Audio starten: ${tr.t}`);
-        a1.innerHTML=`<i class="fa-solid fa-headphones"></i><span>Audio</span>`;
-        const a2=mk("a","tBtn");
-        a2.href=`./player.html?track=${tr.id}&mode=video#play`;
-        a2.setAttribute("aria-label",`Video starten: ${tr.t}`);
-        a2.innerHTML=`<i class="fa-solid fa-film"></i><span>Video</span>`;
-        const a3=mk("a","tBtn");
-        a3.href=tr.mp4;
-        a3.setAttribute("download",`${tr.id}-${tr.t}.mp4`);
-        a3.setAttribute("aria-label",`MP4 laden: ${tr.t}`);
-        a3.innerHTML=`<i class="fa-solid fa-download"></i><span>MP4</span>`;
-        const a4=mk("a","tBtn");
-        a4.href=tr.lrc;
-        a4.setAttribute("download",`${tr.id}-${tr.t}.lrc`);
-        a4.setAttribute("aria-label",`LRC laden: ${tr.t}`);
-        a4.innerHTML=`<i class="fa-solid fa-file-lines"></i><span>LRC</span>`;
-        btns.append(a1,a2,a3,a4);
-        meta.append(title,btns);
-        card.append(imgWrap,meta);
-        frag.appendChild(card);
-      }
-      host.appendChild(frag);
-      if("serviceWorker" in navigator){
-        navigator.serviceWorker.register("./sw.js",{scope:"./"}).catch(()=>{});
-      }
+        const meta = mk("div", "tMeta");
+        const ttl = mk("div", "tTitle");
+        ttl.textContent = "Trackliste nicht verfügbar";
+        const btns = mk("div", "tBtns");
+        const a1 = mk("a", "tBtn");
+        a1.href = "./player.html?mode=audio";
+        a1.innerHTML = `<i class="fa-solid fa-headphones"></i><span>Audio</span>`;
+        const a2 = mk("a", "tBtn");
+        a2.href = "./player.html?mode=video";
+        a2.innerHTML = `<i class="fa-solid fa-film"></i><span>Video</span>`;
+        btns.append(a1, a2);
+        meta.append(ttl, btns);
+        card.append(imgWrap, meta);
+        host.appendChild(card);
+      };
+
+      const boot = async () => {
+        try {
+          const data = await withTimeout(async (signal) => {
+            const r = await fetch(CAT, { cache: "no-store", signal });
+            if (!r.ok) throw new Error("bad");
+            return await r.json();
+          }, 4000);
+
+          const album = data?.album || {};
+          const tracks = Array.isArray(data?.tracks) ? data.tracks : [];
+          setMeta(album, tracks);
+          renderTracks(tracks);
+        } catch {
+          setCover(FALLBACK_COVER);
+          showError();
+        }
+
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker.register("./sw.js", { scope: "./" }).catch(() => {});
+        }
+      };
+
+      boot();
     })();
   </script>
 </body>
