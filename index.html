@@ -2,499 +2,229 @@
 <html lang="de">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
-  <meta name="color-scheme" content="dark light">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#050712">
+  <meta name="color-scheme" content="dark light">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Deus ex CT">
+  <meta name="application-name" content="Deus ex CT">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="format-detection" content="telephone=no">
-  <title>Deus ex CT</title>
+  <meta name="description" content="Deus ex CT – Album WebApp. Player (Audio/Video), Playlist, Deep-Links pro Track, Karaoke-Lyrics (eine Zeile).">
+  <title>Deus ex CT · Start</title>
 
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./Cover/00-Albumcover.jpg">
   <link rel="apple-touch-icon" href="./Cover/00-Albumcover.jpg">
   <link rel="preload" as="image" href="./Cover/00-Albumcover.jpg">
+  <link rel="prefetch" href="./player.html">
+  <link rel="prefetch" href="./app.js">
+  <link rel="preload" as="style" href="./app.css">
+  <link rel="stylesheet" href="./app.css">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="./app.css">
-
-  <style>
-    .homeMain{
-      width:100%;
-      max-width:calc(var(--maxw) + 2*var(--pad));
-      padding:calc(var(--pad) + env(safe-area-inset-top)) calc(var(--pad) + env(safe-area-inset-right)) calc(var(--pad) + env(safe-area-inset-bottom)) calc(var(--pad) + env(safe-area-inset-left));
-      display:flex;
-      flex-direction:column;
-      gap:var(--gap);
-      align-items:stretch;
-    }
-    .homeHero{
-      position:relative;
-      border-radius:var(--r22);
-      border:1px solid var(--stroke);
-      background:linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
-      box-shadow:var(--shadow);
-      overflow:hidden;
-      transform:translateZ(0);
-      contain:layout paint style;
-    }
-    .homeHeroBg{
-      position:absolute;
-      inset:-2px;
-      background:radial-gradient(900px 520px at 18% 20%, rgba(98,167,255,.26), transparent 55%),radial-gradient(840px 520px at 76% 22%, rgba(255,120,160,.18), transparent 60%),radial-gradient(520px 320px at 55% 86%, rgba(116,255,190,.10), transparent 55%),linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.06));
-      filter:saturate(1.05);
-      opacity:.92;
-      transform:translateZ(0);
-    }
-    @media (prefers-color-scheme: light){
-      .homeHeroBg{
-        background:radial-gradient(900px 520px at 18% 20%, rgba(98,167,255,.22), transparent 55%),radial-gradient(840px 520px at 76% 22%, rgba(255,120,160,.14), transparent 60%),radial-gradient(520px 320px at 55% 86%, rgba(116,255,190,.10), transparent 55%),linear-gradient(180deg, rgba(255,255,255,.52), rgba(255,255,255,.22));
-        opacity:1;
-      }
-    }
-    .homeHeroInner{
-      position:relative;
-      z-index:2;
-      padding:18px;
-      display:grid;
-      grid-template-columns:minmax(240px, 340px) 1fr;
-      gap:16px;
-      align-items:center;
-    }
-    .homeCover{
-      border-radius:24px;
-      overflow:hidden;
-      border:1px solid rgba(255,255,255,.10);
-      box-shadow:0 24px 70px rgba(0,0,0,.45);
-      transform:translateZ(0);
-      background:rgba(255,255,255,.04);
-    }
-    .homeCover img{width:100%;height:auto;display:block;object-fit:cover}
-    .homeMeta{min-width:0;display:flex;flex-direction:column;gap:12px}
-    .homeTitle{
-      font-family:var(--fontTitle);
-      font-weight:700;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      font-size:clamp(18px, 2.6vw, 30px);
-      line-height:1.1;
-      margin:0;
-    }
-    .homeLead{font-size:13px;color:var(--muted);line-height:1.65;margin:0;max-width:72ch}
-    .homeCtas{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .homeCtas a{display:inline-flex;align-items:center;gap:10px}
-    .homePrimary{
-      height:44px;
-      padding:0 16px;
-      border-radius:16px;
-      border:1px solid rgba(98,167,255,.28);
-      background:linear-gradient(135deg, rgba(98,167,255,.22), rgba(255,120,160,.14));
-      box-shadow:0 18px 54px rgba(0,0,0,.28);
-      font-size:13px;
-      font-weight:900;
-      letter-spacing:.01em;
-      transform:translateZ(0);
-      transition:transform var(--dur) var(--ease), filter var(--dur) var(--ease), border-color var(--dur) var(--ease);
-      color:var(--fg);
-      cursor:pointer;
-      user-select:none;
-    }
-    .homePrimary:hover{filter:saturate(1.06);border-color:rgba(98,167,255,.36)}
-    .homePrimary:active{transform:translateZ(0) scale(.985)}
-    .homeGhost{
-      height:44px;
-      padding:0 14px;
-      border-radius:16px;
-      border:1px solid var(--stroke);
-      background:linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
-      box-shadow:0 14px 46px rgba(0,0,0,.16);
-      font-size:13px;
-      font-weight:900;
-      letter-spacing:.01em;
-      transform:translateZ(0);
-      transition:transform var(--dur) var(--ease), border-color var(--dur) var(--ease);
-      color:var(--fg);
-      cursor:pointer;
-      user-select:none;
-    }
-    .homeGhost:hover{border-color:var(--stroke2)}
-    .homeGhost:active{transform:translateZ(0) scale(.985)}
-    .homeHint{font-size:12px;color:var(--muted2);margin:0}
-    .homeGrid{
-      display:grid;
-      grid-template-columns:repeat(3, minmax(0, 1fr));
-      gap:var(--gap);
-      align-items:stretch;
-    }
-    .homeCard{
-      border-radius:var(--r22);
-      border:1px solid var(--stroke);
-      background:linear-gradient(135deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
-      box-shadow:var(--shadow2);
-      overflow:hidden;
-      transform:translateZ(0);
-      contain:layout paint style;
-      display:flex;
-      flex-direction:column;
-      min-height:0;
-    }
-    .homeCardHead{
-      padding:14px 16px;
-      border-bottom:1px solid rgba(255,255,255,.07);
-      backdrop-filter:blur(12px);
-      -webkit-backdrop-filter:blur(12px);
-      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-    }
-    @media (prefers-color-scheme: light){
-      .homeCardHead{border-bottom:1px solid rgba(10,18,40,.08)}
-    }
-    .homeCardTitle{font-size:14px;font-weight:900;letter-spacing:.02em}
-    .homeCardSub{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .trackGrid{
-      padding:12px;
-      display:grid;
-      grid-template-columns:repeat(2, minmax(0, 1fr));
-      gap:10px;
-    }
-    .tCard{
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.08);
-      background:rgba(255,255,255,.05);
-      padding:10px;
-      display:grid;
-      grid-template-columns:54px 1fr;
-      gap:10px;
-      align-items:center;
-      transform:translateZ(0);
-    }
-    @media (prefers-color-scheme: light){
-      .tCard{border:1px solid rgba(10,18,40,.10);background:rgba(10,18,40,.04)}
-    }
-    .tImg{width:54px;height:54px;border-radius:16px;overflow:hidden;border:1px solid var(--stroke);background:rgba(255,255,255,.04)}
-    .tImg img{width:100%;height:100%;object-fit:cover}
-    .tMeta{min-width:0;display:flex;flex-direction:column;gap:6px}
-    .tTitle{font-size:12px;font-weight:900;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .tBtns{display:flex;gap:8px;flex-wrap:wrap}
-    .tBtn{
-      height:34px;
-      padding:0 10px;
-      border-radius:14px;
-      border:1px solid var(--stroke);
-      background:linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
-      color:var(--fg);
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      font-size:12px;
-      font-weight:900;
-      letter-spacing:.01em;
-      transform:translateZ(0);
-      transition:transform var(--dur) var(--ease), border-color var(--dur) var(--ease);
-      user-select:none;
-    }
-    .tBtn:hover{border-color:var(--stroke2)}
-    .tBtn:active{transform:translateZ(0) scale(.985)}
-    .tBtn i{font-size:12px;opacity:.92}
-    .homeFooter{
-      margin-top:2px;
-      font-size:12px;
-      color:var(--muted2);
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      flex-wrap:wrap;
-      padding:0 2px;
-    }
-    .homeFooter a{color:var(--fg);opacity:.9}
-    @media (max-width: 980px){
-      .homeHeroInner{grid-template-columns:1fr}
-      .homeCover{max-width:340px;justify-self:center}
-      .homeGrid{grid-template-columns:1fr}
-      .trackGrid{grid-template-columns:1fr}
-    }
-  </style>
 </head>
 
-<body>
+<body data-page="home">
   <div class="app">
-    <header class="topbar" role="banner">
-      <div class="brand">
-        <a class="brandCover" href="./index.html" aria-label="Startseite">
-          <img src="./Cover/00-Albumcover.jpg" alt="Deus ex CT Albumcover" loading="eager" decoding="async">
-        </a>
-        <div class="brandMeta">
-          <div class="brandTitle">Deus ex CT</div>
-          <div class="brandSub">Start · Player · Deep Links</div>
+    <header class="topbar">
+      <div>
+        <div class="brand">
+          <span class="brandCover"><img src="./Cover/00-Albumcover.jpg" alt="Deus ex CT Albumcover" decoding="async"></span>
+          <div class="brandMeta">
+            <div class="brandTitle">Deus ex CT</div>
+            <div class="brandSub">Start · Album WebApp</div>
+          </div>
         </div>
-      </div>
-
-      <div class="topActions" aria-label="Aktionen">
-        <a class="pillBtn" href="./player.html?mode=audio" aria-label="Player öffnen (Audio)">
-          <i class="fa-solid fa-play" aria-hidden="true"></i>
-          <span class="lbl">Player</span>
-        </a>
-        <a class="pillBtn" href="./player.html?mode=video" aria-label="Player öffnen (Video)">
-          <i class="fa-solid fa-film" aria-hidden="true"></i>
-          <span class="lbl">Video</span>
-        </a>
-        <a class="iconBtn" href="./player.html?album=1" aria-label="Album Download & Optionen">
-          <i class="fa-solid fa-download" aria-hidden="true"></i>
-        </a>
+        <div class="topActions">
+          <a class="pillBtn" href="./player.html?mode=audio" aria-label="Player Audio öffnen"><i class="fa-solid fa-headphones"></i><span class="lbl">Audio</span></a>
+          <a class="pillBtn" href="./player.html?mode=video" aria-label="Player Video öffnen"><i class="fa-solid fa-film"></i><span class="lbl">Video</span></a>
+        </div>
       </div>
     </header>
 
-    <main class="homeMain" role="main">
-      <section class="homeHero" aria-label="Start">
-        <div class="homeHeroBg" aria-hidden="true"></div>
+    <main class="homeMain">
+      <section class="homeHero" aria-label="Album">
+        <div class="homeHeroBg"></div>
         <div class="homeHeroInner">
-          <div class="homeCover" aria-label="Albumcover">
-            <img src="./Cover/00-Albumcover.jpg" alt="Deus ex CT Albumcover" loading="eager" decoding="async">
+          <div class="homeCover">
+            <img src="./Cover/00-Albumcover.jpg" alt="Deus ex CT Albumcover" decoding="async">
           </div>
           <div class="homeMeta">
             <h1 class="homeTitle">Deus ex CT</h1>
-            <p class="homeLead">Wähle, was du machen möchtest: Album hören (Audio), Lyrics-Videos ansehen (Video), oder direkt per Link zu einem Track springen. Lyrics im Player sind als Karaoke-Anzeige ausgelegt: immer exakt eine Zeile – die aktuelle im Song.</p>
-            <div class="homeCtas" aria-label="Start Aktionen">
-              <a class="homePrimary" href="./player.html?mode=audio" aria-label="Album hören (Audio)">
-                <i class="fa-solid fa-headphones" aria-hidden="true"></i>
-                <span>Album hören</span>
-              </a>
-              <a class="homePrimary" href="./player.html?mode=video" aria-label="Lyrics-Videos ansehen">
-                <i class="fa-solid fa-clapperboard" aria-hidden="true"></i>
-                <span>Lyrics-Videos</span>
-              </a>
-              <a class="homeGhost" href="./player.html?album=1" aria-label="Album herunterladen">
-                <i class="fa-solid fa-download" aria-hidden="true"></i>
-                <span>Album Download</span>
-              </a>
-              <a class="homeGhost" href="./player.html?track=01&mode=audio" aria-label="Bei Track 01 starten">
-                <i class="fa-solid fa-flag-checkered" aria-hidden="true"></i>
-                <span>Start Track 01</span>
-              </a>
+            <p class="homeLead">Wähle, wie du das Album erleben möchtest: als Audio-Playlist, als Lyrics-Video-Playlist oder direkt per Track-Deep-Link. Lyrics werden im Player als Karaoke-Einzeiler synchron angezeigt.</p>
+            <div class="homeCtas">
+              <a href="./player.html?mode=audio#play" class="homePrimary" aria-label="Audio Player starten"><i class="fa-solid fa-play"></i><span>Audio starten</span></a>
+              <a href="./player.html?mode=video#play" class="homeGhost" aria-label="Video Player starten"><i class="fa-solid fa-play"></i><span>Video starten</span></a>
+              <a href="./player.html?album=1" class="homeGhost" aria-label="Album MP3 Download"><i class="fa-solid fa-download"></i><span>Album MP3</span></a>
             </div>
-            <p class="homeHint">Deep-Link Format: <span style="opacity:.9;font-weight:800">player.html?track=03</span> (optional <span style="opacity:.9;font-weight:800">&amp;mode=video</span>).</p>
+            <p class="homeHint">Deep-Link Beispiel: <span style="font-weight:900">player.html?track=01&amp;mode=audio</span></p>
           </div>
         </div>
       </section>
 
-      <section class="homeGrid" aria-label="Auswahl">
-        <section class="homeCard" aria-label="Direkt zu Track">
+      <section class="homeGrid" aria-label="Übersicht">
+        <section class="homeCard" aria-label="Tracks">
           <div class="homeCardHead">
             <div>
-              <div class="homeCardTitle">Direkt zu Track</div>
-              <div class="homeCardSub">Audio oder Video – eigener Link pro Track</div>
+              <div class="homeCardTitle">Tracks</div>
+              <div class="homeCardSub">Deep-Links & Schnellstart</div>
             </div>
-            <div class="badge">12 Tracks</div>
+            <a class="pillBtn" href="./player.html" aria-label="Playlist öffnen"><i class="fa-solid fa-list"></i><span class="lbl">Playlist</span></a>
           </div>
-
-          <div class="trackGrid" aria-label="Track Links">
-            <div class="tCard">
-              <div class="tImg"><img src="./Cover/01-Oberarzt_Dr_med_Placzek.jpg" alt="Oberarzt Dr. med. Placzek" loading="lazy" decoding="async"></div>
-              <div class="tMeta">
-                <div class="tTitle">01 · Oberarzt Dr. med. Placzek</div>
-                <div class="tBtns">
-                  <a class="tBtn" href="./player.html?track=01&mode=audio" aria-label="Track 01 Audio"><i class="fa-solid fa-headphones" aria-hidden="true"></i><span>Audio</span></a>
-                  <a class="tBtn" href="./player.html?track=01&mode=video" aria-label="Track 01 Video"><i class="fa-solid fa-film" aria-hidden="true"></i><span>Video</span></a>
-                </div>
-              </div>
-            </div>
-
-            <div class="tCard">
-              <div class="tImg"><img src="./Cover/02-Oberarzt_der_Herzen.jpg" alt="Oberarzt der Herzen" loading="lazy" decoding="async"></div>
-              <div class="tMeta">
-                <div class="tTitle">02 · Oberarzt der Herzen</div>
-                <div class="tBtns">
-                  <a class="tBtn" href="./player.html?track=02&mode=audio" aria-label="Track 02 Audio"><i class="fa-solid fa-headphones" aria-hidden="true"></i><span>Audio</span></a>
-                  <a class="tBtn" href="./player.html?track=02&mode=video" aria-label="Track 02 Video"><i class="fa-solid fa-film" aria-hidden="true"></i><span>Video</span></a>
-                </div>
-              </div>
-            </div>
-
-            <div class="tCard">
-              <div class="tImg"><img src="./Cover/03-Vier-Eins-Neun-Zwei.jpg" alt="Vier-Eins-Neun-Zwei" loading="lazy" decoding="async"></div>
-              <div class="tMeta">
-                <div class="tTitle">03 · Vier-Eins-Neun-Zwei</div>
-                <div class="tBtns">
-                  <a class="tBtn" href="./player.html?track=03&mode=audio" aria-label="Track 03 Audio"><i class="fa-solid fa-headphones" aria-hidden="true"></i><span>Audio</span></a>
-                  <a class="tBtn" href="./player.html?track=03&mode=video" aria-label="Track 03 Video"><i class="fa-solid fa-film" aria-hidden="true"></i><span>Video</span></a>
-                </div>
-              </div>
-            </div>
-
-            <div class="tCard">
-              <div class="tImg"><img src="./Cover/04-Pilot_im_Pixelmeer.jpg" alt="Pilot im Pixelmeer" loading="lazy" decoding="async"></div>
-              <div class="tMeta">
-                <div class="tTitle">04 · Pilot im Pixelmeer</div>
-                <div class="tBtns">
-                  <a class="tBtn" href="./player.html?track=04&mode=audio" aria-label="Track 04 Audio"><i class="fa-solid fa-headphones" aria-hidden="true"></i><span>Audio</span></a>
-                  <a class="tBtn" href="./player.html?track=04&mode=video" aria-label="Track 04 Video"><i class="fa-solid fa-film" aria-hidden="true"></i><span>Video</span></a>
-                </div>
-              </div>
-            </div>
-
-            <div class="tCard">
-              <div class="tImg"><img src="./Cover/05-Drei_Gebote.jpg" alt="Drei Gebote" loading="lazy" decoding="async"></div>
-              <div class="tMeta">
-                <div class="tTitle">05 · Drei Gebote</div>
-                <div class="tBtns">
-                  <a class="tBtn" href="./player.html?track=05&mode=audio" aria-label="Track 05 Audio"><i class="fa-solid fa-headphones" aria-hidden="true"></i><span>Audio</span></a>
-                  <a class="tBtn" href="./player.html?track=05&mode=video" aria-label="Track 05 Video"><i class="fa-solid fa-film" aria-hidden="true"></i><span>Video</span></a>
-                </div>
-              </div>
-            </div>
-
-            <div class="tCard">
-              <div class="tImg"><img src="./Cover/06-Kunst_der_Diagnostik.jpg" alt="Kunst der Diagnostik" loading="lazy" decoding="async"></div>
-              <div class="tMeta">
-                <div class="tTitle">06 · Kunst der Diagnostik</div>
-                <div class="tBtns">
-                  <a class="tBtn" href="./player.html?track=06&mode=audio" aria-label="Track 06 Audio"><i class="fa-solid fa-headphones" aria-hidden="true"></i><span>Audio</span></a>
-                  <a class="tBtn" href="./player.html?track=06&mode=video" aria-label="Track 06 Video"><i class="fa-solid fa-film" aria-hidden="true"></i><span>Video</span></a>
-                </div>
-              </div>
-            </div>
-
-            <div class="tCard">
-              <div class="tImg"><img src="./Cover/07-Mit_harter_Hand_und_Charme.jpg" alt="Mit harter Hand und Charme" loading="lazy" decoding="async"></div>
-              <div class="tMeta">
-                <div class="tTitle">07 · Mit harter Hand und Charme</div>
-                <div class="tBtns">
-                  <a class="tBtn" href="./player.html?track=07&mode=audio" aria-label="Track 07 Audio"><i class="fa-solid fa-headphones" aria-hidden="true"></i><span>Audio</span></a>
-                  <a class="tBtn" href="./player.html?track=07&mode=video" aria-label="Track 07 Video"><i class="fa-solid fa-film" aria-hidden="true"></i><span>Video</span></a>
-                </div>
-              </div>
-            </div>
-
-            <div class="tCard">
-              <div class="tImg"><img src="./Cover/08-Durch_Feuer_und_Eis.jpg" alt="Durch Feuer und Eis" loading="lazy" decoding="async"></div>
-              <div class="tMeta">
-                <div class="tTitle">08 · Durch Feuer und Eis</div>
-                <div class="tBtns">
-                  <a class="tBtn" href="./player.html?track=08&mode=audio" aria-label="Track 08 Audio"><i class="fa-solid fa-headphones" aria-hidden="true"></i><span>Audio</span></a>
-                  <a class="tBtn" href="./player.html?track=08&mode=video" aria-label="Track 08 Video"><i class="fa-solid fa-film" aria-hidden="true"></i><span>Video</span></a>
-                </div>
-              </div>
-            </div>
-
-            <div class="tCard">
-              <div class="tImg"><img src="./Cover/09-Held_und_Idol.jpg" alt="Held und Idol" loading="lazy" decoding="async"></div>
-              <div class="tMeta">
-                <div class="tTitle">09 · Held und Idol</div>
-                <div class="tBtns">
-                  <a class="tBtn" href="./player.html?track=09&mode=audio" aria-label="Track 09 Audio"><i class="fa-solid fa-headphones" aria-hidden="true"></i><span>Audio</span></a>
-                  <a class="tBtn" href="./player.html?track=09&mode=video" aria-label="Track 09 Video"><i class="fa-solid fa-film" aria-hidden="true"></i><span>Video</span></a>
-                </div>
-              </div>
-            </div>
-
-            <div class="tCard">
-              <div class="tImg"><img src="./Cover/10-Messerscharf_und_Legendär.jpg" alt="Messerscharf und Legendär" loading="lazy" decoding="async"></div>
-              <div class="tMeta">
-                <div class="tTitle">10 · Messerscharf und Legendär</div>
-                <div class="tBtns">
-                  <a class="tBtn" href="./player.html?track=10&mode=audio" aria-label="Track 10 Audio"><i class="fa-solid fa-headphones" aria-hidden="true"></i><span>Audio</span></a>
-                  <a class="tBtn" href="./player.html?track=10&mode=video" aria-label="Track 10 Video"><i class="fa-solid fa-film" aria-hidden="true"></i><span>Video</span></a>
-                </div>
-              </div>
-            </div>
-
-            <div class="tCard">
-              <div class="tImg"><img src="./Cover/11-Oberärztlicher_Glanz.jpg" alt="Oberärztlicher Glanz" loading="lazy" decoding="async"></div>
-              <div class="tMeta">
-                <div class="tTitle">11 · Oberärztlicher Glanz</div>
-                <div class="tBtns">
-                  <a class="tBtn" href="./player.html?track=11&mode=audio" aria-label="Track 11 Audio"><i class="fa-solid fa-headphones" aria-hidden="true"></i><span>Audio</span></a>
-                  <a class="tBtn" href="./player.html?track=11&mode=video" aria-label="Track 11 Video"><i class="fa-solid fa-film" aria-hidden="true"></i><span>Video</span></a>
-                </div>
-              </div>
-            </div>
-
-            <div class="tCard">
-              <div class="tImg"><img src="./Cover/12-Götterdämmerung.jpg" alt="Götterdämmerung" loading="lazy" decoding="async"></div>
-              <div class="tMeta">
-                <div class="tTitle">12 · Götterdämmerung</div>
-                <div class="tBtns">
-                  <a class="tBtn" href="./player.html?track=12&mode=audio" aria-label="Track 12 Audio"><i class="fa-solid fa-headphones" aria-hidden="true"></i><span>Audio</span></a>
-                  <a class="tBtn" href="./player.html?track=12&mode=video" aria-label="Track 12 Video"><i class="fa-solid fa-film" aria-hidden="true"></i><span>Video</span></a>
-                </div>
-              </div>
-            </div>
-          </div>
+          <div class="trackGrid" id="trackGrid" role="list"></div>
         </section>
 
-        <section class="homeCard" aria-label="Hinweise">
+        <section class="homeCard" aria-label="Funktionen">
           <div class="homeCardHead">
             <div>
-              <div class="homeCardTitle">Hinweise</div>
-              <div class="homeCardSub">Installierbar · Offline · Downloads</div>
+              <div class="homeCardTitle">Funktionen</div>
+              <div class="homeCardSub">State of the Art</div>
             </div>
-            <div class="badge">PWA</div>
+            <span class="badge" aria-label="Karaoke Lyrics">Karaoke</span>
           </div>
-          <div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+          <div style="padding:14px;display:flex;flex-direction:column;gap:12px">
             <div class="setRow" style="margin:0">
-              <div>
-                <div class="setKey">Direktlink</div>
-                <div class="setVal">player.html?track=07&amp;mode=video</div>
+              <div style="min-width:0">
+                <div class="setKey">Player</div>
+                <div class="setVal">Audio/Video-Modus, vollständige Playlist, Shuffle/Repeat, Sprünge, Volume, Deep-Link pro Track.</div>
               </div>
+              <span class="badge">Audio · Video</span>
             </div>
             <div class="setRow" style="margin:0">
-              <div>
-                <div class="setKey">Downloads</div>
-                <div class="setVal">Album MP3 + Videos einzeln</div>
+              <div style="min-width:0">
+                <div class="setKey">Lyrics</div>
+                <div class="setVal">Synchronisierte Anzeige als Einzeiler (nur aktuelle Zeile), Größenumschaltung, On/Off.</div>
               </div>
+              <span class="badge">1 Zeile</span>
             </div>
             <div class="setRow" style="margin:0">
-              <div>
+              <div style="min-width:0">
                 <div class="setKey">Offline</div>
-                <div class="setVal">Cache im Player aktivierbar</div>
+                <div class="setVal">PWA + Service Worker: App-Shell offline verfügbar, optionaler Cache für Media via Player.</div>
               </div>
+              <span class="badge">PWA</span>
             </div>
-            <div class="albumSmall">Der Player selbst wird als eigene Seite geladen, damit Deep-Links sauber teilbar sind.</div>
           </div>
         </section>
 
-        <section class="homeCard" aria-label="Schnellstart">
+        <section class="homeCard" aria-label="Downloads">
           <div class="homeCardHead">
             <div>
-              <div class="homeCardTitle">Schnellstart</div>
-              <div class="homeCardSub">Audio oder Video sofort</div>
+              <div class="homeCardTitle">Downloads</div>
+              <div class="homeCardSub">Album & Videos</div>
             </div>
-            <div class="badge">Start</div>
+            <a class="pillBtn" href="./player.html?album=1" aria-label="Album MP3 erstellen und laden"><i class="fa-solid fa-box-archive"></i><span class="lbl">Album</span></a>
           </div>
-          <div style="padding:14px 16px;display:flex;flex-direction:column;gap:12px">
-            <a class="homePrimary" href="./player.html?mode=audio" aria-label="Album hören (Audio)">
-              <i class="fa-solid fa-headphones" aria-hidden="true"></i>
-              <span>Album hören</span>
-            </a>
-            <a class="homePrimary" href="./player.html?mode=video" aria-label="Lyrics-Videos ansehen (Video)">
-              <i class="fa-solid fa-clapperboard" aria-hidden="true"></i>
-              <span>Lyrics-Videos</span>
-            </a>
-            <a class="homeGhost" href="./player.html?album=1" aria-label="Album Download">
+          <div style="padding:14px;display:flex;flex-direction:column;gap:12px">
+            <a class="setRow" href="./player.html?album=1" style="text-decoration:none">
+              <div style="min-width:0">
+                <div class="setKey">Album als MP3 laden</div>
+                <div class="setVal">Im Player wird ein Album-MP3 aus allen Tracks erstellt und heruntergeladen.</div>
+              </div>
               <i class="fa-solid fa-download" aria-hidden="true"></i>
-              <span>Album Download</span>
             </a>
-            <div class="albumSmall">Wenn du die WebApp installierst, startet sie auf dieser Startseite.</div>
+            <div class="setRow" style="margin:0">
+              <div style="min-width:0">
+                <div class="setKey">Lyrics-Videos pro Track</div>
+                <div class="setVal">In jeder Track-Kachel: direkter Download der jeweiligen MP4-Datei.</div>
+              </div>
+              <i class="fa-solid fa-film" aria-hidden="true"></i>
+            </div>
+            <div class="setRow" style="margin:0">
+              <div style="min-width:0">
+                <div class="setKey">LRC pro Track</div>
+                <div class="setVal">In jeder Track-Kachel: direkter Download der LRC-Datei.</div>
+              </div>
+              <i class="fa-solid fa-file-lines" aria-hidden="true"></i>
+            </div>
           </div>
         </section>
       </section>
 
-      <div class="homeFooter" aria-label="Footer">
-        <div>Deus ex CT · Startseite</div>
-        <div style="display:flex;gap:12px;flex-wrap:wrap">
-          <a href="./player.html?mode=audio" aria-label="Zum Player">Player</a>
-          <a href="./player.html?track=01&mode=audio" aria-label="Track 01">Track 01</a>
-          <a href="./player.html?track=12&mode=video" aria-label="Track 12 Video">Track 12 Video</a>
-        </div>
-      </div>
+      <footer class="homeFooter" aria-label="Footer">
+        <span>Deus ex CT · Album WebApp</span>
+        <span style="opacity:.9;display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end">
+          <a href="./player.html" aria-label="Player öffnen">Player</a>
+          <a href="./player.html?mode=video" aria-label="Player Video öffnen">Video</a>
+          <a href="./player.html?mode=audio" aria-label="Player Audio öffnen">Audio</a>
+        </span>
+      </footer>
     </main>
   </div>
+
+  <script>
+    (()=>{
+      const TRACKS=[
+        {n:1,t:"Oberarzt Dr. med. Placzek",b:"01-Oberarzt_Dr_med_Placzek",c:"01-Oberarzt_Dr_med_Placzek.jpg"},
+        {n:2,t:"Oberarzt der Herzen",b:"02-Oberarzt_der_Herzen",c:"02-Oberarzt_der_Herzen.jpg"},
+        {n:3,t:"Vier-Eins-Neun-Zwei",b:"03-Vier-Eins-Neun-Zwei",c:"03-Vier-Eins-Neun-Zwei.jpg"},
+        {n:4,t:"Pilot im Pixelmeer",b:"04-Pilot_im_Pixelmeer",c:"04-Pilot_im_Pixelmeer.jpg"},
+        {n:5,t:"Drei Gebote",b:"05-Drei_Gebote",c:"05-Drei_Gebote.jpg"},
+        {n:6,t:"Kunst der Diagnostik",b:"06-Kunst_der_Diagnostik",c:"06-Kunst_der_Diagnostik.jpg"},
+        {n:7,t:"Mit harter Hand und Charme",b:"07-Mit_harter_Hand_und_Charme",c:"07-Mit_harter_Hand_und_Charme.jpg"},
+        {n:8,t:"Durch Feuer und Eis",b:"08-Durch_Feuer_und_Eis",c:"08-Durch_Feuer_und_Eis.jpg"},
+        {n:9,t:"Held und Idol",b:"09-Held_und_Idol",c:"09-Held_und_Idol.jpg"},
+        {n:10,t:"Messerscharf und Legendär",b:"10-Messerscharf_und_Legendär",c:"10-Messerscharf_und_Legendär.jpg"},
+        {n:11,t:"Oberärztlicher Glanz",b:"11-Oberärztlicher_Glanz",c:"11-Oberärztlicher_Glanz.jpg"},
+        {n:12,t:"Götterdämmerung",b:"12-Götterdämmerung",c:"12-Gätterdämmerung.jpg"}
+      ].map(x=>({
+        ...x,
+        id:String(x.n).padStart(2,"0"),
+        cover:`./Cover/${x.c}`,
+        mp4:`./Music_Videos/${x.b}.mp4`,
+        lrc:`./Songs/lrc/${x.b}.lrc`
+      }));
+      const host=document.getElementById("trackGrid");
+      if(!host) return;
+      const mk=(tag,cls)=>{const e=document.createElement(tag);if(cls)e.className=cls;return e};
+      const frag=document.createDocumentFragment();
+      for(const tr of TRACKS){
+        const card=mk("div","tCard");
+        card.setAttribute("role","listitem");
+        const imgWrap=mk("div","tImg");
+        const img=new Image();
+        img.decoding="async";
+        img.loading="lazy";
+        img.src=tr.cover;
+        img.alt=tr.t;
+        img.onerror=()=>{img.onerror=null;img.src="./Cover/00-Albumcover.jpg"};
+        imgWrap.appendChild(img);
+        const meta=mk("div","tMeta");
+        const title=mk("div","tTitle");
+        title.textContent=`${tr.id} · ${tr.t}`;
+        const btns=mk("div","tBtns");
+        const a1=mk("a","tBtn");
+        a1.href=`./player.html?track=${tr.id}&mode=audio#play`;
+        a1.setAttribute("aria-label",`Audio starten: ${tr.t}`);
+        a1.innerHTML=`<i class="fa-solid fa-headphones"></i><span>Audio</span>`;
+        const a2=mk("a","tBtn");
+        a2.href=`./player.html?track=${tr.id}&mode=video#play`;
+        a2.setAttribute("aria-label",`Video starten: ${tr.t}`);
+        a2.innerHTML=`<i class="fa-solid fa-film"></i><span>Video</span>`;
+        const a3=mk("a","tBtn");
+        a3.href=tr.mp4;
+        a3.setAttribute("download",`${tr.id}-${tr.t}.mp4`);
+        a3.setAttribute("aria-label",`MP4 laden: ${tr.t}`);
+        a3.innerHTML=`<i class="fa-solid fa-download"></i><span>MP4</span>`;
+        const a4=mk("a","tBtn");
+        a4.href=tr.lrc;
+        a4.setAttribute("download",`${tr.id}-${tr.t}.lrc`);
+        a4.setAttribute("aria-label",`LRC laden: ${tr.t}`);
+        a4.innerHTML=`<i class="fa-solid fa-file-lines"></i><span>LRC</span>`;
+        btns.append(a1,a2,a3,a4);
+        meta.append(title,btns);
+        card.append(imgWrap,meta);
+        frag.appendChild(card);
+      }
+      host.appendChild(frag);
+      if("serviceWorker" in navigator){
+        navigator.serviceWorker.register("./sw.js",{scope:"./"}).catch(()=>{});
+      }
+    })();
+  </script>
 </body>
 </html>
