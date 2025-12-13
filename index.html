@@ -10,15 +10,12 @@
   <meta name="application-name" content="Deus ex CT">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="format-detection" content="telephone=no">
-  <meta name="description" content="Deus ex CT – Album WebApp. Player (Audio/Video), Playlist, Deep-Links pro Track, Karaoke-Lyrics (eine Zeile).">
-  <title>Deus ex CT · Start</title>
+  <meta name="description" content="Deus ex CT – Album WebApp. Startseite mit Albumcover, Track-Übersicht, Deep-Links, Player (Audio/Video), Downloads.">
+  <title>Deus ex CT</title>
 
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./Cover/00-Albumcover.jpg">
   <link rel="apple-touch-icon" href="./Cover/00-Albumcover.jpg">
-  <link rel="preload" as="image" href="./Cover/00-Albumcover.jpg">
-  <link rel="prefetch" href="./player.html">
-  <link rel="prefetch" href="./app.js">
   <link rel="preload" as="style" href="./app.css">
   <link rel="stylesheet" href="./app.css">
 
@@ -33,294 +30,250 @@
     <header class="topbar">
       <div>
         <div class="brand">
-          <span class="brandCover"><img id="brandCoverImg" src="./Cover/00-Albumcover.jpg" alt="Deus ex CT Albumcover" decoding="async"></span>
+          <span class="brandCover"><img id="hdrCover" src="./Cover/00-Albumcover.jpg" alt="Deus ex CT" decoding="async"></span>
           <div class="brandMeta">
-            <div class="brandTitle" id="brandTitle">Deus ex CT</div>
-            <div class="brandSub" id="brandSub">Start · Album WebApp</div>
+            <div class="brandTitle" id="hdrTitle">Deus ex CT</div>
+            <div class="brandSub" id="hdrSub">Start · Audio/Video · Downloads</div>
           </div>
         </div>
+
         <div class="topActions">
-          <a class="pillBtn" href="./player.html?mode=audio" aria-label="Player Audio öffnen"><i class="fa-solid fa-headphones"></i><span class="lbl">Audio</span></a>
-          <a class="pillBtn" href="./player.html?mode=video" aria-label="Player Video öffnen"><i class="fa-solid fa-film"></i><span class="lbl">Video</span></a>
+          <a class="pillBtn" id="goAudio" href="./player.html?track=01&mode=audio" aria-label="Audio Player öffnen"><i class="fa-solid fa-headphones"></i><span class="lbl">Audio</span></a>
+          <a class="pillBtn" id="goVideo" href="./player.html?track=01&mode=video" aria-label="Video Player öffnen"><i class="fa-solid fa-film"></i><span class="lbl">Video</span></a>
+          <a class="pillBtn" id="goTrack" href="./player.html?track=01&mode=audio" aria-label="Direkt zu Track 01"><i class="fa-solid fa-music"></i><span class="lbl">Track</span></a>
+          <a class="pillBtn" id="goAlbum" href="./player.html?track=01&mode=audio&album=1" aria-label="Album MP3 laden"><i class="fa-solid fa-download"></i><span class="lbl">Album</span></a>
         </div>
       </div>
     </header>
 
     <main class="homeMain">
       <section class="homeHero" aria-label="Album">
-        <div class="homeHeroBg"></div>
+        <div class="homeHeroBg" aria-hidden="true"></div>
         <div class="homeHeroInner">
           <div class="homeCover">
-            <img id="homeCoverImg" src="./Cover/00-Albumcover.jpg" alt="Deus ex CT Albumcover" decoding="async">
+            <img id="heroCover" src="./Cover/00-Albumcover.jpg" alt="Deus ex CT Albumcover" decoding="async">
           </div>
+
           <div class="homeMeta">
-            <h1 class="homeTitle" id="homeTitle">Deus ex CT</h1>
-            <p class="homeLead" id="homeLead">Wähle, wie du das Album erleben möchtest: als Audio-Playlist, als Lyrics-Video-Playlist oder direkt per Track-Deep-Link. Lyrics werden im Player als Karaoke-Einzeiler synchron angezeigt.</p>
-            <div class="homeCtas">
-              <a href="./player.html?mode=audio#play" class="homePrimary" aria-label="Audio Player starten"><i class="fa-solid fa-play"></i><span>Audio starten</span></a>
-              <a href="./player.html?mode=video#play" class="homeGhost" aria-label="Video Player starten"><i class="fa-solid fa-play"></i><span>Video starten</span></a>
-              <a href="./player.html?album=1" class="homeGhost" aria-label="Album MP3 Download"><i class="fa-solid fa-download"></i><span>Album MP3</span></a>
+            <h1 class="homeTitle" id="heroTitle">Deus ex CT</h1>
+            <p class="homeLead" id="heroLead">Wähle, was du tun möchtest: Audio hören, Lyrics-Videos ansehen oder per Deep-Link direkt auf einen Track verweisen. Alle Songs liegen als Playlist im Player.</p>
+
+            <div class="homeCtas" aria-label="Aktionen">
+              <a class="homePrimary" id="ctaAudio" href="./player.html?track=01&mode=audio" aria-label="Audio Player"><i class="fa-solid fa-headphones"></i><span>Audio Player</span></a>
+              <a class="homePrimary" id="ctaVideo" href="./player.html?track=01&mode=video" aria-label="Lyrics-Video Player"><i class="fa-solid fa-film"></i><span>Lyrics-Video Player</span></a>
+              <a class="homeGhost" id="ctaAlbum" href="./player.html?track=01&mode=audio&album=1" aria-label="Album MP3 laden"><i class="fa-solid fa-download"></i><span>Album-MP3 laden</span></a>
+              <a class="homeGhost" id="ctaPlayer" href="./player.html?track=01&mode=audio" aria-label="Player öffnen"><i class="fa-solid fa-play"></i><span>Player öffnen</span></a>
             </div>
-            <p class="homeHint" id="homeHint">Deep-Link Beispiel: <span style="font-weight:900">player.html?track=01&amp;mode=audio</span></p>
+
+            <p class="homeHint" id="heroHint">Deep-Link Beispiel: <span class="badge">player.html?track=03&amp;mode=video</span></p>
           </div>
         </div>
       </section>
 
       <section class="homeGrid" aria-label="Übersicht">
-        <section class="homeCard" aria-label="Tracks">
+        <div class="homeCard" aria-label="Tracks">
           <div class="homeCardHead">
             <div>
-              <div class="homeCardTitle">Tracks</div>
-              <div class="homeCardSub" id="tracksSub">Deep-Links & Schnellstart</div>
+              <div class="homeCardTitle" id="tracksTitle">Tracks</div>
+              <div class="homeCardSub" id="tracksSub">Direkt-Links pro Track · Audio oder Video</div>
             </div>
-            <a class="pillBtn" href="./player.html" aria-label="Playlist öffnen"><i class="fa-solid fa-list"></i><span class="lbl">Playlist</span></a>
+            <span class="badge" id="tracksCount">12</span>
           </div>
-          <div class="trackGrid" id="trackGrid" role="list" aria-label="Trackliste">
-            <div class="tCard" role="listitem" style="opacity:.9">
-              <div class="tImg"><img src="./Cover/00-Albumcover.jpg" alt="Lade Tracks" decoding="async"></div>
-              <div class="tMeta">
-                <div class="tTitle">Lade Trackliste …</div>
-                <div class="tBtns">
-                  <span class="tBtn" style="pointer-events:none;opacity:.7"><i class="fa-solid fa-circle-notch fa-spin"></i><span>Bitte warten</span></span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+          <div class="trackGrid" id="trackGrid"></div>
+        </div>
 
-        <section class="homeCard" aria-label="Funktionen">
-          <div class="homeCardHead">
-            <div>
-              <div class="homeCardTitle">Funktionen</div>
-              <div class="homeCardSub">State of the Art</div>
-            </div>
-            <span class="badge" aria-label="Karaoke Lyrics">Karaoke</span>
-          </div>
-          <div style="padding:14px;display:flex;flex-direction:column;gap:12px">
-            <div class="setRow" style="margin:0">
-              <div style="min-width:0">
-                <div class="setKey">Player</div>
-                <div class="setVal">Audio/Video-Modus, vollständige Playlist, Shuffle/Repeat, Sprünge, Volume, Deep-Link pro Track.</div>
-              </div>
-              <span class="badge">Audio · Video</span>
-            </div>
-            <div class="setRow" style="margin:0">
-              <div style="min-width:0">
-                <div class="setKey">Lyrics</div>
-                <div class="setVal">Synchronisierte Anzeige als Einzeiler (nur aktuelle Zeile), Größenumschaltung, On/Off.</div>
-              </div>
-              <span class="badge">1 Zeile</span>
-            </div>
-            <div class="setRow" style="margin:0">
-              <div style="min-width:0">
-                <div class="setKey">Offline</div>
-                <div class="setVal">PWA + Service Worker: App-Shell offline verfügbar, optionaler Cache für Media via Player.</div>
-              </div>
-              <span class="badge">PWA</span>
-            </div>
-          </div>
-        </section>
-
-        <section class="homeCard" aria-label="Downloads">
+        <div class="homeCard" aria-label="Downloads & Hinweise">
           <div class="homeCardHead">
             <div>
               <div class="homeCardTitle">Downloads</div>
-              <div class="homeCardSub">Album & Videos</div>
+              <div class="homeCardSub">Album-MP3 oder einzelne Dateien im Player</div>
             </div>
-            <a class="pillBtn" href="./player.html?album=1" aria-label="Album MP3 erstellen und laden"><i class="fa-solid fa-box-archive"></i><span class="lbl">Album</span></a>
+            <span class="badge">Tip</span>
           </div>
-          <div style="padding:14px;display:flex;flex-direction:column;gap:12px">
-            <a class="setRow" href="./player.html?album=1" style="text-decoration:none">
-              <div style="min-width:0">
-                <div class="setKey">Album als MP3 laden</div>
-                <div class="setVal">Im Player wird ein Album-MP3 aus allen Tracks erstellt und heruntergeladen.</div>
+          <div style="padding:14px;display:flex;flex-direction:column;gap:10px">
+            <div class="setRow">
+              <div>
+                <div class="setKey">Album-MP3</div>
+                <div class="setVal">Startet den Album-Download im Player (zusammengefügte MP3 aus allen Tracks).</div>
               </div>
-              <i class="fa-solid fa-download" aria-hidden="true"></i>
-            </a>
-            <div class="setRow" style="margin:0">
-              <div style="min-width:0">
-                <div class="setKey">Lyrics-Videos pro Track</div>
-                <div class="setVal">In jeder Track-Kachel: direkter Download der jeweiligen MP4-Datei.</div>
-              </div>
-              <i class="fa-solid fa-film" aria-hidden="true"></i>
+              <a class="tBtn" href="./player.html?track=01&mode=audio&album=1" aria-label="Album MP3 laden"><i class="fa-solid fa-download"></i><span>Start</span></a>
             </div>
-            <div class="setRow" style="margin:0">
-              <div style="min-width:0">
-                <div class="setKey">LRC pro Track</div>
-                <div class="setVal">In jeder Track-Kachel: direkter Download der LRC-Datei.</div>
+
+            <div class="setRow">
+              <div>
+                <div class="setKey">Einzel-Downloads</div>
+                <div class="setVal">MP3 / MP4 / LRC findest du pro Track direkt in der Player-Playlist (Download-Icons rechts).</div>
               </div>
-              <i class="fa-solid fa-file-lines" aria-hidden="true"></i>
+              <a class="tBtn" href="./player.html?track=01&mode=audio" aria-label="Player öffnen"><i class="fa-solid fa-list"></i><span>Player</span></a>
+            </div>
+
+            <div class="setRow">
+              <div>
+                <div class="setKey">Lyrics-Anzeige</div>
+                <div class="setVal">Im Player wird immer nur die aktuelle Zeile angezeigt (Karaoke-Einzeiler). Umschaltbar.</div>
+              </div>
+              <a class="tBtn" href="./player.html?track=01&mode=video" aria-label="Video Player öffnen"><i class="fa-solid fa-music"></i><span>Go</span></a>
+            </div>
+
+            <div class="setRow">
+              <div>
+                <div class="setKey">Deep-Links</div>
+                <div class="setVal">Du kannst jeden Track direkt verlinken: <span class="badge">track=01..12</span> und <span class="badge">mode=audio|video</span>.</div>
+              </div>
+              <a class="tBtn" href="./player.html?track=03&mode=video" aria-label="Beispiel Link"><i class="fa-solid fa-link"></i><span>Demo</span></a>
             </div>
           </div>
-        </section>
+        </div>
+
+        <div class="homeCard" aria-label="Info">
+          <div class="homeCardHead">
+            <div>
+              <div class="homeCardTitle">Kurz-Guide</div>
+              <div class="homeCardSub">Schnellstart für Mobile & Desktop</div>
+            </div>
+            <span class="badge">UX</span>
+          </div>
+          <div style="padding:14px;display:flex;flex-direction:column;gap:10px">
+            <div class="setRow">
+              <div>
+                <div class="setKey">Playlist</div>
+                <div class="setVal">Im Player über <span class="badge">Liste</span> öffnen. Track antippen zum Abspielen.</div>
+              </div>
+              <a class="tBtn" href="./player.html?track=01&mode=audio" aria-label="Player öffnen"><i class="fa-solid fa-play"></i><span>Open</span></a>
+            </div>
+
+            <div class="setRow">
+              <div>
+                <div class="setKey">Audio/Video</div>
+                <div class="setVal">Im Player oben per Modus-Button umschalten. Position wird übernommen.</div>
+              </div>
+              <a class="tBtn" href="./player.html?track=01&mode=video" aria-label="Video öffnen"><i class="fa-solid fa-film"></i><span>Video</span></a>
+            </div>
+
+            <div class="setRow">
+              <div>
+                <div class="setKey">Mobile Bedienung</div>
+                <div class="setVal">Buttons oben sind horizontal scrollbar, damit nichts überläuft. Layout bleibt stabil.</div>
+              </div>
+              <a class="tBtn" href="#tracks" aria-label="Zu den Tracks"><i class="fa-solid fa-chevron-down"></i><span>Tracks</span></a>
+            </div>
+          </div>
+        </div>
       </section>
 
       <footer class="homeFooter" aria-label="Footer">
-        <span id="footLeft">Deus ex CT · Album WebApp</span>
-        <span style="opacity:.9;display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end">
-          <a href="./player.html" aria-label="Player öffnen">Player</a>
-          <a href="./player.html?mode=video" aria-label="Player Video öffnen">Video</a>
-          <a href="./player.html?mode=audio" aria-label="Player Audio öffnen">Audio</a>
-        </span>
+        <div>© <span id="y"></span> Deus ex CT</div>
+        <div><a href="./player.html?track=01&mode=audio">Player</a></div>
       </footer>
     </main>
   </div>
 
   <script>
     (() => {
-      const CAT = "./catalog.json";
       const FALLBACK_COVER = "./Cover/00-Albumcover.jpg";
-      const $ = (s, r=document) => r.querySelector(s);
-      const mk = (t, c) => { const e = document.createElement(t); if (c) e.className = c; return e; };
-      const esc = (s) => String(s ?? "").replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
-      const safeName = (s) => String(s ?? "track").replace(/[\u0000-\u001f<>:"/\\|?*\u007f]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 120) || "track";
-      const withTimeout = async (p, ms) => {
-        const ac = new AbortController();
-        const t = setTimeout(() => ac.abort(), ms);
-        try { return await p(ac.signal); } finally { clearTimeout(t); }
-      };
+      const $ = (s, r = document) => r.querySelector(s);
+      const esc = (s) => String(s ?? "");
+      const pad2 = (n) => String(n).padStart(2, "0");
+      const safe = (s) => String(s ?? "").normalize("NFKD").replace(/[\u0000-\u001f<>:"/\\|?*\u007f]+/g, " ").replace(/\s+/g, " ").trim();
+      const setImgFallback = (img) => { if (!img) return; img.onerror = () => { img.onerror = null; img.src = FALLBACK_COVER; }; };
 
-      const setCover = (src) => {
-        const a = src || FALLBACK_COVER;
-        const bi = $("#brandCoverImg");
-        const hi = $("#homeCoverImg");
-        if (bi) bi.src = a;
-        if (hi) hi.src = a;
-        const fix = (img) => {
-          if (!img) return;
-          img.onerror = () => { img.onerror = null; img.src = FALLBACK_COVER; };
-        };
-        fix(bi); fix(hi);
-      };
+      $("#y").textContent = String(new Date().getFullYear());
 
-      const renderTracks = (tracks) => {
-        const host = $("#trackGrid");
-        if (!host) return;
-        host.textContent = "";
+      const applyCatalog = (data) => {
+        const album = data && data.album ? data.album : {};
+        const tracks = Array.isArray(data && data.tracks) ? data.tracks : [];
+        const title = safe(album.title || "Deus ex CT") || "Deus ex CT";
+        const cover = esc(album.cover || FALLBACK_COVER);
+
+        $("#hdrTitle").textContent = title;
+        $("#heroTitle").textContent = title;
+        $("#tracksCount").textContent = String(tracks.length || album.tracks || 12);
+
+        const hdrCover = $("#hdrCover");
+        hdrCover.src = cover;
+        setImgFallback(hdrCover);
+
+        const heroCover = $("#heroCover");
+        heroCover.src = cover;
+        setImgFallback(heroCover);
+
+        const first = tracks[0] && tracks[0].id ? String(tracks[0].id) : "01";
+        const firstId = /^\d{2}$/.test(first) ? first : pad2(parseInt(first, 10) || 1);
+
+        const setHref = (id, mode) => `./player.html?track=${encodeURIComponent(id)}&mode=${encodeURIComponent(mode)}`;
+        $("#goAudio").href = setHref(firstId, "audio");
+        $("#goVideo").href = setHref(firstId, "video");
+        $("#goTrack").href = setHref(firstId, "audio");
+        $("#ctaAudio").href = setHref(firstId, "audio");
+        $("#ctaVideo").href = setHref(firstId, "video");
+        $("#ctaPlayer").href = setHref(firstId, "audio");
+        $("#ctaAlbum").href = `./player.html?track=${encodeURIComponent(firstId)}&mode=audio&album=1`;
+        $("#goAlbum").href = `./player.html?track=${encodeURIComponent(firstId)}&mode=audio&album=1`;
+
+        const grid = $("#trackGrid");
+        grid.id = "tracks";
+        grid.textContent = "";
         const frag = document.createDocumentFragment();
 
-        for (const tr of tracks) {
-          const id = String(tr.id ?? tr.n ?? "").padStart(2, "0").slice(-2);
-          const title = String(tr.title ?? tr.t ?? `Track ${id}`);
-          const cover = tr.cover || FALLBACK_COVER;
-          const mp4 = tr.video || tr.mp4 || "";
-          const lrc = tr.lrc || "";
-          const card = mk("div", "tCard");
-          card.setAttribute("role", "listitem");
+        for (let i = 0; i < tracks.length; i++) {
+          const t = tracks[i] || {};
+          const id = /^\d{2}$/.test(String(t.id)) ? String(t.id) : pad2(i + 1);
+          const name = safe(t.title || `Track ${id}`) || `Track ${id}`;
+          const c = esc(t.cover || cover || FALLBACK_COVER);
 
-          const imgWrap = mk("div", "tImg");
-          const img = new Image();
+          const card = document.createElement("div");
+          card.className = "tCard";
+
+          const imgWrap = document.createElement("div");
+          imgWrap.className = "tImg";
+          const img = document.createElement("img");
           img.decoding = "async";
           img.loading = "lazy";
-          img.src = cover;
-          img.alt = title;
-          img.onerror = () => { img.onerror = null; img.src = FALLBACK_COVER; };
+          img.alt = name;
+          img.src = c;
+          setImgFallback(img);
           imgWrap.appendChild(img);
 
-          const meta = mk("div", "tMeta");
-          const ttl = mk("div", "tTitle");
-          ttl.textContent = `${id} · ${title}`;
+          const meta = document.createElement("div");
+          meta.className = "tMeta";
 
-          const btns = mk("div", "tBtns");
+          const titleEl = document.createElement("div");
+          titleEl.className = "tTitle";
+          titleEl.textContent = `${id} · ${name}`;
 
-          const a1 = mk("a", "tBtn");
-          a1.href = `./player.html?track=${encodeURIComponent(id)}&mode=audio#play`;
-          a1.setAttribute("aria-label", `Audio starten: ${title}`);
+          const btns = document.createElement("div");
+          btns.className = "tBtns";
+
+          const a1 = document.createElement("a");
+          a1.className = "tBtn";
+          a1.href = setHref(id, "audio");
+          a1.setAttribute("aria-label", `${id} Audio`);
           a1.innerHTML = `<i class="fa-solid fa-headphones"></i><span>Audio</span>`;
 
-          const a2 = mk("a", "tBtn");
-          a2.href = `./player.html?track=${encodeURIComponent(id)}&mode=video#play`;
-          a2.setAttribute("aria-label", `Video starten: ${title}`);
+          const a2 = document.createElement("a");
+          a2.className = "tBtn";
+          a2.href = setHref(id, "video");
+          a2.setAttribute("aria-label", `${id} Video`);
           a2.innerHTML = `<i class="fa-solid fa-film"></i><span>Video</span>`;
 
-          const a3 = mk("a", "tBtn");
-          a3.href = mp4 || `./player.html?track=${encodeURIComponent(id)}&mode=video`;
-          a3.setAttribute("download", `${id}-${safeName(title)}.mp4`);
-          a3.setAttribute("aria-label", `MP4 laden: ${title}`);
-          a3.innerHTML = `<i class="fa-solid fa-download"></i><span>MP4</span>`;
-          if (!mp4) a3.style.opacity = ".55";
-
-          const a4 = mk("a", "tBtn");
-          a4.href = lrc || `./player.html?track=${encodeURIComponent(id)}`;
-          a4.setAttribute("download", `${id}-${safeName(title)}.lrc`);
-          a4.setAttribute("aria-label", `LRC laden: ${title}`);
-          a4.innerHTML = `<i class="fa-solid fa-file-lines"></i><span>LRC</span>`;
-          if (!lrc) a4.style.opacity = ".55";
-
-          btns.append(a1, a2, a3, a4);
-          meta.append(ttl, btns);
+          btns.append(a1, a2);
+          meta.append(titleEl, btns);
           card.append(imgWrap, meta);
           frag.appendChild(card);
         }
 
-        host.appendChild(frag);
+        grid.appendChild(frag);
       };
 
-      const setMeta = (album, tracks) => {
-        const at = String(album?.title || "Deus ex CT");
-        $("#brandTitle") && ($("#brandTitle").textContent = at);
-        $("#homeTitle") && ($("#homeTitle").textContent = at);
-        $("#footLeft") && ($("#footLeft").textContent = `${at} · Album WebApp`);
-        const sub = tracks?.length ? `${tracks.length} Tracks · Deep-Links & Schnellstart` : "Deep-Links & Schnellstart";
-        $("#tracksSub") && ($("#tracksSub").textContent = sub);
-        $("#brandSub") && ($("#brandSub").textContent = "Start · Album WebApp");
-        document.title = `${at} · Start`;
-        const hint = $("#homeHint");
-        if (hint) hint.innerHTML = `Deep-Link Beispiel: <span style="font-weight:900">player.html?track=01&amp;mode=audio</span>`;
-        if (album?.cover) setCover(album.cover);
-      };
-
-      const showError = () => {
-        const host = $("#trackGrid");
-        if (!host) return;
-        host.textContent = "";
-        const card = mk("div", "tCard");
-        card.setAttribute("role", "listitem");
-        const imgWrap = mk("div", "tImg");
-        const img = new Image();
-        img.decoding = "async";
-        img.src = FALLBACK_COVER;
-        img.alt = "Fehler";
-        imgWrap.appendChild(img);
-        const meta = mk("div", "tMeta");
-        const ttl = mk("div", "tTitle");
-        ttl.textContent = "Trackliste nicht verfügbar";
-        const btns = mk("div", "tBtns");
-        const a1 = mk("a", "tBtn");
-        a1.href = "./player.html?mode=audio";
-        a1.innerHTML = `<i class="fa-solid fa-headphones"></i><span>Audio</span>`;
-        const a2 = mk("a", "tBtn");
-        a2.href = "./player.html?mode=video";
-        a2.innerHTML = `<i class="fa-solid fa-film"></i><span>Video</span>`;
-        btns.append(a1, a2);
-        meta.append(ttl, btns);
-        card.append(imgWrap, meta);
-        host.appendChild(card);
-      };
-
-      const boot = async () => {
-        try {
-          const data = await withTimeout(async (signal) => {
-            const r = await fetch(CAT, { cache: "no-store", signal });
-            if (!r.ok) throw new Error("bad");
-            return await r.json();
-          }, 4000);
-
-          const album = data?.album || {};
-          const tracks = Array.isArray(data?.tracks) ? data.tracks : [];
-          setMeta(album, tracks);
-          renderTracks(tracks);
-        } catch {
-          setCover(FALLBACK_COVER);
-          showError();
-        }
-
-        if ("serviceWorker" in navigator) {
-          navigator.serviceWorker.register("./sw.js", { scope: "./" }).catch(() => {});
-        }
-      };
-
-      boot();
+      fetch("./catalog.json", { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : Promise.reject()))
+        .then(applyCatalog)
+        .catch(() => {
+          applyCatalog({
+            album: { title: "Deus ex CT", cover: FALLBACK_COVER, tracks: 12 },
+            tracks: Array.from({ length: 12 }, (_, i) => ({ id: pad2(i + 1), title: `Track ${pad2(i + 1)}`, cover: FALLBACK_COVER }))
+          });
+        });
     })();
   </script>
 </body>
