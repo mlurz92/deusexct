@@ -1,0 +1,129 @@
+{
+  "album": {
+    "title": "Deus ex CT",
+    "cover": "./Cover/00-Albumcover.jpg",
+    "tracks": 12
+  },
+  "tracks": [
+    {
+      "id": "01",
+      "n": 1,
+      "title": "Oberarzt Dr. med. Placzek",
+      "base": "01-Oberarzt_Dr_med_Placzek",
+      "cover": "./Cover/01-Oberarzt_Dr_med_Placzek.jpg",
+      "mp3": "./Songs/mp3/01-Oberarzt_Dr_med_Placzek.mp3",
+      "lrc": "./Songs/lrc/01-Oberarzt_Dr_med_Placzek.lrc",
+      "video": "./Music_Videos/01-Oberarzt_Dr_med_Placzek.mp4"
+    },
+    {
+      "id": "02",
+      "n": 2,
+      "title": "Oberarzt der Herzen",
+      "base": "02-Oberarzt_der_Herzen",
+      "cover": "./Cover/02-Oberarzt_der_Herzen.jpg",
+      "mp3": "./Songs/mp3/02-Oberarzt_der_Herzen.mp3",
+      "lrc": "./Songs/lrc/02-Oberarzt_der_Herzen.lrc",
+      "video": "./Music_Videos/02-Oberarzt_der_Herzen.mp4"
+    },
+    {
+      "id": "03",
+      "n": 3,
+      "title": "Vier-Eins-Neun-Zwei",
+      "base": "03-Vier-Eins-Neun-Zwei",
+      "cover": "./Cover/03-Vier-Eins-Neun-Zwei.jpg",
+      "mp3": "./Songs/mp3/03-Vier-Eins-Neun-Zwei.mp3",
+      "lrc": "./Songs/lrc/03-Vier-Eins-Neun-Zwei.lrc",
+      "video": "./Music_Videos/03-Vier-Eins-Neun-Zwei.mp4"
+    },
+    {
+      "id": "04",
+      "n": 4,
+      "title": "Pilot im Pixelmeer",
+      "base": "04-Pilot_im_Pixelmeer",
+      "cover": "./Cover/04-Pilot_im_Pixelmeer.jpg",
+      "mp3": "./Songs/mp3/04-Pilot_im_Pixelmeer.mp3",
+      "lrc": "./Songs/lrc/04-Pilot_im_Pixelmeer.lrc",
+      "video": "./Music_Videos/04-Pilot_im_Pixelmeer.mp4"
+    },
+    {
+      "id": "05",
+      "n": 5,
+      "title": "Drei Gebote",
+      "base": "05-Drei_Gebote",
+      "cover": "./Cover/05-Drei_Gebote.jpg",
+      "mp3": "./Songs/mp3/05-Drei_Gebote.mp3",
+      "lrc": "./Songs/lrc/05-Drei_Gebote.lrc",
+      "video": "./Music_Videos/05-Drei_Gebote.mp4"
+    },
+    {
+      "id": "06",
+      "n": 6,
+      "title": "Kunst der Diagnostik",
+      "base": "06-Kunst_der_Diagnostik",
+      "cover": "./Cover/06-Kunst_der_Diagnostik.jpg",
+      "mp3": "./Songs/mp3/06-Kunst_der_Diagnostik.mp3",
+      "lrc": "./Songs/lrc/06-Kunst_der_Diagnostik.lrc",
+      "video": "./Music_Videos/06-Kunst_der_Diagnostik.mp4"
+    },
+    {
+      "id": "07",
+      "n": 7,
+      "title": "Mit harter Hand und Charme",
+      "base": "07-Mit_harter_Hand_und_Charme",
+      "cover": "./Cover/07-Mit_harter_Hand_und_Charme.jpg",
+      "mp3": "./Songs/mp3/07-Mit_harter_Hand_und_Charme.mp3",
+      "lrc": "./Songs/lrc/07-Mit_harter_Hand_und_Charme.lrc",
+      "video": "./Music_Videos/07-Mit_harter_Hand_und_Charme.mp4"
+    },
+    {
+      "id": "08",
+      "n": 8,
+      "title": "Durch Feuer und Eis",
+      "base": "08-Durch_Feuer_und_Eis",
+      "cover": "./Cover/08-Durch_Feuer_und_Eis.jpg",
+      "mp3": "./Songs/mp3/08-Durch_Feuer_und_Eis.mp3",
+      "lrc": "./Songs/lrc/08-Durch_Feuer_und_Eis.lrc",
+      "video": "./Music_Videos/08-Durch_Feuer_und_Eis.mp4"
+    },
+    {
+      "id": "09",
+      "n": 9,
+      "title": "Held und Idol",
+      "base": "09-Held_und_Idol",
+      "cover": "./Cover/09-Held_und_Idol.jpg",
+      "mp3": "./Songs/mp3/09-Held_und_Idol.mp3",
+      "lrc": "./Songs/lrc/09-Held_und_Idol.lrc",
+      "video": "./Music_Videos/09-Held_und_Idol.mp4"
+    },
+    {
+      "id": "10",
+      "n": 10,
+      "title": "Messerscharf und Legendär",
+      "base": "10-Messerscharf_und_Legendär",
+      "cover": "./Cover/10-Messerscharf_und_Legendär.jpg",
+      "mp3": "./Songs/mp3/10-Messerscharf_und_Legendär.mp3",
+      "lrc": "./Songs/lrc/10-Messerscharf_und_Legendär.lrc",
+      "video": "./Music_Videos/10-Messerscharf_und_Legendär.mp4"
+    },
+    {
+      "id": "11",
+      "n": 11,
+      "title": "Oberärztlicher Glanz",
+      "base": "11-Oberärztlicher_Glanz",
+      "cover": "./Cover/11-Oberärztlicher_Glanz.jpg",
+      "mp3": "./Songs/mp3/11-Oberärztlicher_Glanz.mp3",
+      "lrc": "./Songs/lrc/11-Oberärztlicher_Glanz.lrc",
+      "video": "./Music_Videos/11-Oberärztlicher_Glanz.mp4"
+    },
+    {
+      "id": "12",
+      "n": 12,
+      "title": "Götterdämmerung",
+      "base": "12-Götterdämmerung",
+      "cover": "./Cover/12-Gätterdämmerung.jpg",
+      "mp3": "./Songs/mp3/12-Götterdämmerung.mp3",
+      "lrc": "./Songs/lrc/12-Götterdämmerung.lrc",
+      "video": "./Music_Videos/12-Götterdämmerung.mp4"
+    }
+  ]
+}
