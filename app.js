@@ -18,7 +18,7 @@ const ASSETS=(()=>{
   const per=TRACKS.flatMap(t=>[t.cover,t.mp3,t.lrc,t.video]);
   return Array.from(new Set(core.concat(per)));
 })();
-const LS_KEY="dexct_state_v1",LS_CACHE_FLAG="dexct_cache_flag_v1";
+const LS_KEY="dexct_state_v1",LS_CACHE_FLAG="dexct_cache_flag_v1",LS_HOME_SEEN="dexct_home_seen_v1";
 const DEF={mode:"audio",lyrics:"on",lyricsSize:"md",autoPlay:false,autoFollow:true,shuffle:false,repeat:0,vol:.9,cur:0};
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const fmtTime=s=>{
@@ -51,7 +51,6 @@ const loadState=()=>{
 };
 const ST=loadState();
 const saveState=()=>{try{localStorage.setItem(LS_KEY,JSON.stringify(ST))}catch{}};
-
 const sanitize=()=>{
   ST.mode=ST.mode==="video"?"video":"audio";
   ST.lyrics=ST.lyrics==="off"?"off":"on";
@@ -133,12 +132,27 @@ let Q={
   lyrTimed:false,
   lyrAbort:null,
   lyrUserScrollAt:0,
+  focusLineNode:null,
+  focusStampNode:null,
+  lyrBodyStyle:el.lyricsBody?el.lyricsBody.getAttribute("style")||"":"" ,
   albumUrl:null,
   albumBusy:false,
   albumAbort:null,
   swReg:null,
   swReady:false,
-  swCaching:false
+  swCaching:false,
+  homeSheet:null,
+  songsSheet:null,
+  searchSheet:null,
+  libMount:null,
+  libStyle:null,
+  libInSheet:false,
+  searchWrap:$(".searchWrap"),
+  topActions:$(".topActions"),
+  main:$(".main"),
+  library:$(".library"),
+  mq:matchMedia("(max-width: 980px)"),
+  isMobile:false
 };
 
 const media=()=>ST.mode==="video"?el.video:el.audio;
@@ -336,7 +350,37 @@ const parseLRC=txt=>{
   return {timed:!!timedLines.length,lines:(timedLines.length?timedLines:plain)};
 };
 
-const renderLyrics=(arr,timed)=>{
+const setLyricsFocusLayout=on=>{
+  if(!el.lyricsBody) return;
+  if(on){
+    el.lyricsBody.style.overflow="hidden";
+    el.lyricsBody.style.display="grid";
+    el.lyricsBody.style.placeItems="center";
+    el.lyricsBody.style.textAlign="center";
+    el.lyricsBody.style.padding="22px 18px";
+  }else{
+    el.lyricsBody.setAttribute("style",Q.lyrBodyStyle||"");
+  }
+};
+
+const renderLyricsFocus=()=>{
+  setLyricsFocusLayout(true);
+  const d=document.createElement("div");
+  d.className="lLine active";
+  const stamp=document.createElement("span");
+  stamp.className="lStamp";
+  stamp.textContent="";
+  const txt=document.createElement("span");
+  txt.textContent="";
+  d.appendChild(stamp);
+  d.appendChild(txt);
+  el.lyricsBody.replaceChildren(d);
+  Q.focusLineNode=txt;
+  Q.focusStampNode=stamp;
+};
+
+const renderLyricsFull=(arr,timed)=>{
+  setLyricsFocusLayout(false);
   const frag=document.createDocumentFragment();
   for(let i=0;i<arr.length;i++){
     const it=arr[i];
@@ -352,9 +396,7 @@ const renderLyrics=(arr,timed)=>{
       sp.textContent=it.txt||"";
       d.appendChild(st);
       d.appendChild(sp);
-    }else{
-      d.textContent=it.txt||"";
-    }
+    }else d.textContent=it.txt||"";
     frag.appendChild(d);
   }
   el.lyricsBody.replaceChildren(frag);
@@ -367,6 +409,8 @@ const loadLyrics=async idx=>{
   Q.activeLine=-1;
   Q.lyr=[];
   Q.lyrTimed=false;
+  Q.focusLineNode=null;
+  Q.focusStampNode=null;
   el.lyricsBody.replaceChildren();
   const t=TRACKS[idx];
   try{
@@ -376,10 +420,16 @@ const loadLyrics=async idx=>{
     const parsed=parseLRC(txt);
     Q.lyr=parsed.lines;
     Q.lyrTimed=parsed.timed;
-    renderLyrics(Q.lyr,Q.lyrTimed);
-    if(!Q.lyr.length) el.lyricsBody.textContent="Keine Lyrics verfügbar.";
+    if(Q.lyrTimed){
+      renderLyricsFocus();
+      syncLyrics(0);
+    }else{
+      renderLyricsFull(Q.lyr,false);
+      if(!Q.lyr.length) el.lyricsBody.textContent="Keine Lyrics verfügbar.";
+    }
   }catch(e){
     if(e&&e.name==="AbortError") return;
+    setLyricsFocusLayout(false);
     el.lyricsBody.textContent="Lyrics konnten nicht geladen werden.";
   }
 };
@@ -395,16 +445,23 @@ const findActiveLyricIndex=t=>{
   return ans;
 };
 
+const setFocusLine=idx=>{
+  const a=Q.lyr;
+  if(!Q.focusLineNode||!a||!a.length) return;
+  if(idx<0) idx=0;
+  idx=clamp(idx,0,a.length-1);
+  const it=a[idx];
+  Q.focusLineNode.textContent=(it&&it.txt!=null)?String(it.txt):"";
+  if(Q.focusStampNode) Q.focusStampNode.textContent=isFinite(it&&it.t)?fmtTime(it.t):"";
+};
+
 const syncLyrics=t=>{
+  if(ST.lyrics!=="on") return;
+  if(!Q.lyrTimed) return;
   const idx=findActiveLyricIndex(t);
   if(idx===Q.activeLine) return;
   Q.activeLine=idx;
-  const nodes=$$(".lLine",el.lyricsBody);
-  for(let i=0;i<nodes.length;i++) nodes[i].classList.toggle("active",i===idx);
-  if(idx>=0 && ST.autoFollow && (performance.now()-Q.lyrUserScrollAt)>1500){
-    const n=nodes[idx];
-    if(n) n.scrollIntoView({block:"center",inline:"nearest",behavior:"smooth"});
-  }
+  setFocusLine(idx);
 };
 
 const updateTimeline=()=>{
@@ -414,7 +471,7 @@ const updateTimeline=()=>{
   el.tCur.textContent=fmtTime(cur);
   el.tDur.textContent=dur?fmtTime(dur):"—:—";
   if(!Q.scrub && dur>0) el.seek.value=String(Math.round(clamp(cur/dur,0,1)*1000));
-  if(ST.lyrics==="on") syncLyrics(cur);
+  syncLyrics(cur);
 };
 
 const stopRAF=()=>{if(Q.raf){cancelAnimationFrame(Q.raf);Q.raf=0}};
@@ -619,9 +676,8 @@ const openSheet=sheet=>{
     gsap.fromTo(back,{opacity:0},{opacity:1,duration:.22,ease:"power2.out"});
     gsap.fromTo(panel,{opacity:0,y:18},{opacity:1,y:0,duration:.28,ease:"power2.out"});
   }else{
-    back.style.opacity="1";
-    panel.style.opacity="1";
-    panel.style.transform="translateY(0px)";
+    if(back) back.style.opacity="1";
+    if(panel){panel.style.opacity="1";panel.style.transform="translateY(0px)"}
   }
 };
 
@@ -637,8 +693,11 @@ const closeSheet=sheet=>{
 };
 
 const closeAnySheet=()=>{
-  if(!el.settingsSheet.hidden) closeSheet(el.settingsSheet);
-  if(!el.albumSheet.hidden) closeSheet(el.albumSheet);
+  if(el.settingsSheet && !el.settingsSheet.hidden) closeSheet(el.settingsSheet);
+  if(el.albumSheet && !el.albumSheet.hidden) closeSheet(el.albumSheet);
+  if(Q.homeSheet && !Q.homeSheet.hidden) closeSheet(Q.homeSheet);
+  if(Q.songsSheet && !Q.songsSheet.hidden) closeSheet(Q.songsSheet);
+  if(Q.searchSheet && !Q.searchSheet.hidden) closeSheet(Q.searchSheet);
 };
 
 const updateAlbumProgress=(on,txt,pct)=>{
@@ -761,8 +820,8 @@ const initSW=async()=>{
       if(d.type==="CACHE_PROGRESS"){
         Q.swCaching=!!d.active;
         const pct=isFinite(d.pct)?d.pct:0;
-        if(!el.settingsSheet.hidden) el.cacheLbl.textContent=Q.swCaching?"Caching…":(localStorage.getItem(LS_CACHE_FLAG)==="1"?"Cache leeren":"Einrichten");
-        if(!el.albumSheet.hidden){
+        if(el.settingsSheet && !el.settingsSheet.hidden) el.cacheLbl.textContent=Q.swCaching?"Caching…":(localStorage.getItem(LS_CACHE_FLAG)==="1"?"Cache leeren":"Einrichten");
+        if(el.albumSheet && !el.albumSheet.hidden){
           el.albumStatus.textContent=d.label||el.albumStatus.textContent;
           updateAlbumProgress(true,d.label||"Caching…",pct);
         }
@@ -772,9 +831,9 @@ const initSW=async()=>{
         const on=!!d.cached;
         localStorage.setItem(LS_CACHE_FLAG,on?"1":"0");
         applyStateToDOM();
-        if(!el.albumSheet.hidden) updateAlbumProgress(false,"",0);
+        if(el.albumSheet && !el.albumSheet.hidden) updateAlbumProgress(false,"",0);
         toast("Offline Cache",on?"Aktiv":"Geleert",on?"fa-solid fa-cloud-check":"fa-solid fa-trash");
-        el.albumStatus.textContent=on?"Offline Cache aktiv":"Offline Cache geleert";
+        if(el.albumSheet) el.albumStatus.textContent=on?"Offline Cache aktiv":"Offline Cache geleert";
       }
     });
   }catch{}
@@ -795,9 +854,7 @@ const toggleCache=async()=>{
   const cached=localStorage.getItem(LS_CACHE_FLAG)==="1";
   if(!Q.swReady){toast("Offline Cache","Service Worker nicht verfügbar","fa-solid fa-triangle-exclamation");return}
   if(!cached){
-    openSheet(el.albumSheet);
-    el.albumStatus.textContent="Offline Cache wird aufgebaut…";
-    updateAlbumProgress(true,"Caching…",0);
+    if(el.albumSheet){openSheet(el.albumSheet);el.albumStatus.textContent="Offline Cache wird aufgebaut…";updateAlbumProgress(true,"Caching…",0)}
     const ok=await swPost({type:"CACHE_ALL",urls:ASSETS});
     if(!ok){updateAlbumProgress(false,"",0);toast("Cache","Konnte nicht starten","fa-solid fa-triangle-exclamation")}
     return;
@@ -806,9 +863,186 @@ const toggleCache=async()=>{
   if(!ok) toast("Cache","Konnte nicht löschen","fa-solid fa-triangle-exclamation");
 };
 
+const mkSheet=(id,title,wide)=>{
+  const wrap=document.createElement("div");
+  wrap.className="sheet";
+  wrap.id=id;
+  wrap.hidden=true;
+  const back=document.createElement("div");
+  back.className="sheetBackdrop";
+  back.dataset.close="1";
+  const panel=document.createElement("div");
+  panel.className="sheetPanel"+(wide?" wide":"");
+  const top=document.createElement("div");
+  top.className="sheetTop";
+  const h=document.createElement("div");
+  h.className="sheetTitle";
+  h.textContent=title||"";
+  const x=document.createElement("button");
+  x.className="iconBtn";
+  x.type="button";
+  x.dataset.close="1";
+  x.setAttribute("aria-label","Schließen");
+  const xi=document.createElement("i");
+  xi.className="fa-solid fa-xmark";
+  x.appendChild(xi);
+  top.appendChild(h);
+  top.appendChild(x);
+  const body=document.createElement("div");
+  body.className="sheetBody";
+  panel.appendChild(top);
+  panel.appendChild(body);
+  wrap.appendChild(back);
+  wrap.appendChild(panel);
+  wrap.addEventListener("click",e=>{
+    const c=e.target&&e.target.closest("[data-close]");
+    if(c){
+      if(wrap===el.albumSheet && Q.albumBusy && Q.albumAbort) try{Q.albumAbort.abort()}catch{}
+      closeSheet(wrap);
+    }
+  });
+  document.body.appendChild(wrap);
+  return {wrap,body,panel};
+};
+
+const mkActionBtn=(icon,aria,cls)=>{
+  const b=document.createElement("button");
+  b.className=cls||"iconBtn";
+  b.type="button";
+  b.setAttribute("aria-label",aria||"");
+  const i=document.createElement("i");
+  i.className=icon;
+  b.appendChild(i);
+  return b;
+};
+
+const ensureMobileShell=()=>{
+  if(!Q.topActions) Q.topActions=$(".topActions");
+  if(!Q.searchWrap) Q.searchWrap=$(".searchWrap");
+  if(!Q.library) Q.library=$(".library");
+  if(!Q.main) Q.main=$(".main");
+  if(!Q.topActions) return;
+  if(!Q.homeSheet){
+    const h=mkSheet("homeSheet","Deus ex CT",true);
+    Q.homeSheet=h.wrap;
+    const art="./Cover/00-Albumcover.jpg";
+    h.body.innerHTML=`<div class="albumBody"><div class="albumGrid"><div class="albumArt"><img src="${art}" alt="Deus ex CT Albumcover" loading="eager" decoding="async"></div><div class="albumText"><div class="albumH">Deus ex CT</div><div class="albumP">Ein Album-Player mit Playlist, Audio/Video-Modus und Karaoke-Lyrics. Mobil fokussiert: Songs & Suche als Sheets, Lyrics als aktuelle Zeile.</div><div class="albumBtns"><button class="miniBtn" type="button" data-home="play"><i class="fa-solid fa-play"></i><span>Play</span></button><button class="miniBtn" type="button" data-home="songs"><i class="fa-solid fa-music"></i><span>Songs</span></button><button class="miniBtn" type="button" data-home="search"><i class="fa-solid fa-magnifying-glass"></i><span>Suche</span></button><button class="miniBtn" type="button" data-home="mode"><i class="fa-solid fa-film"></i><span>Audio/Video</span></button><button class="miniBtn" type="button" data-home="download"><i class="fa-solid fa-download"></i><span>Album</span></button><button class="miniBtn" type="button" data-home="cache"><i class="fa-solid fa-cloud-arrow-down"></i><span>Offline</span></button></div><div class="albumSmall">Tip: Home kannst du jederzeit wieder öffnen.</div></div></div></div>`;
+    h.body.addEventListener("click",e=>{
+      const a=e.target&&e.target.closest("[data-home]");
+      if(!a) return;
+      const t=a.dataset.home;
+      if(t==="play"){closeSheet(Q.homeSheet);play();}
+      if(t==="songs"){closeSheet(Q.homeSheet);openSongs();}
+      if(t==="search"){closeSheet(Q.homeSheet);openSearch();}
+      if(t==="mode"){setMode(ST.mode==="audio"?"video":"audio");}
+      if(t==="download"){closeSheet(Q.homeSheet);if(el.albumSheet){openSheet(el.albumSheet);buildAlbumMP3()}}
+      if(t==="cache"){closeSheet(Q.homeSheet);toggleCache();}
+      try{localStorage.setItem(LS_HOME_SEEN,"1")}catch{}
+    });
+  }
+  if(!Q.songsSheet){
+    const s=mkSheet("songsSheet","Songs",true);
+    Q.songsSheet=s.wrap;
+    Q.songsSheetBody=s.body;
+  }
+  if(!Q.searchSheet){
+    const s=mkSheet("searchSheet","Suche",true);
+    Q.searchSheet=s.wrap;
+    Q.searchSheetBody=s.body;
+    s.body.innerHTML=`<div class="setRow"><div><div class="setKey">Song suchen</div><div class="setVal">Titel, Track-Nr, Begriff</div></div></div><div class="searchWrap" style="margin:0;border-radius:16px;padding:12px 12px 12px 14px"><i class="fa-solid fa-magnifying-glass"></i><input id="mSearch" class="search" type="search" placeholder="Search…" autocomplete="off" autocapitalize="off" spellcheck="false"><button id="mClear" class="iconBtn" type="button" aria-label="Leeren" style="width:40px;height:40px;border-radius:12px"><i class="fa-solid fa-xmark"></i></button></div><div class="albumSmall" style="margin-top:10px">Ergebnisliste aktualisiert sich sofort.</div>`;
+    const inp=$("#mSearch",s.body);
+    const clr=$("#mClear",s.body);
+    const sync=()=>{
+      Q.filter=inp.value||"";
+      if(el.search) el.search.value=Q.filter;
+      renderList();
+      updateNowUI();
+    };
+    inp.addEventListener("input",sync);
+    clr.addEventListener("click",()=>{inp.value="";sync();inp.focus()});
+    Q.openSearchFocus=()=>{inp.value=Q.filter||"";setTimeout(()=>inp.focus(),40)};
+  }
+
+  if(!Q.btnHome){
+    Q.btnHome=mkActionBtn("fa-solid fa-house","Startseite");
+    Q.btnSongs=mkActionBtn("fa-solid fa-music","Songs");
+    Q.btnSearch=mkActionBtn("fa-solid fa-magnifying-glass","Suche");
+    Q.btnHome.addEventListener("click",()=>openHome(true));
+    Q.btnSongs.addEventListener("click",openSongs);
+    Q.btnSearch.addEventListener("click",openSearch);
+    Q.topActions.insertBefore(Q.btnSearch,Q.topActions.firstChild);
+    Q.topActions.insertBefore(Q.btnSongs,Q.btnSearch);
+    Q.topActions.insertBefore(Q.btnHome,Q.btnSongs);
+  }
+};
+
+const moveLibraryIntoSongsSheet=()=>{
+  if(Q.libInSheet) return;
+  if(!Q.library||!Q.main||!Q.songsSheetBody) return;
+  if(!Q.libMount){
+    Q.libMount=document.createElement("div");
+    Q.libMount.style.display="none";
+    Q.main.insertBefore(Q.libMount,Q.library);
+  }
+  Q.libStyle=Q.library.getAttribute("style")||"";
+  Q.library.style.boxShadow="none";
+  Q.library.style.border="0";
+  Q.library.style.borderRadius="0";
+  Q.library.style.background="transparent";
+  Q.library.style.overflow="hidden";
+  Q.library.style.height="auto";
+  Q.library.style.minHeight="0";
+  Q.songsSheetBody.appendChild(Q.library);
+  Q.libInSheet=true;
+};
+
+const restoreLibraryToMain=()=>{
+  if(!Q.libInSheet) return;
+  if(!Q.library||!Q.main||!Q.libMount) return;
+  Q.main.insertBefore(Q.library,Q.libMount);
+  Q.library.setAttribute("style",Q.libStyle||"");
+  Q.libInSheet=false;
+};
+
+const applyMobileVisibility=()=>{
+  Q.isMobile=!!Q.mq.matches;
+  if(Q.isMobile){
+    ensureMobileShell();
+    moveLibraryIntoSongsSheet();
+    if(Q.searchWrap) Q.searchWrap.style.display="none";
+    if(el.lyricsFollowBtn) el.lyricsFollowBtn.style.display="none";
+  }else{
+    if(Q.searchWrap) Q.searchWrap.style.display="";
+    if(el.lyricsFollowBtn) el.lyricsFollowBtn.style.display="";
+    restoreLibraryToMain();
+  }
+};
+
+const openHome=(force)=>{
+  ensureMobileShell();
+  const seen=(()=>{try{return localStorage.getItem(LS_HOME_SEEN)==="1"}catch{return false}})();
+  if(!seen || force){
+    openSheet(Q.homeSheet);
+    if(!seen) try{localStorage.setItem(LS_HOME_SEEN,"1")}catch{}
+  }
+};
+
+const openSongs=()=>{
+  ensureMobileShell();
+  applyMobileVisibility();
+  openSheet(Q.songsSheet);
+};
+
+const openSearch=()=>{
+  ensureMobileShell();
+  applyMobileVisibility();
+  openSheet(Q.searchSheet);
+  if(Q.openSearchFocus) Q.openSearchFocus();
+};
+
 const bindUI=()=>{
-  el.clearSearch.addEventListener("click",()=>{el.search.value="";Q.filter="";renderList();updateNowUI();el.search.focus()});
-  el.search.addEventListener("input",()=>{Q.filter=el.search.value||"";renderList();updateNowUI()});
+  if(el.clearSearch) el.clearSearch.addEventListener("click",()=>{if(el.search){el.search.value="";Q.filter="";renderList();updateNowUI();el.search.focus()}});
+  if(el.search) el.search.addEventListener("input",()=>{Q.filter=el.search.value||"";renderList();updateNowUI()});
 
   el.list.addEventListener("click",e=>{
     const act=e.target&&e.target.closest("[data-act]");
@@ -823,13 +1057,23 @@ const bindUI=()=>{
     const row=e.target&&e.target.closest(".track");
     if(!row) return;
     const idx=+(row.dataset.idx||-1);
-    if(idx>=0) setTrack(idx,{autoplay:true});
+    if(idx>=0){
+      setTrack(idx,{autoplay:true});
+      if(Q.isMobile && Q.songsSheet && !Q.songsSheet.hidden) closeSheet(Q.songsSheet);
+    }
   });
 
   el.list.addEventListener("keydown",e=>{
     const row=e.target&&e.target.closest(".track");
     if(!row) return;
-    if(e.key==="Enter"||e.key===" "){e.preventDefault();const idx=+(row.dataset.idx||-1);if(idx>=0) setTrack(idx,{autoplay:true})}
+    if(e.key==="Enter"||e.key===" "){
+      e.preventDefault();
+      const idx=+(row.dataset.idx||-1);
+      if(idx>=0){
+        setTrack(idx,{autoplay:true});
+        if(Q.isMobile && Q.songsSheet && !Q.songsSheet.hidden) closeSheet(Q.songsSheet);
+      }
+    }
   });
 
   el.play.addEventListener("click",togglePlay);
@@ -865,21 +1109,15 @@ const bindUI=()=>{
 
   el.toggleLyrics.addEventListener("click",()=>setLyricsOn(ST.lyrics!=="on"));
   el.lyricsClose.addEventListener("click",()=>setLyricsOn(false));
-  el.lyricsSizeBtn.addEventListener("click",toggleLyricsSize);
-  el.lyricsFollowBtn.addEventListener("click",()=>setAutoFollow(!ST.autoFollow));
-  el.lyricsBody.addEventListener("scroll",()=>{Q.lyrUserScrollAt=performance.now()},{passive:true});
-  el.lyricsBody.addEventListener("click",e=>{
-    const line=e.target&&e.target.closest(".lLine");
-    if(!line||!Q.lyrTimed) return;
-    const t=parseFloat(line.dataset.t||"NaN");
-    if(isFinite(t)){seekTo(t,true);Q.lyrUserScrollAt=0}
-  });
+  if(el.lyricsSizeBtn) el.lyricsSizeBtn.addEventListener("click",toggleLyricsSize);
+  if(el.lyricsFollowBtn) el.lyricsFollowBtn.addEventListener("click",()=>setAutoFollow(!ST.autoFollow));
+  if(el.lyricsBody) el.lyricsBody.addEventListener("scroll",()=>{Q.lyrUserScrollAt=performance.now()},{passive:true});
 
   el.downloadTrack.addEventListener("click",()=>downloadCurrent("mp3"));
   el.downloadVideo.addEventListener("click",()=>downloadCurrent("mp4"));
   el.downloadLrc.addEventListener("click",()=>downloadCurrent("lrc"));
 
-  el.downloadAlbum.addEventListener("click",()=>{openSheet(el.albumSheet);buildAlbumMP3()});
+  el.downloadAlbum.addEventListener("click",()=>{if(el.albumSheet){openSheet(el.albumSheet);buildAlbumMP3()}});
   el.albumDownload2.addEventListener("click",()=>buildAlbumMP3());
 
   el.openSettings.addEventListener("click",()=>openSheet(el.settingsSheet));
@@ -897,6 +1135,7 @@ const bindUI=()=>{
   el.cacheBtn.addEventListener("click",toggleCache);
 
   [el.settingsSheet,el.albumSheet].forEach(sheet=>{
+    if(!sheet) return;
     sheet.addEventListener("click",e=>{
       const c=e.target&&e.target.closest("[data-close]");
       if(c){
@@ -909,7 +1148,10 @@ const bindUI=()=>{
   const onEnded=()=>{
     const rep=ST.repeat|0;
     if(rep===2){seekTo(0,true);return}
-    if(ST.shuffle){nextTrack();return}
+    if(ST.shuffle){
+      nextTrack();
+      return;
+    }
     const atEnd=(ST.cur|0)>=TRACKS.length-1;
     if(atEnd && rep!==1){pauseAll();toast("Ende","Playlist beendet","fa-solid fa-flag-checkered");return}
     nextTrack();
@@ -958,6 +1200,11 @@ const init=()=>{
   bindUI();
   armAutoplayOnce();
   initSW();
+  ensureMobileShell();
+  applyMobileVisibility();
+  if(Q.mq) Q.mq.addEventListener("change",()=>{applyMobileVisibility();});
+  const showHome=(()=>{try{return localStorage.getItem(LS_HOME_SEEN)!=="1"}catch{return true}})();
+  if(showHome) setTimeout(()=>openHome(false),220);
   if(window.gsap){
     gsap.fromTo(".topbar",{y:-8,opacity:0},{y:0,opacity:1,duration:.45,ease:"power2.out",delay:.04});
     gsap.fromTo(".library",{y:10,opacity:0},{y:0,opacity:1,duration:.55,ease:"power2.out",delay:.08});
