@@ -10,7 +10,7 @@
   <meta name="application-name" content="Deus ex CT">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="format-detection" content="telephone=no">
-  <meta name="description" content="Deus ex CT – Player. Audio/Video, Playlist, Deep-Links pro Track, Karaoke-Lyrics (eine Zeile), Offline-Cache.">
+  <meta name="description" content="Deus ex CT – Player. Audio/Video, Playlist, Deep-Links pro Track, Karaoke-Lyrics (eine Zeile), Downloads, Offline-Cache.">
   <title>Deus ex CT · Player</title>
 
   <link rel="manifest" href="./manifest.webmanifest">
@@ -31,10 +31,10 @@
       <div>
         <div class="brand">
           <a class="pillBtn" id="backBtn" href="./index.html" aria-label="Zur Startseite"><i class="fa-solid fa-chevron-left"></i><span class="lbl">Start</span></a>
-          <span class="brandCover"><img src="./Cover/00-Albumcover.jpg" alt="Deus ex CT" decoding="async"></span>
+          <span class="brandCover"><img id="brandCoverImg" src="./Cover/00-Albumcover.jpg" alt="Deus ex CT" decoding="async"></span>
           <div class="brandMeta">
-            <div class="brandTitle">Deus ex CT</div>
-            <div class="brandSub">Player · Audio/Video · Deep-Links</div>
+            <div class="brandTitle" id="brandTitle">Deus ex CT</div>
+            <div class="brandSub" id="brandSub">Player · Audio/Video · Deep-Links</div>
           </div>
         </div>
 
@@ -60,7 +60,8 @@
             <div class="npTitle" id="nowTitle">—</div>
             <div class="npSub" id="nowSub">—</div>
             <div class="npMini">
-              <span class="badge">Deep-Link</span>
+              <span class="badge" id="badgeTrack">Track</span>
+              <span class="badge" id="badgeMode">Audio</span>
               <span class="badge">Karaoke</span>
               <span class="badge">PWA</span>
             </div>
@@ -110,14 +111,20 @@
           </div>
         </div>
       </section>
+
+      <noscript>
+        <div style="margin-top:12px;padding:12px 14px;border-radius:18px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);color:rgba(255,255,255,.88);font-weight:900">
+          Bitte JavaScript aktivieren, um den Player zu nutzen.
+        </div>
+      </noscript>
     </main>
 
     <div id="sheetBackdrop" class="sheetBackdrop" aria-hidden="true"></div>
     <aside id="playlistSheet" class="sheet" aria-label="Playlist">
       <div class="sheetHead">
         <div class="sheetTitle">
-          <div class="sheetH1">Playlist</div>
-          <div class="sheetH2">Tippe einen Track an · Downloads rechts</div>
+          <div class="sheetH1" id="sheetH1">Playlist</div>
+          <div class="sheetH2" id="sheetH2">Track antippen · Downloads rechts</div>
         </div>
         <button class="pillBtn" id="sheetClose" type="button" aria-label="Schließen"><i class="fa-solid fa-xmark"></i><span class="lbl">Close</span></button>
       </div>
