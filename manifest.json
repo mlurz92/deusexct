@@ -1,0 +1,262 @@
+{
+  "name": "Deus ex CT - Das Album von ML",
+  "short_name": "Deus ex CT",
+  "description": "Das komplette Album 'Deus ex CT' mit 12 Songs über Oberarzt Dr. med. Placzek - mit integriertem Music Player und Lyrics Videos",
+  "start_url": "./",
+  "scope": "./",
+  "id": "deus-ex-ct-pwa",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#000000",
+  "background_color": "#0a0a0a",
+  "categories": ["music", "entertainment"],
+  "lang": "de-DE",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "iarc_rating_id": "",
+  "icons": [
+    {
+      "src": "assets/images/00-Albumcover.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/images/00-Albumcover.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "assets/images/00-Albumcover.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "label": "Album Cover - Deus ex CT",
+      "platform": "wide"
+    },
+    {
+      "src": "assets/images/01-Oberarzt_Dr_med_Placzek.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "label": "Track 1 - Oberarzt Dr. med. Placzek",
+      "platform": "wide"
+    },
+    {
+      "src": "assets/images/06-Kunst_der_Diagnostik.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "label": "Track 6 - Kunst der Diagnostik",
+      "platform": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Oberarzt Dr. med. Placzek",
+      "short_name": "Track 1",
+      "description": "Direkt zu Track 1 springen",
+      "url": "./?track=1",
+      "icons": [
+        {
+          "src": "assets/images/01-Oberarzt_Dr_med_Placzek.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Oberarzt der Herzen",
+      "short_name": "Track 2",
+      "description": "Direkt zu Track 2 springen",
+      "url": "./?track=2",
+      "icons": [
+        {
+          "src": "assets/images/02-Oberarzt_der_Herzen.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Vier-Eins-Neun-Zwei",
+      "short_name": "Track 3",
+      "description": "Direkt zu Track 3 springen",
+      "url": "./?track=3",
+      "icons": [
+        {
+          "src": "assets/images/03-Vier-Eins-Neun-Zwei.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Pilot im Pixelmeer",
+      "short_name": "Track 4",
+      "description": "Direkt zu Track 4 springen",
+      "url": "./?track=4",
+      "icons": [
+        {
+          "src": "assets/images/04-Pilot_im_Pixelmeer.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Drei Gebote",
+      "short_name": "Track 5",
+      "description": "Direkt zu Track 5 springen",
+      "url": "./?track=5",
+      "icons": [
+        {
+          "src": "assets/images/05-Drei_Gebote.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Kunst der Diagnostik",
+      "short_name": "Track 6",
+      "description": "Direkt zu Track 6 springen",
+      "url": "./?track=6",
+      "icons": [
+        {
+          "src": "assets/images/06-Kunst_der_Diagnostik.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Mit harter Hand und Charme",
+      "short_name": "Track 7",
+      "description": "Direkt zu Track 7 springen",
+      "url": "./?track=7",
+      "icons": [
+        {
+          "src": "assets/images/07-Mit_harter_Hand_und_Charme.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Durch Feuer und Eis",
+      "short_name": "Track 8",
+      "description": "Direkt zu Track 8 springen",
+      "url": "./?track=8",
+      "icons": [
+        {
+          "src": "assets/images/08-Durch_Feuer_und_Eis.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Held und Idol",
+      "short_name": "Track 9",
+      "description": "Direkt zu Track 9 springen",
+      "url": "./?track=9",
+      "icons": [
+        {
+          "src": "assets/images/09-Held_und_Idol.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Messerscharf und Legendär",
+      "short_name": "Track 10",
+      "description": "Direkt zu Track 10 springen",
+      "url": "./?track=10",
+      "icons": [
+        {
+          "src": "assets/images/10-Messerscharf_und_Legendär.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Oberärztlicher Glanz",
+      "short_name": "Track 11",
+      "description": "Direkt zu Track 11 springen",
+      "url": "./?track=11",
+      "icons": [
+        {
+          "src": "assets/images/11-Oberärztlicher_Glanz.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Götterdämmerung",
+      "short_name": "Track 12",
+      "description": "Direkt zu Track 12 springen",
+      "url": "./?track=12",
+      "icons": [
+        {
+          "src": "assets/images/12-Götterdämmerung.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui",
+    "browser"
+  ],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "launch_handler": {
+    "client_mode": ["focus-existing", "auto"]
+  },
+  "handle_links": "preferred",
+  "share_target": {
+    "action": "./",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+deusexct",
+      "url": "./?track=%s"
+    }
+  ],
+  "file_handlers": [
+    {
+      "action": "./",
+      "name": "Audio Files",
+      "accept": {
+        "audio/mpeg": [".mp3"],
+        "audio/mp4": [".m4a"],
+        "audio/ogg": [".ogg"]
+      }
+    },
+    {
+      "action": "./",
+      "name": "Lyrics Files",
+      "accept": {
+        "text/plain": [".lrc"],
+        "application/x-subrip": [".srt"]
+      }
+    }
+  ],
+  "capture_links": "existing-client-navigate"
+}
