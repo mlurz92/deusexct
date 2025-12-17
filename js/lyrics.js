@@ -1,467 +1,652 @@
-window.Lyrics = (function() {
-    let lyricsData = [];
-    let currentLyricIndex = -1;
-    let isLoaded = false;
-    let animationTimeout = null;
-    let fetchController = null;
-    
-    const elements = {
-        prevLine: null,
-        currentLine: null,
-        nextLine: null
-    };
-    
-    const lrcMetadata = {
-        title: '',
-        artist: '',
-        album: '',
-        length: '',
-        by: '',
-        offset: 0,
-        creator: '',
-        version: '',
-        author: '',
-        program: ''
-    };
-    
-    function initialize() {
-        cacheElements();
-        resetDisplay();
-    }
-    
-    function cacheElements() {
-        elements.prevLine = document.querySelector('.lyrics-line.prev');
-        elements.currentLine = document.querySelector('.lyrics-line.current');
-        elements.nextLine = document.querySelector('.lyrics-line.next');
-    }
-    
-    function loadLyrics(lrcPath) {
-        if (fetchController) {
-            fetchController.abort();
-        }
-        
-        resetLyrics();
-        
-        if (!lrcPath) {
-            setNoLyricsAvailable();
-            return;
-        }
-        
-        fetchController = new AbortController();
-        
-        fetch(lrcPath, { signal: fetchController.signal })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.text();
-            })
-            .then(lrcContent => {
-                parseLRC(lrcContent);
-                isLoaded = true;
-                fetchController = null;
-            })
-            .catch(error => {
-                if (error.name !== 'AbortError') {
-                    console.error('Failed to load lyrics:', error);
-                    setNoLyricsAvailable();
-                }
-                fetchController = null;
-            });
-    }
-    
-    function parseLRC(content) {
-        const lines = content.split(/\r?\n/).filter(line => line.trim());
-        lyricsData = [];
-        
-        const timestampRegex = /\[(\d{2}):(\d{2})(?:\.(\d{2,3}))?\]/g;
-        const metadataRegex = /\[([a-z_]+):(.+)\]/i;
-        
-        lines.forEach(line => {
-            const metadataMatch = line.match(metadataRegex);
-            
-            if (metadataMatch && !line.match(timestampRegex)) {
-                const key = metadataMatch[1].toLowerCase();
-                const value = metadataMatch[2].trim();
-                
-                switch(key) {
-                    case 'ti':
-                    case 'title':
-                        lrcMetadata.title = value;
-                        break;
-                    case 'ar':
-                    case 'artist':
-                        lrcMetadata.artist = value;
-                        break;
-                    case 'al':
-                    case 'album':
-                        lrcMetadata.album = value;
-                        break;
-                    case 'length':
-                        lrcMetadata.length = value;
-                        break;
-                    case 'by':
-                        lrcMetadata.by = value;
-                        break;
-                    case 'offset':
-                        lrcMetadata.offset = parseInt(value) || 0;
-                        break;
-                    case 're':
-                    case 'tool':
-                        lrcMetadata.creator = value;
-                        break;
-                    case 've':
-                    case 'version':
-                        lrcMetadata.version = value;
-                        break;
-                    case 'au':
-                    case 'author':
-                        lrcMetadata.author = value;
-                        break;
-                    case 'program':
-                        lrcMetadata.program = value;
-                        break;
-                }
-                return;
+const LyricsManager = (function() {
+    let currentLyrics = [];
+    let currentTrackId = null;
+    let lyricsCache = {};
+    let currentLineIndex = -1;
+    let onLyricChangeCallback = null;
+    let onFullLyricsLoadedCallback = null;
+    let lastUpdateTime = -1;
+    let isLoading = false;
+    let loadingPromise = null;
+
+    function parseLRC(lrcContent) {
+        const lines = lrcContent.split('\n');
+        const lyrics = [];
+        const metadata = {};
+        const timeRegex = /\[(\d{2}):(\d{2})\.(\d{2,3})\]/g;
+        const metaRegex = /\[([a-z]{2}):(.+)\]/i;
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+
+            const metaMatch = line.match(metaRegex);
+            if (metaMatch && !line.match(timeRegex)) {
+                metadata[metaMatch[1].toLowerCase()] = metaMatch[2].trim();
+                continue;
             }
-            
+
             let match;
             const timestamps = [];
-            let lastIndex = 0;
-            let text = '';
-            
-            while ((match = timestampRegex.exec(line)) !== null) {
-                const minutes = parseInt(match[1]);
-                const seconds = parseInt(match[2]);
-                const milliseconds = match[3] ? parseInt(match[3].padEnd(3, '0')) : 0;
-                
-                timestamps.push({
-                    minutes: minutes,
-                    seconds: seconds,
-                    milliseconds: milliseconds
-                });
-                
-                lastIndex = match.index + match[0].length;
-            }
-            
-            if (timestamps.length > 0) {
-                text = line.substring(lastIndex).trim();
-                
-                if (!text) {
-                    text = '♪';
+            let text = line;
+
+            timeRegex.lastIndex = 0;
+
+            while ((match = timeRegex.exec(line)) !== null) {
+                const minutes = parseInt(match[1], 10);
+                const seconds = parseInt(match[2], 10);
+                let milliseconds = parseInt(match[3], 10);
+                if (match[3].length === 2) {
+                    milliseconds = milliseconds * 10;
                 }
-                
-                timestamps.forEach(timestamp => {
-                    const time = timestamp.minutes * 60 + 
-                               timestamp.seconds + 
-                               timestamp.milliseconds / 1000 + 
-                               (lrcMetadata.offset / 1000);
-                    
-                    lyricsData.push({
-                        time: time,
+                timestamps.push(minutes * 60 + seconds + milliseconds / 1000);
+                text = text.replace(match[0], '');
+            }
+
+            text = text.trim();
+
+            for (let j = 0; j < timestamps.length; j++) {
+                if (text || timestamps.length === 1) {
+                    lyrics.push({
+                        time: timestamps[j],
                         text: text,
-                        rawTime: timestamp
+                        index: lyrics.length
                     });
-                });
+                }
             }
+        }
+
+        lyrics.sort(function(a, b) {
+            return a.time - b.time;
         });
-        
-        lyricsData.sort((a, b) => a.time - b.time);
-        
-        if (lyricsData.length === 0) {
-            setNoLyricsAvailable();
-        } else {
-            processLyrics();
+
+        for (let i = 0; i < lyrics.length; i++) {
+            lyrics[i].index = i;
+            lyrics[i].endTime = i < lyrics.length - 1 ? lyrics[i + 1].time : lyrics[i].time + 10;
         }
-    }
-    
-    function processLyrics() {
-        for (let i = 0; i < lyricsData.length; i++) {
-            if (i < lyricsData.length - 1) {
-                lyricsData[i].duration = lyricsData[i + 1].time - lyricsData[i].time;
-            } else {
-                lyricsData[i].duration = 5;
-            }
-        }
-    }
-    
-    function setNoLyricsAvailable() {
-        lyricsData = [{ time: 0, text: 'Keine Lyrics verfügbar', duration: Number.MAX_VALUE }];
-        isLoaded = true;
-        updateDisplay();
-    }
-    
-    function updateTime(currentTime) {
-        if (!isLoaded || lyricsData.length === 0) return;
-        
-        let newIndex = -1;
-        
-        for (let i = lyricsData.length - 1; i >= 0; i--) {
-            if (currentTime >= lyricsData[i].time) {
-                newIndex = i;
-                break;
-            }
-        }
-        
-        if (newIndex !== currentLyricIndex) {
-            currentLyricIndex = newIndex;
-            updateDisplay();
-            
-            if (newIndex >= 0 && lyricsData[newIndex].duration) {
-                const remainingTime = lyricsData[newIndex].time + lyricsData[newIndex].duration - currentTime;
-                schedulePrefetch(newIndex + 1, remainingTime);
-            }
-        }
-    }
-    
-    function schedulePrefetch(nextIndex, timeUntilNext) {
-        if (animationTimeout) {
-            clearTimeout(animationTimeout);
-        }
-        
-        if (nextIndex < lyricsData.length && timeUntilNext > 0.5) {
-            animationTimeout = setTimeout(() => {
-                prepareLyricTransition(nextIndex);
-            }, (timeUntilNext - 0.5) * 1000);
-        }
-    }
-    
-    function prepareLyricTransition(nextIndex) {
-        if (nextIndex < lyricsData.length) {
-            const nextElement = elements.nextLine;
-            if (nextElement && nextElement.textContent !== lyricsData[nextIndex].text) {
-                nextElement.style.opacity = '0';
-                nextElement.textContent = lyricsData[nextIndex].text;
-                
-                requestAnimationFrame(() => {
-                    nextElement.style.opacity = '';
-                });
-            }
-        }
-    }
-    
-    function updateDisplay() {
-        if (!isLoaded) {
-            resetDisplay();
-            return;
-        }
-        
-        const prevText = currentLyricIndex > 0 ? lyricsData[currentLyricIndex - 1].text : '';
-        const currentText = currentLyricIndex >= 0 ? lyricsData[currentLyricIndex].text : '';
-        const nextText = currentLyricIndex < lyricsData.length - 1 ? lyricsData[currentLyricIndex + 1].text : '';
-        
-        animateLineChange(elements.prevLine, prevText, 'prev');
-        animateLineChange(elements.currentLine, currentText, 'current');
-        animateLineChange(elements.nextLine, nextText, 'next');
-    }
-    
-    function animateLineChange(element, newText, position) {
-        if (!element) return;
-        
-        if (element.textContent === newText) return;
-        
-        if (element.dataset.animating === 'true') return;
-        
-        element.dataset.animating = 'true';
-        
-        const duration = position === 'current' ? 200 : 150;
-        const delay = position === 'current' ? 0 : 50;
-        
-        setTimeout(() => {
-            element.style.opacity = '0';
-            element.style.transform = position === 'current' 
-                ? 'translateY(20px) scale(0.95)' 
-                : 'translateY(10px)';
-            
-            setTimeout(() => {
-                element.textContent = newText;
-                
-                requestAnimationFrame(() => {
-                    element.style.transition = `all ${duration}ms cubic-bezier(0.4, 0, 0.2, 1)`;
-                    element.style.opacity = '';
-                    element.style.transform = '';
-                    
-                    setTimeout(() => {
-                        element.style.transition = '';
-                        element.dataset.animating = 'false';
-                    }, duration);
-                });
-            }, duration / 2);
-        }, delay);
-    }
-    
-    function resetLyrics() {
-        lyricsData = [];
-        currentLyricIndex = -1;
-        isLoaded = false;
-        
-        if (animationTimeout) {
-            clearTimeout(animationTimeout);
-            animationTimeout = null;
-        }
-        
-        Object.keys(lrcMetadata).forEach(key => {
-            lrcMetadata[key] = key === 'offset' ? 0 : '';
-        });
-    }
-    
-    function resetDisplay() {
-        if (elements.prevLine) {
-            elements.prevLine.textContent = '';
-            elements.prevLine.style.opacity = '';
-            elements.prevLine.style.transform = '';
-        }
-        if (elements.currentLine) {
-            elements.currentLine.textContent = '';
-            elements.currentLine.style.opacity = '';
-            elements.currentLine.style.transform = '';
-        }
-        if (elements.nextLine) {
-            elements.nextLine.textContent = '';
-            elements.nextLine.style.opacity = '';
-            elements.nextLine.style.transform = '';
-        }
-    }
-    
-    function getCurrentLyric() {
-        if (!isLoaded || currentLyricIndex < 0 || currentLyricIndex >= lyricsData.length) {
-            return null;
-        }
+
         return {
-            time: lyricsData[currentLyricIndex].time,
-            text: lyricsData[currentLyricIndex].text,
-            duration: lyricsData[currentLyricIndex].duration,
-            index: currentLyricIndex
+            metadata: metadata,
+            lyrics: lyrics
         };
     }
-    
-    function getAllLyrics() {
-        return lyricsData.map((lyric, index) => ({
-            time: lyric.time,
-            text: lyric.text,
-            duration: lyric.duration,
-            index: index
-        }));
-    }
-    
-    function getMetadata() {
-        return { ...lrcMetadata };
-    }
-    
-    function seekToLyric(index) {
-        if (index >= 0 && index < lyricsData.length) {
-            currentLyricIndex = index;
-            updateDisplay();
-            return lyricsData[index].time;
+
+    function loadLyrics(url, trackId) {
+        if (lyricsCache[trackId]) {
+            currentLyrics = lyricsCache[trackId].lyrics;
+            currentTrackId = trackId;
+            currentLineIndex = -1;
+            lastUpdateTime = -1;
+            if (onFullLyricsLoadedCallback) {
+                onFullLyricsLoadedCallback(lyricsCache[trackId]);
+            }
+            return Promise.resolve(lyricsCache[trackId]);
         }
-        return null;
-    }
-    
-    function getNextLyricTime() {
-        if (currentLyricIndex < lyricsData.length - 1) {
-            return lyricsData[currentLyricIndex + 1].time;
+
+        if (isLoading && loadingPromise) {
+            return loadingPromise;
         }
-        return null;
+
+        isLoading = true;
+
+        loadingPromise = new Promise(function(resolve, reject) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(function() {
+                controller.abort();
+            }, 10000);
+
+            fetch(url, { signal: controller.signal })
+                .then(function(response) {
+                    clearTimeout(timeoutId);
+                    if (!response.ok) {
+                        throw new Error('Failed to load lyrics: ' + response.status);
+                    }
+                    return response.text();
+                })
+                .then(function(lrcContent) {
+                    const parsed = parseLRC(lrcContent);
+                    lyricsCache[trackId] = parsed;
+                    currentLyrics = parsed.lyrics;
+                    currentTrackId = trackId;
+                    currentLineIndex = -1;
+                    lastUpdateTime = -1;
+                    isLoading = false;
+                    loadingPromise = null;
+                    if (onFullLyricsLoadedCallback) {
+                        onFullLyricsLoadedCallback(parsed);
+                    }
+                    resolve(parsed);
+                })
+                .catch(function(error) {
+                    clearTimeout(timeoutId);
+                    currentLyrics = [];
+                    currentTrackId = trackId;
+                    currentLineIndex = -1;
+                    lastUpdateTime = -1;
+                    isLoading = false;
+                    loadingPromise = null;
+                    reject(error);
+                });
+        });
+
+        return loadingPromise;
     }
-    
-    function getPreviousLyricTime() {
-        if (currentLyricIndex > 0) {
-            return lyricsData[currentLyricIndex - 1].time;
+
+    function binarySearchLineIndex(currentTime) {
+        if (!currentLyrics || currentLyrics.length === 0) {
+            return -1;
         }
-        return null;
-    }
-    
-    function findLyricIndexByTime(time) {
-        for (let i = lyricsData.length - 1; i >= 0; i--) {
-            if (time >= lyricsData[i].time) {
-                return i;
+
+        if (currentTime < currentLyrics[0].time) {
+            return -1;
+        }
+
+        if (currentTime >= currentLyrics[currentLyrics.length - 1].time) {
+            return currentLyrics.length - 1;
+        }
+
+        let low = 0;
+        let high = currentLyrics.length - 1;
+        let result = -1;
+
+        while (low <= high) {
+            const mid = Math.floor((low + high) / 2);
+            
+            if (currentLyrics[mid].time <= currentTime) {
+                result = mid;
+                low = mid + 1;
+            } else {
+                high = mid - 1;
             }
         }
-        return -1;
+
+        return result;
     }
-    
-    function searchLyrics(searchText) {
-        if (!searchText || !isLoaded) return [];
+
+    function findLineIndexAtTime(currentTime) {
+        if (!currentLyrics || currentLyrics.length === 0) {
+            return -1;
+        }
+
+        if (currentLineIndex >= 0 && currentLineIndex < currentLyrics.length) {
+            const current = currentLyrics[currentLineIndex];
+            if (currentTime >= current.time && currentTime < current.endTime) {
+                return currentLineIndex;
+            }
+
+            if (currentLineIndex < currentLyrics.length - 1) {
+                const next = currentLyrics[currentLineIndex + 1];
+                if (currentTime >= next.time && currentTime < next.endTime) {
+                    return currentLineIndex + 1;
+                }
+            }
+
+            if (currentLineIndex > 0) {
+                const prev = currentLyrics[currentLineIndex - 1];
+                if (currentTime >= prev.time && currentTime < prev.endTime) {
+                    return currentLineIndex - 1;
+                }
+            }
+        }
+
+        return binarySearchLineIndex(currentTime);
+    }
+
+    function getCurrentLine(currentTime) {
+        if (!currentLyrics || currentLyrics.length === 0) {
+            return null;
+        }
+
+        const index = findLineIndexAtTime(currentTime);
+        return index >= 0 ? currentLyrics[index] : null;
+    }
+
+    function getNextLine(currentTime) {
+        if (!currentLyrics || currentLyrics.length === 0) {
+            return null;
+        }
+
+        const currentIndex = findLineIndexAtTime(currentTime);
         
-        const searchLower = searchText.toLowerCase();
-        const results = [];
+        if (currentIndex === -1) {
+            return currentLyrics[0];
+        }
         
-        lyricsData.forEach((lyric, index) => {
-            if (lyric.text.toLowerCase().includes(searchLower)) {
-                results.push({
-                    time: lyric.time,
-                    text: lyric.text,
-                    index: index,
-                    matchStart: lyric.text.toLowerCase().indexOf(searchLower),
-                    matchLength: searchText.length
+        if (currentIndex < currentLyrics.length - 1) {
+            return currentLyrics[currentIndex + 1];
+        }
+
+        return null;
+    }
+
+    function getPrevLine(currentTime) {
+        if (!currentLyrics || currentLyrics.length === 0) {
+            return null;
+        }
+
+        const currentIndex = findLineIndexAtTime(currentTime);
+        
+        if (currentIndex > 0) {
+            return currentLyrics[currentIndex - 1];
+        }
+
+        return null;
+    }
+
+    function getLineAtIndex(index) {
+        if (!currentLyrics || index < 0 || index >= currentLyrics.length) {
+            return null;
+        }
+        return currentLyrics[index];
+    }
+
+    function getAllLines() {
+        return currentLyrics ? currentLyrics.slice() : [];
+    }
+
+    function getLineCount() {
+        return currentLyrics ? currentLyrics.length : 0;
+    }
+
+    function updateCurrentLine(currentTime) {
+        if (Math.abs(currentTime - lastUpdateTime) < 0.016) {
+            return {
+                changed: false,
+                prevLine: currentLineIndex > 0 ? currentLyrics[currentLineIndex - 1] : null,
+                currentLine: currentLineIndex >= 0 ? currentLyrics[currentLineIndex] : null,
+                nextLine: currentLineIndex >= 0 && currentLineIndex < currentLyrics.length - 1 ? currentLyrics[currentLineIndex + 1] : null,
+                index: currentLineIndex
+            };
+        }
+
+        lastUpdateTime = currentTime;
+        const newIndex = findLineIndexAtTime(currentTime);
+
+        if (newIndex !== currentLineIndex) {
+            const oldIndex = currentLineIndex;
+            currentLineIndex = newIndex;
+
+            const prevLine = newIndex > 0 ? currentLyrics[newIndex - 1] : null;
+            const currentLine = newIndex >= 0 ? currentLyrics[newIndex] : null;
+            const nextLine = newIndex >= 0 && newIndex < currentLyrics.length - 1 ? currentLyrics[newIndex + 1] : null;
+
+            if (onLyricChangeCallback) {
+                onLyricChangeCallback({
+                    prevLine: prevLine,
+                    currentLine: currentLine,
+                    nextLine: nextLine,
+                    currentIndex: newIndex,
+                    previousIndex: oldIndex,
+                    totalLines: currentLyrics.length
                 });
             }
-        });
-        
+
+            return {
+                changed: true,
+                prevLine: prevLine,
+                currentLine: currentLine,
+                nextLine: nextLine,
+                index: newIndex
+            };
+        }
+
+        return {
+            changed: false,
+            prevLine: newIndex > 0 ? currentLyrics[newIndex - 1] : null,
+            currentLine: newIndex >= 0 ? currentLyrics[newIndex] : null,
+            nextLine: newIndex >= 0 && newIndex < currentLyrics.length - 1 ? currentLyrics[newIndex + 1] : null,
+            index: newIndex
+        };
+    }
+
+    function seekToLine(index) {
+        if (!currentLyrics || index < 0 || index >= currentLyrics.length) {
+            return null;
+        }
+        currentLineIndex = index;
+        lastUpdateTime = -1;
+        return currentLyrics[index].time;
+    }
+
+    function getTimeForLine(index) {
+        if (!currentLyrics || index < 0 || index >= currentLyrics.length) {
+            return -1;
+        }
+        return currentLyrics[index].time;
+    }
+
+    function setOnLyricChange(callback) {
+        onLyricChangeCallback = callback;
+    }
+
+    function setOnFullLyricsLoaded(callback) {
+        onFullLyricsLoadedCallback = callback;
+    }
+
+    function reset() {
+        currentLineIndex = -1;
+        lastUpdateTime = -1;
+    }
+
+    function clear() {
+        currentLyrics = [];
+        currentTrackId = null;
+        currentLineIndex = -1;
+        lastUpdateTime = -1;
+        isLoading = false;
+        loadingPromise = null;
+    }
+
+    function clearCache() {
+        lyricsCache = {};
+    }
+
+    function preloadLyrics(tracks) {
+        const promises = [];
+        for (let i = 0; i < tracks.length; i++) {
+            const track = tracks[i];
+            if (!lyricsCache[track.id] && track.lyricsSrc) {
+                const promise = fetch(track.lyricsSrc)
+                    .then(function(response) {
+                        return response.text();
+                    })
+                    .then(function(lrcContent) {
+                        const parsed = parseLRC(lrcContent);
+                        lyricsCache[track.id] = parsed;
+                        return parsed;
+                    })
+                    .catch(function() {
+                        return null;
+                    });
+                promises.push(promise);
+            }
+        }
+        return Promise.all(promises);
+    }
+
+    function preloadSingleTrack(track) {
+        if (!track || !track.lyricsSrc || lyricsCache[track.id]) {
+            return Promise.resolve(lyricsCache[track.id] || null);
+        }
+
+        return fetch(track.lyricsSrc)
+            .then(function(response) {
+                return response.text();
+            })
+            .then(function(lrcContent) {
+                const parsed = parseLRC(lrcContent);
+                lyricsCache[track.id] = parsed;
+                return parsed;
+            })
+            .catch(function() {
+                return null;
+            });
+    }
+
+    function getCurrentTrackId() {
+        return currentTrackId;
+    }
+
+    function hasLyrics() {
+        return currentLyrics && currentLyrics.length > 0;
+    }
+
+    function getMetadata() {
+        if (currentTrackId && lyricsCache[currentTrackId]) {
+            return lyricsCache[currentTrackId].metadata;
+        }
+        return {};
+    }
+
+    function searchLyrics(query) {
+        if (!currentLyrics || !query) {
+            return [];
+        }
+
+        const lowerQuery = query.toLowerCase();
+        const results = [];
+
+        for (let i = 0; i < currentLyrics.length; i++) {
+            if (currentLyrics[i].text.toLowerCase().indexOf(lowerQuery) !== -1) {
+                results.push({
+                    line: currentLyrics[i],
+                    index: i
+                });
+            }
+        }
+
         return results;
     }
-    
-    function highlightSearchResult(searchText) {
-        const results = searchLyrics(searchText);
-        if (results.length > 0) {
-            return seekToLyric(results[0].index);
+
+    function getLyricsAroundTime(currentTime, before, after) {
+        before = before !== undefined ? before : 2;
+        after = after !== undefined ? after : 2;
+
+        const currentIndex = findLineIndexAtTime(currentTime);
+        const result = {
+            before: [],
+            current: null,
+            after: []
+        };
+
+        if (currentIndex === -1 || !currentLyrics) {
+            return result;
         }
-        return null;
-    }
-    
-    function exportLyrics(format = 'lrc') {
-        if (!isLoaded || lyricsData.length === 0) return null;
-        
-        if (format === 'lrc') {
-            let content = '';
-            
-            Object.entries(lrcMetadata).forEach(([key, value]) => {
-                if (value) {
-                    const lrcKey = key === 'title' ? 'ti' : 
-                                  key === 'artist' ? 'ar' : 
-                                  key === 'album' ? 'al' : key;
-                    content += `[${lrcKey}:${value}]\n`;
-                }
-            });
-            
-            content += '\n';
-            
-            lyricsData.forEach(lyric => {
-                const minutes = Math.floor(lyric.time / 60);
-                const seconds = (lyric.time % 60).toFixed(2);
-                const formattedTime = `[${minutes.toString().padStart(2, '0')}:${seconds.padStart(5, '0')}]`;
-                content += `${formattedTime}${lyric.text}\n`;
-            });
-            
-            return content;
-        } else if (format === 'json') {
-            return JSON.stringify({
-                metadata: lrcMetadata,
-                lyrics: lyricsData
-            }, null, 2);
+
+        result.current = currentLyrics[currentIndex];
+
+        const startBefore = Math.max(0, currentIndex - before);
+        for (let i = startBefore; i < currentIndex; i++) {
+            result.before.push(currentLyrics[i]);
         }
+
+        const endAfter = Math.min(currentLyrics.length - 1, currentIndex + after);
+        for (let i = currentIndex + 1; i <= endAfter; i++) {
+            result.after.push(currentLyrics[i]);
+        }
+
+        return result;
+    }
+
+    function formatLyricsAsText() {
+        if (!currentLyrics || currentLyrics.length === 0) {
+            return '';
+        }
+
+        let text = '';
+        for (let i = 0; i < currentLyrics.length; i++) {
+            if (currentLyrics[i].text) {
+                text += currentLyrics[i].text + '\n';
+            }
+        }
+        return text.trim();
+    }
+
+    function formatLyricsAsHTML(currentTime) {
+        if (!currentLyrics || currentLyrics.length === 0) {
+            return '';
+        }
+
+        const currentIndex = findLineIndexAtTime(currentTime || 0);
+        let html = '';
+
+        for (let i = 0; i < currentLyrics.length; i++) {
+            let className = 'lyrics-line';
+            if (i === currentIndex) {
+                className += ' active';
+            } else if (i < currentIndex) {
+                className += ' past';
+            }
+            html += '<p class="' + className + '" data-index="' + i + '" data-time="' + currentLyrics[i].time + '">';
+            html += escapeHTML(currentLyrics[i].text) || '♪';
+            html += '</p>';
+        }
+
+        return html;
+    }
+
+    function escapeHTML(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function getProgressInLine(currentTime) {
+        const currentIndex = findLineIndexAtTime(currentTime);
+        if (currentIndex === -1 || !currentLyrics[currentIndex]) {
+            return 0;
+        }
+
+        const line = currentLyrics[currentIndex];
+        const duration = line.endTime - line.time;
         
-        return null;
+        if (duration <= 0) {
+            return 1;
+        }
+
+        const progress = (currentTime - line.time) / duration;
+        return Math.max(0, Math.min(1, progress));
     }
-    
-    function isReady() {
-        return isLoaded;
+
+    function estimateReadingProgress(currentTime, totalDuration) {
+        if (!currentLyrics || currentLyrics.length === 0 || !totalDuration) {
+            return 0;
+        }
+
+        const currentIndex = findLineIndexAtTime(currentTime);
+        if (currentIndex === -1) {
+            return 0;
+        }
+
+        return (currentIndex + 1) / currentLyrics.length;
     }
-    
+
+    function getCurrentLineIndex() {
+        return currentLineIndex;
+    }
+
+    function getUpcomingLines(count) {
+        count = count || 3;
+        
+        if (!currentLyrics || currentLineIndex < 0) {
+            return [];
+        }
+
+        const result = [];
+        const startIndex = currentLineIndex + 1;
+        const endIndex = Math.min(startIndex + count, currentLyrics.length);
+
+        for (let i = startIndex; i < endIndex; i++) {
+            result.push(currentLyrics[i]);
+        }
+
+        return result;
+    }
+
+    function getPastLines(count) {
+        count = count || 3;
+        
+        if (!currentLyrics || currentLineIndex < 0) {
+            return [];
+        }
+
+        const result = [];
+        const startIndex = Math.max(0, currentLineIndex - count);
+
+        for (let i = startIndex; i < currentLineIndex; i++) {
+            result.push(currentLyrics[i]);
+        }
+
+        return result;
+    }
+
+    function isLineActive(index, currentTime) {
+        if (!currentLyrics || index < 0 || index >= currentLyrics.length) {
+            return false;
+        }
+
+        const line = currentLyrics[index];
+        return currentTime >= line.time && currentTime < line.endTime;
+    }
+
+    function getLineDuration(index) {
+        if (!currentLyrics || index < 0 || index >= currentLyrics.length) {
+            return 0;
+        }
+
+        const line = currentLyrics[index];
+        return line.endTime - line.time;
+    }
+
+    function getTotalLyricsDuration() {
+        if (!currentLyrics || currentLyrics.length === 0) {
+            return 0;
+        }
+
+        const firstLine = currentLyrics[0];
+        const lastLine = currentLyrics[currentLyrics.length - 1];
+
+        return lastLine.endTime - firstLine.time;
+    }
+
+    function isCached(trackId) {
+        return !!lyricsCache[trackId];
+    }
+
+    function getCacheSize() {
+        return Object.keys(lyricsCache).length;
+    }
+
+    function removeCacheEntry(trackId) {
+        if (lyricsCache[trackId]) {
+            delete lyricsCache[trackId];
+            return true;
+        }
+        return false;
+    }
+
     return {
-        initialize,
-        loadLyrics,
-        updateTime,
-        getCurrentLyric,
-        getAllLyrics,
-        getMetadata,
-        seekToLyric,
-        getNextLyricTime,
-        getPreviousLyricTime,
-        findLyricIndexByTime,
-        highlightSearchResult,
-        searchLyrics,
-        exportLyrics,
-        isReady
+        parseLRC: parseLRC,
+        loadLyrics: loadLyrics,
+        getCurrentLine: getCurrentLine,
+        getNextLine: getNextLine,
+        getPrevLine: getPrevLine,
+        getLineAtIndex: getLineAtIndex,
+        getAllLines: getAllLines,
+        getLineCount: getLineCount,
+        findLineIndexAtTime: findLineIndexAtTime,
+        updateCurrentLine: updateCurrentLine,
+        seekToLine: seekToLine,
+        getTimeForLine: getTimeForLine,
+        setOnLyricChange: setOnLyricChange,
+        setOnFullLyricsLoaded: setOnFullLyricsLoaded,
+        reset: reset,
+        clear: clear,
+        clearCache: clearCache,
+        preloadLyrics: preloadLyrics,
+        preloadSingleTrack: preloadSingleTrack,
+        getCurrentTrackId: getCurrentTrackId,
+        hasLyrics: hasLyrics,
+        getMetadata: getMetadata,
+        searchLyrics: searchLyrics,
+        getLyricsAroundTime: getLyricsAroundTime,
+        formatLyricsAsText: formatLyricsAsText,
+        formatLyricsAsHTML: formatLyricsAsHTML,
+        getProgressInLine: getProgressInLine,
+        estimateReadingProgress: estimateReadingProgress,
+        getCurrentLineIndex: getCurrentLineIndex,
+        getUpcomingLines: getUpcomingLines,
+        getPastLines: getPastLines,
+        isLineActive: isLineActive,
+        getLineDuration: getLineDuration,
+        getTotalLyricsDuration: getTotalLyricsDuration,
+        isCached: isCached,
+        getCacheSize: getCacheSize,
+        removeCacheEntry: removeCacheEntry
     };
 })();
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = LyricsManager;
+}
