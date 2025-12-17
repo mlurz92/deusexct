@@ -755,13 +755,14 @@ body {
     }
 }
 
+/* ✅ KORRIGIERTES VIDEO-LAYOUT */
 .player-video-layout {
     flex: 1;
     width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch; /* Stretch für volle Breite */
     justify-content: center;
     padding: 0;
     background: #000;
@@ -777,8 +778,10 @@ body {
     width: 100%;
     height: 100%;
     max-width: 1000px;
+    margin: 0 auto; /* Zentrierung des Containers */
 }
 
+/* ✅ PERFEKTE VIDEO-ZENTRIERUNG */
 .video-wrapper {
     flex: 1;
     width: 100%;
@@ -790,24 +793,49 @@ body {
     position: relative;
     overflow: hidden;
     contain: layout style paint;
+    /* Präzise Zentrierung */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 #videoPlayer {
-    width: 100%;
-    height: 100%;
+    /* Exakte Zentrierung mit proportionaler Skalierung */
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
     object-fit: contain;
     background: #000;
     will-change: transform;
+    /* Perfekte Zentrierung */
+    display: block;
+    position: relative;
+    /* Horizontale Zentrierung */
+    margin-left: auto;
+    margin-right: auto;
+    /* Vertikale Zentrierung */
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 :fullscreen #videoPlayer,
 :-webkit-full-screen #videoPlayer,
 :-moz-full-screen #videoPlayer,
 :-ms-fullscreen #videoPlayer {
-    width: 100%;
-    height: 100%;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    width: auto !important;
+    height: auto !important;
     object-fit: contain !important;
     background: #000;
+    /* Perfekte Zentrierung auch im Fullscreen */
+    position: relative !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
 }
 
 .video-overlay-controls {
@@ -1466,6 +1494,20 @@ body {
     transform: translate(-50%, -50%) scale(1) translateZ(0);
 }
 
+/* ✅ ERWEITERTE RESPONSIVE STÜTZUNG FÜR VIDEO-LAYOUT */
+/* Für kleinere Tablets und größere Smartphones */
+@media (min-width: 480px) {
+    .player-video-layout {
+        padding: 20px;
+    }
+    
+    .video-external-controls {
+        width: 90%;
+        max-width: 800px;
+    }
+}
+
+/* Für Desktop und größere Tablets */
 @media (min-width: 768px) {
     .album-layout-grid {
         flex-direction: row;
@@ -1492,50 +1534,54 @@ body {
         min-width: 0;
     }
 
+    /* ✅ AUDIO-LAYOUT GETEILT FÜR KLEINERE BILDSCHIRME */
     .player-audio-layout {
         flex-direction: row;
-        gap: 40px;
-        max-width: 1200px;
+        gap: 30px;
+        max-width: 1000px;
         margin: 0 auto;
-        padding: 40px;
+        padding: 30px;
+        /* Responsive Schwelle bei 768px für bessere Mobilunterstützung */
     }
 
     .audio-stage-top {
         max-height: 100%;
-        width: 50%;
+        width: 45%;
         justify-content: center;
     }
 
     .audio-stage-bottom {
-        width: 50%;
+        width: 55%;
         height: 100%;
     }
 
     .player-lyrics-area {
         max-height: 60vh;
         border-left: 1px solid var(--border-light);
-        padding-left: 40px;
+        padding-left: 30px;
         mask-image: none;
         -webkit-mask-image: none;
     }
 
     .player-current-lyric {
-        font-size: 24px;
-        margin: 24px 0;
+        font-size: 22px;
+        margin: 20px 0;
     }
 
     .player-prev-lyric,
     .player-next-lyric {
-        font-size: 16px;
-        margin: 12px 0;
+        font-size: 15px;
+        margin: 10px 0;
     }
 
+    /* ✅ VERBESSERTES VIDEO-LAYOUT FÜR DESKTOP */
     .player-video-layout {
-        padding: 40px;
+        padding: 30px;
     }
 
     .video-external-controls {
-        width: 60%;
+        width: 80%;
+        max-width: 900px;
     }
 
     .player-bottom-bar {
@@ -1558,6 +1604,7 @@ body {
     }
 }
 
+/* Für sehr große Bildschirme */
 @media (min-width: 1024px) {
     .header-content {
         padding: 0 32px;
@@ -1565,6 +1612,17 @@ body {
 
     .bar-content-grid {
         padding: 0 32px;
+    }
+
+    .player-audio-layout {
+        gap: 40px;
+        max-width: 1200px;
+        padding: 40px;
+    }
+
+    .video-external-controls {
+        width: 70%;
+        max-width: 1000px;
     }
 }
 
