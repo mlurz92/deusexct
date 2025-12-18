@@ -801,41 +801,30 @@ body {
 }
 
 #videoPlayer {
-    /* Exakte Zentrierung mit proportionaler Skalierung */
+    width: 100%;
+    height: 100%;
     max-width: 100%;
     max-height: 100%;
-    width: auto;
-    height: auto;
     object-fit: contain;
     background: #000;
     will-change: transform;
-    /* Perfekte Zentrierung */
     display: block;
     position: relative;
-    /* Horizontale Zentrierung */
-    margin-left: auto;
-    margin-right: auto;
-    /* Vertikale Zentrierung */
-    top: 50%;
-    transform: translateY(-50%);
+    margin: 0 auto;
 }
 
 :fullscreen #videoPlayer,
 :-webkit-full-screen #videoPlayer,
 :-moz-full-screen #videoPlayer,
 :-ms-fullscreen #videoPlayer {
+    width: 100% !important;
+    height: 100% !important;
     max-width: 100% !important;
     max-height: 100% !important;
-    width: auto !important;
-    height: auto !important;
     object-fit: contain !important;
     background: #000;
-    /* Perfekte Zentrierung auch im Fullscreen */
     position: relative !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
+    margin: 0 auto !important;
 }
 
 .video-overlay-controls {
