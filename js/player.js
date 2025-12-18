@@ -227,7 +227,6 @@ const PlayerEngine = (function() {
     // --- Volume & Sync Logic ---
 
     function syncVolumeState() {
-        // Enforce volume state on ALL elements
         const targets = [audioElement, videoElement];
         
         targets.forEach(el => {
@@ -283,12 +282,8 @@ const PlayerEngine = (function() {
     function attachCommonListeners(element, mode) {
         if (!element) return;
 
-        // Cleanup old listeners if necessary (not strictly needed if using closure scope correctly, but safer)
-        // Note: We use anonymous functions, so removeEventListener is hard. 
-        // Instead, we verify state inside the listener.
-
         element.onplay = function() {
-            if (currentMode !== mode) return; // Ignore if mode switched
+            if (currentMode !== mode) return; 
             playbackState = PlaybackState.PLAYING;
             isPlaying = true;
             isLoadingMedia = false;
@@ -302,7 +297,6 @@ const PlayerEngine = (function() {
 
         element.onpause = function() {
             if (currentMode !== mode) return;
-            // Ignore pause if we are just seeking or loading
             if (playbackState !== PlaybackState.SEEKING && playbackState !== PlaybackState.LOADING) {
                 playbackState = PlaybackState.PAUSED;
                 isPlaying = false;
@@ -321,7 +315,6 @@ const PlayerEngine = (function() {
 
         element.onerror = function(e) {
             if (currentMode !== mode) return;
-            // Ignore errors if we started loading something else
             if (element.error && element.error.code === 20) return; // Abort error
 
             playbackState = PlaybackState.ERROR;
@@ -331,9 +324,8 @@ const PlayerEngine = (function() {
             const error = element.error;
             const errorCode = error ? error.code : 0;
             
-            // AbortError check (Standard DOM Exception 20)
             if (errorCode === 20 || (error && error.message && error.message.includes('abort'))) {
-                return; // Ignore aborts
+                return;
             }
 
             if (callbacks.onError) callbacks.onError({ 
@@ -353,7 +345,6 @@ const PlayerEngine = (function() {
         };
 
         element.oncanplay = function() {
-            // Apply volume sync immediately when metadata/media is ready
             syncVolumeState();
             
             if (playbackState === PlaybackState.LOADING) {
@@ -368,7 +359,6 @@ const PlayerEngine = (function() {
             }
             isLoadingMedia = false;
             
-            // Execute pending play
             if (pendingPlayRequest) {
                 pendingPlayRequest = false;
                 performPlaySync();
@@ -378,13 +368,11 @@ const PlayerEngine = (function() {
         };
 
         element.onloadedmetadata = function() {
-            syncVolumeState(); // Double check volume sync
+            syncVolumeState();
             if (callbacks.onDurationChange) callbacks.onDurationChange({ duration: element.duration, mode: mode });
         };
 
         element.onvolumechange = function() {
-            // Sync internal state if changed externally
-            // But usually we control this.
             if (callbacks.onVolumeChange) callbacks.onVolumeChange({ volume: element.volume, muted: element.muted });
         };
 
@@ -405,7 +393,6 @@ const PlayerEngine = (function() {
 
         element.onstalled = function() {
             if (currentMode !== mode) return;
-            // Stall logic
             if (playbackState === PlaybackState.PLAYING) {
                 handleMediaStall(element);
             }
@@ -419,7 +406,6 @@ const PlayerEngine = (function() {
     function setupVideoListeners() {
         attachCommonListeners(videoElement, 'video');
         
-        // Fullscreen specific
         if (videoElement) {
             videoElement.addEventListener('webkitbeginfullscreen', function() {
                 isVideoFullscreen = true;
@@ -443,7 +429,6 @@ const PlayerEngine = (function() {
             
             const currentTime = element.currentTime;
             try {
-                // Try to nudge the buffer
                 if (currentTime > 0.5) {
                     element.currentTime = currentTime - 0.1;
                 }
@@ -475,7 +460,6 @@ const PlayerEngine = (function() {
     function loadTrack(track, mode, startTime) {
         if (!track || !mediaElementsReady) return false;
         
-        // Cancel previous operations by incrementing ID
         loadRequestId++;
         const myRequestId = loadRequestId;
 
@@ -492,7 +476,7 @@ const PlayerEngine = (function() {
         playbackAttempts = 0;
         stallRetryCount = 0;
 
-        // Force stop/pause everything first to clear buffers/decoders
+        // FIXED: Force reset to clear buffers and race conditions
         stopAllMedia(true);
 
         if (currentMode === 'audio') {
@@ -510,14 +494,20 @@ const PlayerEngine = (function() {
         return true;
     }
 
-    function stopAllMedia(resetSrc) {
+    function stopAllMedia(forceReset) {
         if (audioElement) {
             audioElement.pause();
-            if (resetSrc) audioElement.removeAttribute('src'); 
+            if (forceReset) {
+                audioElement.removeAttribute('src'); 
+                audioElement.load(); // Force release
+            }
         }
         if (videoElement) {
             videoElement.pause();
-            if (resetSrc) videoElement.removeAttribute('src');
+            if (forceReset) {
+                videoElement.removeAttribute('src');
+                videoElement.load(); // Force release
+            }
         }
         if (bgVideoElement) {
             bgVideoElement.pause();
@@ -527,20 +517,17 @@ const PlayerEngine = (function() {
     function loadAudioTrack(track, startTime, requestId) {
         if (!audioElement || !track.audioSrc) return;
         
-        // Ensure video is completely stopped
+        // FIXED: Aggressively unload video element to prevent bandwidth contention
         if (videoElement) {
             videoElement.pause();
-            // Don't clear src here immediately to avoid flickering, 
-            // but ensure it's not playing.
+            videoElement.removeAttribute('src');
+            videoElement.load();
         }
 
         try {
             audioElement.src = track.audioSrc;
             audioElement.currentTime = startTime;
-            
-            // Sync Volume BEFORE Load
             syncVolumeState();
-            
             audioElement.load();
             loadBackgroundVideo(track);
         } catch (e) {
@@ -551,25 +538,23 @@ const PlayerEngine = (function() {
     function loadVideoTrack(track, startTime, requestId) {
         if (!videoElement || !track.videoSrc) return;
 
-        // Ensure audio and bgVideo are stopped
+        // FIXED: Aggressively unload audio element
         if (audioElement) {
             audioElement.pause();
+            audioElement.removeAttribute('src');
+            audioElement.load();
         }
         if (bgVideoElement) {
             bgVideoElement.pause();
         }
 
         const videoSrc = track.videoSrc[currentQuality] || track.videoSrc.mid || track.videoSrc.high;
-        
         if (!videoSrc) return;
 
         try {
             videoElement.src = videoSrc;
             videoElement.currentTime = startTime;
-            
-            // CRITICAL: Sync Volume BEFORE Load to prevent missing audio on start
             syncVolumeState();
-            
             videoElement.load();
         } catch (e) {
             console.error("Video Load Error", e);
@@ -584,7 +569,6 @@ const PlayerEngine = (function() {
             return;
         }
         
-        // Check if src is already correct
         if (bgVideoElement.src && bgVideoElement.src.includes(track.backgroundSrc.split('/').pop())) {
             if (isPlaying && currentMode === 'audio') {
                 bgVideoElement.play().catch(() => {});
@@ -595,7 +579,6 @@ const PlayerEngine = (function() {
         bgVideoElement.src = track.backgroundSrc;
         bgVideoElement.load();
         
-        // Only play if we are ALREADY playing audio (otherwise wait for play event)
         if (isPlaying && currentMode === 'audio') {
             const p = bgVideoElement.play();
             if (p) p.catch(() => {});
@@ -618,10 +601,8 @@ const PlayerEngine = (function() {
     function performPlaySync() {
         const element = currentMode === 'audio' ? audioElement : videoElement;
         
-        // Safety check
         if (!element || !element.src) return false;
         
-        // Ensure volume is synced right before play
         syncVolumeState();
 
         if (element.paused === false) {
@@ -638,21 +619,24 @@ const PlayerEngine = (function() {
                 isPlaying = true;
                 playbackAttempts = 0;
             }).catch(function(e) {
-                // Analyze Error
                 const name = e.name || '';
                 
-                // AbortError is normal during rapid switching, ignore it.
                 if (name === 'AbortError' || e.code === 20) {
                     return; 
                 }
                 
+                // FIXED: Handle NotAllowedError (iOS Audio Trap) correctly without retry loop
                 if (name === 'NotAllowedError') {
                     pendingPlayRequest = true;
                     isPlaying = false;
+                    playbackState = PlaybackState.PAUSED;
+                    // Do NOT retry here via setTimeout. 
+                    // Let the UI know we need a user gesture.
+                    if (callbacks.onPause) callbacks.onPause({ mode: currentMode, track: currentTrack });
                     return;
                 }
                 
-                // Retry logic
+                // Retry logic only for Network errors
                 if (playbackAttempts < maxPlaybackAttempts) {
                     playbackAttempts++;
                     const delay = playbackRetryDelay * Math.pow(1.5, playbackAttempts - 1);
@@ -674,6 +658,7 @@ const PlayerEngine = (function() {
             return Promise.resolve();
         }
 
+        // FIXED: Strict check for mobile interaction
         if (!userHasInteracted && isMobile) {
             pendingPlayRequest = true;
             return Promise.resolve();
@@ -782,30 +767,26 @@ const PlayerEngine = (function() {
     function switchMode(newMode, preservePosition) {
         if (newMode === currentMode) return Promise.resolve();
         
-        // Create a new load request scope
         loadRequestId++;
         const myRequestId = loadRequestId;
 
         const wasPlaying = isPlaying;
         
-        // 1. Get current position
         const sourceElement = currentMode === 'audio' ? audioElement : videoElement;
         const currentTime = sourceElement ? sourceElement.currentTime : 0;
         
-        // 2. Stop everything immediately
-        stopAllMedia(false); // Don't clear src yet, allows smooth transition visually usually
+        // FIXED: Using force reset to ensure clean state
+        stopAllMedia(true);
         
         const previousMode = currentMode;
         currentMode = newMode;
         
-        // Notify UI
         if (callbacks.onModeChange) {
             callbacks.onModeChange({ previousMode: previousMode, currentMode: newMode, track: currentTrack });
         }
 
         if (!currentTrack) return Promise.resolve();
 
-        // 3. Load new source
         playbackState = PlaybackState.LOADING;
         isLoadingMedia = true;
         
@@ -818,20 +799,19 @@ const PlayerEngine = (function() {
                 return;
             }
 
-            // Cleanup function for listeners
             const cleanup = () => {
                 targetElement.removeEventListener('canplay', onReady);
                 targetElement.removeEventListener('error', onError);
             };
 
             const onReady = () => {
-                if (loadRequestId !== myRequestId) return; // Obsolete request
+                // FIXED: Check requestId to prevent race conditions
+                if (loadRequestId !== myRequestId) return;
                 cleanup();
                 
                 playbackState = PlaybackState.READY;
                 isLoadingMedia = false;
                 
-                // Restore Position
                 if (preservePosition && currentTime > 0) {
                     try {
                         if (targetElement.duration) {
@@ -840,10 +820,8 @@ const PlayerEngine = (function() {
                     } catch(e) {}
                 }
                 
-                // Volume Sync AGAIN just to be sure
                 syncVolumeState();
 
-                // Load background if needed
                 if (currentMode === 'audio') {
                     loadBackgroundVideo(currentTrack);
                 } else {
@@ -859,7 +837,6 @@ const PlayerEngine = (function() {
             const onError = (e) => {
                 if (loadRequestId !== myRequestId) return;
                 cleanup();
-                // Check if Abort
                 if (targetElement.error && targetElement.error.code === 20) return;
                 
                 playbackState = PlaybackState.ERROR;
@@ -869,22 +846,14 @@ const PlayerEngine = (function() {
             targetElement.addEventListener('canplay', onReady, { once: true });
             targetElement.addEventListener('error', onError, { once: true });
 
-            // Apply Source
             targetElement.src = targetSrc;
-            
-            // Apply Volume
             syncVolumeState();
-            
             targetElement.load();
             
-            // Failsafe timeout
             setTimeout(() => {
                 if (loadRequestId === myRequestId && playbackState === PlaybackState.LOADING) {
-                    // Try to proceed anyway if readyState matches
                     if (targetElement.readyState >= 3) {
                         onReady();
-                    } else {
-                        // Don't reject, just leave it (network might be slow)
                     }
                 }
             }, 5000);
@@ -896,12 +865,10 @@ const PlayerEngine = (function() {
             currentQuality = quality;
             saveQualityToStorage();
             
-            // Reload if in video mode
             if (currentMode === 'video' && currentTrack) {
                 const currentTime = videoElement ? videoElement.currentTime : 0;
                 const wasPlaying = isPlaying;
                 
-                // Reuse logic similar to switchMode but simpler
                 loadVideoTrack(currentTrack, currentTime, loadRequestId);
                 
                 if (wasPlaying) {
@@ -1016,7 +983,7 @@ const PlayerEngine = (function() {
         if (!container) return Promise.reject(new Error("No element"));
         if (container.requestFullscreen) return container.requestFullscreen();
         if (container.webkitRequestFullscreen) return container.webkitRequestFullscreen();
-        if (container.webkitEnterFullscreen) return container.webkitEnterFullscreen(); // iOS
+        if (container.webkitEnterFullscreen) return container.webkitEnterFullscreen();
         return Promise.reject(new Error("Fullscreen not supported"));
     }
     function exitFullscreen() {

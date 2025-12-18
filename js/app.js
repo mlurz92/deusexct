@@ -13,9 +13,6 @@ var App = (function() {
     var lastProgressValue = 0;
     var touchStartY = 0;
     var isTouchingProgress = false;
-    var playbackRetryCount = 0;
-    var maxPlaybackRetries = 3;
-    var lastPlayRequestTime = 0;
     var isAppReady = false;
 
     var elements = {
@@ -144,7 +141,6 @@ var App = (function() {
             renderPlaylist();
             restoreState();
             
-            // FIX: Set ready flags BEFORE routing to ensure playTrack logic works
             isInitialized = true;
             isAppReady = true; 
             
@@ -447,42 +443,22 @@ var App = (function() {
         if (PlayerEngine.getIsPlaying()) {
             PlayerEngine.pause();
         } else {
-            playbackRetryCount = 0;
             attemptPlayback();
         }
     }
 
     function attemptPlayback() {
-        var mode = PlayerEngine.getCurrentMode();
+        // We do NOT use a retry loop here anymore.
+        // PlayerEngine handles internal robustness.
+        // If PlayerEngine detects NotAllowedError, it triggers onPause event.
+        // App just triggers play and trusts the engine.
         
-        PlayerEngine.play().then(function() {
-            playbackRetryCount = 0;
-        }).catch(function(e) {
-            // FIX: Robust Autoplay Handling
-            if (e.name === 'NotAllowedError' || (e.message && e.message.includes('play() failed'))) {
-                 // Autoplay blocked: Stop retrying, update UI to show it's ready but paused
-                 showToast('Tippen zum Abspielen');
-                 playbackRetryCount = maxPlaybackRetries; // Stop further retries
-                 updatePlayPauseButtons(false);
-                 return;
-            }
-
-            if (playbackRetryCount < maxPlaybackRetries) {
-                playbackRetryCount++;
-                var delayMs = 300 + (playbackRetryCount * 200);
-                setTimeout(attemptPlayback, delayMs);
-            } else {
-                if (mode === 'video') {
-                    showToast('Video-Wiedergabe fehlgeschlagen. Wechsel zu Audio...');
-                    setTimeout(function() {
-                        switchToAudioMode();
-                        PlayerEngine.play().catch(function() {
-                            showToast('Wiedergabe fehlgeschlagen. Bitte tippen zum erneuten Versuch.');
-                        });
-                    }, 500);
-                } else {
-                    showToast('Wiedergabe fehlgeschlagen. Bitte tippen zum erneuten Versuch.');
-                }
+        PlayerEngine.play().catch(function(e) {
+            // This catch is only for immediate synchronous issues.
+            // Most errors come via the error event listener.
+            if (e && e.name === 'NotAllowedError') {
+                showToast('Bitte tippen zum Abspielen');
+                updatePlayPauseButtons(false);
             }
         });
     }
@@ -571,7 +547,6 @@ var App = (function() {
             if (typeof MediaSessionManager !== 'undefined' && MediaSessionManager.setPlaybackState) {
                 MediaSessionManager.setPlaybackState('playing');
             }
-            playbackRetryCount = 0;
         });
 
         PlayerEngine.on('pause', function(data) {
@@ -630,7 +605,7 @@ var App = (function() {
 
         PlayerEngine.on('error', function(data) {
             showToast('Fehler beim Abspielen. Bitte erneut versuchen.');
-            playbackRetryCount = 0;
+            updatePlayPauseButtons(false);
         });
 
         PlayerEngine.on('canPlay', function(data) {
@@ -882,7 +857,6 @@ var App = (function() {
         
         PlayerEngine.loadTrack(track, mode);
         
-        playbackRetryCount = 0;
         attemptPlayback();
         
         updatePlaylistHighlight(track.id);
