@@ -774,14 +774,14 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: space-between;
     width: 100%;
     height: 100%;
     max-width: 1000px;
     margin: 0 auto; /* Zentrierung des Containers */
 }
 
-/* ✅ OPTIMIERTE VIDEO-UTILISIERUNG */
+/* ✅ PERFEKTE VIDEO-ZENTRIERUNG */
 .video-wrapper {
     flex: 1;
     width: 100%;
@@ -793,18 +793,23 @@ body {
     position: relative;
     overflow: hidden;
     contain: layout style paint;
+    /* Präzise Zentrierung */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 #videoPlayer {
-    /* Perfekte Zentrierung mit optimaler Skalierung */
-    max-width: calc(100% - 20px);
-    max-height: calc(100% - 20px);
+    /* Exakte Zentrierung mit proportionaler Skalierung */
+    max-width: 100%;
+    max-height: 100%;
     width: auto;
     height: auto;
     object-fit: contain;
     background: #000;
     will-change: transform;
-    /* Exakte 2D-Zentrierung */
+    /* Perfekte Zentrierung */
     display: block;
     position: relative;
     /* Horizontale Zentrierung */
@@ -813,28 +818,24 @@ body {
     /* Vertikale Zentrierung */
     top: 50%;
     transform: translateY(-50%);
-    /* Verhindert Überlagerungen */
-    z-index: 1;
 }
 
 :fullscreen #videoPlayer,
 :-webkit-full-screen #videoPlayer,
 :-moz-full-screen #videoPlayer,
 :-ms-fullscreen #videoPlayer {
-    /* Im Fullscreen: Perfekte Zentrierung mit optimaler Skalierung */
-    max-width: calc(100% - 20px) !important;
-    max-height: calc(100% - 20px) !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
     width: auto !important;
     height: auto !important;
     object-fit: contain !important;
     background: #000;
-    /* Exakte 2D-Zentrierung auch im Fullscreen */
+    /* Perfekte Zentrierung auch im Fullscreen */
     position: relative !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
     top: 50% !important;
     transform: translateY(-50%) !important;
-    z-index: 1 !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
 }
 
 .video-overlay-controls {
@@ -1622,26 +1623,6 @@ body {
     .video-external-controls {
         width: 70%;
         max-width: 1000px;
-    }
-}
-
-/* ✅ OPTIMIERUNG FÜR SEHR KLEINE BILDSCHIRME */
-@media (max-height: 500px) {
-    .video-external-controls {
-        height: 50px; /* Kleinere Controls bei geringer Höhe */
-        padding: 0 10px; /* Weniger Padding bei wenig Platz */
-    }
-}
-
-/* ✅ ABSCHNEIDUNGSSCHUTZ FÜR SEHR SCHMALE BILDSCHIRME */
-@media (max-width: 320px) {
-    #videoPlayer {
-        max-width: calc(100% - 10px);
-        max-height: calc(100% - 10px);
-    }
-    
-    .video-external-controls {
-        padding: 0 5px;
     }
 }
 
