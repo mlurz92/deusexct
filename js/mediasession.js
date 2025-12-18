@@ -39,12 +39,12 @@ const MediaSessionManager = (function() {
     function generateArtworkArray(imageSrc) {
         if (!imageSrc) return [];
         return [
-            { src: imageSrc, sizes: '96x96', type: 'image/png' },
-            { src: imageSrc, sizes: '128x128', type: 'image/png' },
-            { src: imageSrc, sizes: '192x192', type: 'image/png' },
-            { src: imageSrc, sizes: '256x256', type: 'image/png' },
-            { src: imageSrc, sizes: '384x384', type: 'image/png' },
-            { src: imageSrc, sizes: '512x512', type: 'image/png' }
+            { src: imageSrc, sizes: '96x96', type: 'image/webp' },
+            { src: imageSrc, sizes: '128x128', type: 'image/webp' },
+            { src: imageSrc, sizes: '192x192', type: 'image/webp' },
+            { src: imageSrc, sizes: '256x256', type: 'image/webp' },
+            { src: imageSrc, sizes: '384x384', type: 'image/webp' },
+            { src: imageSrc, sizes: '512x512', type: 'image/webp' }
         ];
     }
 

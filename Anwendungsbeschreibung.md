@@ -97,10 +97,10 @@ Die Anwendung ist vollständig responsive und optimiert für:
 Die Startseite zeigt das komplette Album mit allen Metadaten und Steueroptionen.
 
 **Elemente:**
-- **Album-Cover:** `assets/images/00-Albumcover.png` (512×512px)
+- **Album-Cover:** `assets/images/00-Albumcover.webp` (512×512px)
   - CSS `box-shadow` mit Tiefenwirkung
   - Responsive Größe (max 400px Mobile, max 512px Desktop)
-  - PNG mit Transparenz-Support
+  - webp mit Transparenz-Support
 
 - **Album-Info:**
   - **Titel:** "Deus ex CT"
@@ -123,18 +123,18 @@ Die Startseite zeigt das komplette Album mit allen Metadaten und Steueroptionen.
 
 | # | Trackname | Dauer | Slug | Audio-Datei | Bild | Lyrics | BG-Video |
 |---|-----------|-------|------|-------------|------|--------|----------|
-| 01 | Oberarzt Dr. med. Placzek | 02:12 | `oberarzt-dr-med-placzek` | `01-Oberarzt_Dr_med_Placzek.mp3` | `01-Oberarzt_Dr_med_Placzek.png` | `01-Oberarzt_Dr_med_Placzek.lrc` | `01-Oberarzt_Dr_med_Placzek.mp4` |
-| 02 | Oberarzt der Herzen | 03:32 | `oberarzt-der-herzen` | `02-Oberarzt_der_Herzen.mp3` | `02-Oberarzt_der_Herzen.png` | `02-Oberarzt_der_Herzen.lrc` | `02-Oberarzt_der_Herzen.mp4` |
-| 03 | Vier-Eins-Neun-Zwei | 04:14 | `vier-eins-neun-zwei` | `03-Vier-Eins-Neun-Zwei.mp3` | `03-Vier-Eins-Neun-Zwei.png` | `03-Vier-Eins-Neun-Zwei.lrc` | `03-Vier-Eins-Neun-Zwei.mp4` |
-| 04 | Pilot im Pixelmeer | 03:59 | `pilot-im-pixelmeer` | `04-Pilot_im_Pixelmeer.mp3` | `04-Pilot_im_Pixelmeer.png` | `04-Pilot_im_Pixelmeer.lrc` | `04-Pilot_im_Pixelmeer.mp4` |
-| 05 | Drei Gebote | 03:54 | `drei-gebote` | `05-Drei_Gebote.mp3` | `05-Drei_Gebote.png` | `05-Drei_Gebote.lrc` | `05-Drei_Gebote.mp4` |
-| 06 | Kunst der Diagnostik | 03:26 | `kunst-der-diagnostik` | `06-Kunst_der_Diagnostik.mp3` | `06-Kunst_der_Diagnostik.png` | `06-Kunst_der_Diagnostik.lrc` | `06-Kunst_der_Diagnostik.mp4` |
-| 07 | Mit harter Hand und Charme | 03:46 | `mit-harter-hand-und-charme` | `07-Mit_harter_Hand_und_Charme.mp3` | `07-Mit_harter_Hand_und_Charme.png` | `07-Mit_harter_Hand_und_Charme.lrc` | `07-Mit_harter_Hand_und_Charme.mp4` |
-| 08 | Durch Feuer und Eis | 03:09 | `durch-feuer-und-eis` | `08-Durch_Feuer_und_Eis.mp3` | `08-Durch_Feuer_und_Eis.png` | `08-Durch_Feuer_und_Eis.lrc` | `08-Durch_Feuer_und_Eis.mp4` |
-| 09 | Held und Idol | 04:02 | `held-und-idol` | `09-Held_und_Idol.mp3` | `09-Held_und_Idol.png` | `09-Held_und_Idol.lrc` | `09-Held_und_Idol.mp4` |
-| 10 | Messerscharf und Legendär | 03:19 | `messerscharf-und-legendaer` | `10-Messerscharf_und_Legendaer.mp3` | `10-Messerscharf_und_Legendaer.png` | `10-Messerscharf_und_Legendaer.lrc` | `10-Messerscharf_und_Legendaer.mp4` |
-| 11 | Oberärztlicher Glanz | 03:14 | `oberaerztlicher-glanz` | `11-Oberaerztlicher_Glanz.mp3` | `11-Oberaerztlicher_Glanz.png` | `11-Oberaerztlicher_Glanz.lrc` | `11-Oberaerztlicher_Glanz.mp4` |
-| 12 | Götterdämmerung | 05:03 | `goetterdaemmerung` | `12-Goetterdaemmerung.mp3` | `12-Goetterdaemmerung.png` | `12-Goetterdaemmerung.lrc` | `12-Goetterdaemmerung.mp4` |
+| 01 | Oberarzt Dr. med. Placzek | 02:12 | `oberarzt-dr-med-placzek` | `01-Oberarzt_Dr_med_Placzek.mp3` | `01-Oberarzt_Dr_med_Placzek.webp` | `01-Oberarzt_Dr_med_Placzek.lrc` | `01-Oberarzt_Dr_med_Placzek.mp4` |
+| 02 | Oberarzt der Herzen | 03:32 | `oberarzt-der-herzen` | `02-Oberarzt_der_Herzen.mp3` | `02-Oberarzt_der_Herzen.webp` | `02-Oberarzt_der_Herzen.lrc` | `02-Oberarzt_der_Herzen.mp4` |
+| 03 | Vier-Eins-Neun-Zwei | 04:14 | `vier-eins-neun-zwei` | `03-Vier-Eins-Neun-Zwei.mp3` | `03-Vier-Eins-Neun-Zwei.webp` | `03-Vier-Eins-Neun-Zwei.lrc` | `03-Vier-Eins-Neun-Zwei.mp4` |
+| 04 | Pilot im Pixelmeer | 03:59 | `pilot-im-pixelmeer` | `04-Pilot_im_Pixelmeer.mp3` | `04-Pilot_im_Pixelmeer.webp` | `04-Pilot_im_Pixelmeer.lrc` | `04-Pilot_im_Pixelmeer.mp4` |
+| 05 | Drei Gebote | 03:54 | `drei-gebote` | `05-Drei_Gebote.mp3` | `05-Drei_Gebote.webp` | `05-Drei_Gebote.lrc` | `05-Drei_Gebote.mp4` |
+| 06 | Kunst der Diagnostik | 03:26 | `kunst-der-diagnostik` | `06-Kunst_der_Diagnostik.mp3` | `06-Kunst_der_Diagnostik.webp` | `06-Kunst_der_Diagnostik.lrc` | `06-Kunst_der_Diagnostik.mp4` |
+| 07 | Mit harter Hand und Charme | 03:46 | `mit-harter-hand-und-charme` | `07-Mit_harter_Hand_und_Charme.mp3` | `07-Mit_harter_Hand_und_Charme.webp` | `07-Mit_harter_Hand_und_Charme.lrc` | `07-Mit_harter_Hand_und_Charme.mp4` |
+| 08 | Durch Feuer und Eis | 03:09 | `durch-feuer-und-eis` | `08-Durch_Feuer_und_Eis.mp3` | `08-Durch_Feuer_und_Eis.webp` | `08-Durch_Feuer_und_Eis.lrc` | `08-Durch_Feuer_und_Eis.mp4` |
+| 09 | Held und Idol | 04:02 | `held-und-idol` | `09-Held_und_Idol.mp3` | `09-Held_und_Idol.webp` | `09-Held_und_Idol.lrc` | `09-Held_und_Idol.mp4` |
+| 10 | Messerscharf und Legendär | 03:19 | `messerscharf-und-legendaer` | `10-Messerscharf_und_Legendaer.mp3` | `10-Messerscharf_und_Legendaer.webp` | `10-Messerscharf_und_Legendaer.lrc` | `10-Messerscharf_und_Legendaer.mp4` |
+| 11 | Oberärztlicher Glanz | 03:14 | `oberaerztlicher-glanz` | `11-Oberaerztlicher_Glanz.mp3` | `11-Oberaerztlicher_Glanz.webp` | `11-Oberaerztlicher_Glanz.lrc` | `11-Oberaerztlicher_Glanz.mp4` |
+| 12 | Götterdämmerung | 05:03 | `goetterdaemmerung` | `12-Goetterdaemmerung.mp3` | `12-Goetterdaemmerung.webp` | `12-Goetterdaemmerung.lrc` | `12-Goetterdaemmerung.mp4` |
 
 **Tracklist-Rendering (`renderPlaylist()`):**
 ```
@@ -146,7 +146,7 @@ Die Startseite zeigt das komplette Album mit allen Metadaten und Steueroptionen.
       <div class="playlist-item-duration">02:12</div>
     </div>
     <div class="playlist-item-artwork">
-      <img src="assets/images/01-Oberarzt_Dr_med_Placzek.png" alt="Track 1">
+      <img src="assets/images/01-Oberarzt_Dr_med_Placzek.webp" alt="Track 1">
     </div>
   </div>
   <!-- ... weitere 11 Tracks -->
@@ -709,7 +709,7 @@ curl https://deus-ex-ct.markuslurz.de/manifest.json | jq .
 
 3. Icon-Größen prüfen:
 ```bash
-identify assets/images/00-Albumcover.png
+identify assets/images/00-Albumcover.webp
 # Sollte zeigen: 512x512 Pixel
 ```
 
@@ -792,7 +792,7 @@ curl -I https://deus-ex-ct.markuslurz.de/index.html
 
 | Asset | Größe | Anzahl | Total |
 |-------|-------|--------|-------|
-| **00-Albumcover.png** | 512 KB | 1 | 512 KB |
+| **00-Albumcover.webp** | 512 KB | 1 | 512 KB |
 | **Track-Artwork** | 400 KB | 12 | 4.8 MB |
 | **MP3 Audio** (128 Kbps) | ~1 MB/min | 12 | ~40 MB |
 | **Background-Videos** | 2-3 MB | 12 | ~30 MB |

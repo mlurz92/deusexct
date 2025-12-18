@@ -8,7 +8,7 @@ const PlaylistManager = (function() {
             duration: '02:12',
             durationSeconds: 132,
             audioSrc: 'assets/audio/01-Oberarzt_Dr_med_Placzek.mp3',
-            imageSrc: 'assets/images/01-Oberarzt_Dr_med_Placzek.png',
+            imageSrc: 'assets/images/01-Oberarzt_Dr_med_Placzek.webp',
             lyricsSrc: 'assets/lyrics/01-Oberarzt_Dr_med_Placzek.lrc',
             backgroundSrc: 'assets/video/background/01-Oberarzt_Dr_med_Placzek.mp4',
             videoSrc: {
@@ -26,7 +26,7 @@ const PlaylistManager = (function() {
             duration: '03:32',
             durationSeconds: 212,
             audioSrc: 'assets/audio/02-Oberarzt_der_Herzen.mp3',
-            imageSrc: 'assets/images/02-Oberarzt_der_Herzen.png',
+            imageSrc: 'assets/images/02-Oberarzt_der_Herzen.webp',
             lyricsSrc: 'assets/lyrics/02-Oberarzt_der_Herzen.lrc',
             backgroundSrc: 'assets/video/background/02-Oberarzt_der_Herzen.mp4',
             videoSrc: {
@@ -44,7 +44,7 @@ const PlaylistManager = (function() {
             duration: '04:14',
             durationSeconds: 254,
             audioSrc: 'assets/audio/03-Vier-Eins-Neun-Zwei.mp3',
-            imageSrc: 'assets/images/03-Vier-Eins-Neun-Zwei.png',
+            imageSrc: 'assets/images/03-Vier-Eins-Neun-Zwei.webp',
             lyricsSrc: 'assets/lyrics/03-Vier-Eins-Neun-Zwei.lrc',
             backgroundSrc: 'assets/video/background/03-Vier-Eins-Neun-Zwei.mp4',
             videoSrc: {
@@ -62,7 +62,7 @@ const PlaylistManager = (function() {
             duration: '03:59',
             durationSeconds: 239,
             audioSrc: 'assets/audio/04-Pilot_im_Pixelmeer.mp3',
-            imageSrc: 'assets/images/04-Pilot_im_Pixelmeer.png',
+            imageSrc: 'assets/images/04-Pilot_im_Pixelmeer.webp',
             lyricsSrc: 'assets/lyrics/04-Pilot_im_Pixelmeer.lrc',
             backgroundSrc: 'assets/video/background/04-Pilot_im_Pixelmeer.mp4',
             videoSrc: {
@@ -80,7 +80,7 @@ const PlaylistManager = (function() {
             duration: '03:54',
             durationSeconds: 234,
             audioSrc: 'assets/audio/05-Drei_Gebote.mp3',
-            imageSrc: 'assets/images/05-Drei_Gebote.png',
+            imageSrc: 'assets/images/05-Drei_Gebote.webp',
             lyricsSrc: 'assets/lyrics/05-Drei_Gebote.lrc',
             backgroundSrc: 'assets/video/background/05-Drei_Gebote.mp4',
             videoSrc: {
@@ -98,7 +98,7 @@ const PlaylistManager = (function() {
             duration: '03:26',
             durationSeconds: 206,
             audioSrc: 'assets/audio/06-Kunst_der_Diagnostik.mp3',
-            imageSrc: 'assets/images/06-Kunst_der_Diagnostik.png',
+            imageSrc: 'assets/images/06-Kunst_der_Diagnostik.webp',
             lyricsSrc: 'assets/lyrics/06-Kunst_der_Diagnostik.lrc',
             backgroundSrc: 'assets/video/background/06-Kunst_der_Diagnostik.mp4',
             videoSrc: {
@@ -116,7 +116,7 @@ const PlaylistManager = (function() {
             duration: '03:46',
             durationSeconds: 226,
             audioSrc: 'assets/audio/07-Mit_harter_Hand_und_Charme.mp3',
-            imageSrc: 'assets/images/07-Mit_harter_Hand_und_Charme.png',
+            imageSrc: 'assets/images/07-Mit_harter_Hand_und_Charme.webp',
             lyricsSrc: 'assets/lyrics/07-Mit_harter_Hand_und_Charme.lrc',
             backgroundSrc: 'assets/video/background/07-Mit_harter_Hand_und_Charme.mp4',
             videoSrc: {
@@ -134,7 +134,7 @@ const PlaylistManager = (function() {
             duration: '03:09',
             durationSeconds: 189,
             audioSrc: 'assets/audio/08-Durch_Feuer_und_Eis.mp3',
-            imageSrc: 'assets/images/08-Durch_Feuer_und_Eis.png',
+            imageSrc: 'assets/images/08-Durch_Feuer_und_Eis.webp',
             lyricsSrc: 'assets/lyrics/08-Durch_Feuer_und_Eis.lrc',
             backgroundSrc: 'assets/video/background/08-Durch_Feuer_und_Eis.mp4',
             videoSrc: {
@@ -152,7 +152,7 @@ const PlaylistManager = (function() {
             duration: '04:02',
             durationSeconds: 242,
             audioSrc: 'assets/audio/09-Held_und_Idol.mp3',
-            imageSrc: 'assets/images/09-Held_und_Idol.png',
+            imageSrc: 'assets/images/09-Held_und_Idol.webp',
             lyricsSrc: 'assets/lyrics/09-Held_und_Idol.lrc',
             backgroundSrc: 'assets/video/background/09-Held_und_Idol.mp4',
             videoSrc: {
@@ -170,7 +170,7 @@ const PlaylistManager = (function() {
             duration: '03:19',
             durationSeconds: 199,
             audioSrc: 'assets/audio/10-Messerscharf_und_Legendaer.mp3',
-            imageSrc: 'assets/images/10-Messerscharf_und_Legendaer.png',
+            imageSrc: 'assets/images/10-Messerscharf_und_Legendaer.webp',
             lyricsSrc: 'assets/lyrics/10-Messerscharf_und_Legendaer.lrc',
             backgroundSrc: 'assets/video/background/10-Messerscharf_und_Legendaer.mp4',
             videoSrc: {
@@ -188,7 +188,7 @@ const PlaylistManager = (function() {
             duration: '03:14',
             durationSeconds: 194,
             audioSrc: 'assets/audio/11-Oberaerztlicher_Glanz.mp3',
-            imageSrc: 'assets/images/11-Oberaerztlicher_Glanz.png',
+            imageSrc: 'assets/images/11-Oberaerztlicher_Glanz.webp',
             lyricsSrc: 'assets/lyrics/11-Oberaerztlicher_Glanz.lrc',
             backgroundSrc: 'assets/video/background/11-Oberaerztlicher_Glanz.mp4',
             videoSrc: {
@@ -206,7 +206,7 @@ const PlaylistManager = (function() {
             duration: '05:03',
             durationSeconds: 303,
             audioSrc: 'assets/audio/12-Goetterdaemmerung.mp3',
-            imageSrc: 'assets/images/12-Goetterdaemmerung.png',
+            imageSrc: 'assets/images/12-Goetterdaemmerung.webp',
             lyricsSrc: 'assets/lyrics/12-Goetterdaemmerung.lrc',
             backgroundSrc: 'assets/video/background/12-Goetterdaemmerung.mp4',
             videoSrc: {
@@ -221,7 +221,7 @@ const PlaylistManager = (function() {
     const albumInfo = {
         title: 'Deus ex CT',
         artist: 'Oberarzt Dr. med. Placzek',
-        coverSrc: 'assets/images/00-Albumcover.png',
+        coverSrc: 'assets/images/00-Albumcover.webp',
         totalTracks: 12,
         totalDuration: '40:50',
         totalDurationSeconds: 2450,

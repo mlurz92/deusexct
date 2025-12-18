@@ -166,7 +166,7 @@ const Track = {
         mid: 'assets/video/mid/01-*_mid.mp4',   // 720p (Default)
         high: 'assets/video/high/01-*_hq.mp4'   // 1080p
     },
-    imageSrc: 'assets/images/01-*.png',         // Artwork
+    imageSrc: 'assets/images/01-*.webp',         // Artwork
     backgroundSrc: 'assets/video/background/01-*.mp4',  // Loop-Video
     lyricsSrc: 'assets/lyrics/01-*.lrc'         // LRC-Datei
 };
@@ -533,9 +533,9 @@ if ('mediaSession' in navigator) {
         album: 'Deus ex CT',
         artwork: [
             {
-                src: 'assets/images/01-Oberarzt_Dr_med_Placzek.png',
+                src: 'assets/images/01-Oberarzt_Dr_med_Placzek.webp',
                 sizes: '512x512',
-                type: 'image/png'
+                type: 'image/webp'
             }
         ]
     });

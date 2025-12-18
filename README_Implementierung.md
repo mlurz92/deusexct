@@ -61,7 +61,7 @@ const tracks = [
             mid: 'assets/video/mid/01-Oberarzt_Dr_med_Placzek_Lyrics_mid.mp4',
             high: 'assets/video/high/01-Oberarzt_Dr_med_Placzek_Lyrics_hq.mp4'
         },
-        imageSrc: 'assets/images/01-Oberarzt_Dr_med_Placzek.png',
+        imageSrc: 'assets/images/01-Oberarzt_Dr_med_Placzek.webp',
         backgroundSrc: 'assets/video/background/01-Oberarzt_Dr_med_Placzek.mp4',
         lyricsSrc: 'assets/lyrics/01-Oberarzt_Dr_med_Placzek.lrc'
     },
@@ -71,7 +71,7 @@ const tracks = [
 const albumInfo = {
     title: 'Deus ex CT',
     artist: 'Oberarzt Dr. med. Placzek',
-    coverSrc: 'assets/images/00-Albumcover.png',
+    coverSrc: 'assets/images/00-Albumcover.webp',
     totalTracks: 12,
     totalDuration: '40:50',
     totalDurationSeconds: 2450,
@@ -397,9 +397,9 @@ MediaSessionManager.setMetadata({
     album: 'Deus ex CT',
     artwork: [
         {
-            src: 'assets/images/01-Oberarzt_Dr_med_Placzek.png',
+            src: 'assets/images/01-Oberarzt_Dr_med_Placzek.webp',
             sizes: '512x512',
-            type: 'image/png'
+            type: 'image/webp'
         }
     ]
 });
@@ -855,8 +855,8 @@ assets/
 │   ├── Deus_ex_CT_Complete.zip
 │   └── Oberarzt_Dr_med_Placzek_Deus-Ex-CT_Lyrics-Videos_(HQ).zip
 ├── images/
-│   ├── 00-Albumcover.png (512×512px)
-│   └── 01-12-*.png
+│   ├── 00-Albumcover.webp (512×512px)
+│   └── 01-12-*.webp
 ├── lyrics/
 │   └── 01-12-*.lrc (UTF-8, [mm:ss.cc]Format)
 └── video/
@@ -1137,16 +1137,16 @@ iconv -f CP1252 -t UTF-8 input.lrc > output.lrc
 wc -l output.lrc  # Sollte 20-100 Zeilen pro Track sein
 ```
 
-**Artwork (PNG):**
+**Artwork (webp):**
 ```bash
-# Komprimiere PNG
-optipng -o2 input.png -out output.png
+# Komprimiere webp
+optiwebp -o2 input.webp -out output.webp
 
 # Oder mit ImageMagick
-convert input.jpg -quality 85 output.png
+convert input.jpg -quality 85 output.webp
 
 # Größe sollte 400-512 KB sein
-ls -lh output.png
+ls -lh output.webp
 ```
 
 ### JavaScript-Optimierungen
@@ -1193,7 +1193,7 @@ function preloadNextTrack() {
         mid: 'assets/video/mid/13-Neuer_Track_Lyrics_mid.mp4',
         high: 'assets/video/high/13-Neuer_Track_Lyrics_hq.mp4'
     },
-    imageSrc: 'assets/images/13-Neuer_Track.png',
+    imageSrc: 'assets/images/13-Neuer_Track.webp',
     backgroundSrc: 'assets/video/background/13-Neuer_Track.mp4',
     lyricsSrc: 'assets/lyrics/13-Neuer_Track.lrc'
 }
@@ -1201,7 +1201,7 @@ function preloadNextTrack() {
 
 **2. Assets uploaden:**
 - `assets/audio/13-Neuer_Track.mp3`
-- `assets/images/13-Neuer_Track.png`
+- `assets/images/13-Neuer_Track.webp`
 - `assets/lyrics/13-Neuer_Track.lrc`
 - `assets/video/background/13-Neuer_Track.mp4`
 - `assets/video/low/13-Neuer_Track_Lyrics_low.mp4`

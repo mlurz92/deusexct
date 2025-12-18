@@ -41,9 +41,9 @@ Die Anwendung arbeitet mit der folgenden vorgegebenen, **unveränderlichen Datei
     ├── downloads/                       # ZIP-Archive (exakte Namen!)
     │   ├── Deus_ex_CT_Complete.zip
     │   └── Oberarzt_Dr_med_Placzek_Deus-Ex-CT_Lyrics-Videos_(HQ).zip
-    ├── images/                          # PNG Artwork (512×512px)
-    │   ├── 00-Albumcover.png
-    │   └── 01-12-*.png
+    ├── images/                          # webp Artwork (512×512px)
+    │   ├── 00-Albumcover.webp
+    │   └── 01-12-*.webp
     ├── lyrics/                          # LRC-Dateien ([mm:ss.cc]Format)
     │   └── 01-12-*.lrc
     └── video/
@@ -79,7 +79,7 @@ Album Total: 40:50 (2.450 Sekunden)
 
 **Datei-Benennung (EXAKT):**
 - Audio: `NN-Trackname.mp3` (z.B. `01-Oberarzt_Dr_med_Placzek.mp3`)
-- Images: `NN-Trackname.png` (z.B. `01-Oberarzt_Dr_med_Placzek.png`)
+- Images: `NN-Trackname.webp` (z.B. `01-Oberarzt_Dr_med_Placzek.webp`)
 - Lyrics: `NN-Trackname.lrc` (z.B. `01-Oberarzt_Dr_med_Placzek.lrc`)
 - Background Video: `NN-Trackname.mp4` (z.B. `01-Oberarzt_Dr_med_Placzek.mp4`)
 - Video LOW: `NN-Trackname_Lyrics_low.mp4`
@@ -374,8 +374,8 @@ else → MID (Desktop default, HQ optional)
   "background_color": "#000000",
   "theme_color": "#000000",
   "icons": [
-    { "src": "assets/images/00-Albumcover.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "assets/images/00-Albumcover.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "assets/images/00-Albumcover.webp", "sizes": "192x192", "type": "image/webp", "purpose": "any maskable" },
+    { "src": "assets/images/00-Albumcover.webp", "sizes": "512x512", "type": "image/webp", "purpose": "any maskable" }
   ]
 }
 ```
