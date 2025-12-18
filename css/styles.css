@@ -311,12 +311,7 @@ body {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
     contain: content;
-    /* Ergänzung für korrekten Startpunkt unter dem Header */
-    /* Die Höhe des Headers muss kompensiert werden, da der Header im Flex-Flow ist (flex: 0 0 auto) und nicht fixiert. 
-       Da #app ein flex-column ist, und der Header (fixed height) und main-content (flex: 1) Geschwister sind, 
-       sollte dies das Problem beheben, dass der obere Bereich des Videos unter dem Header verschwindet, wenn der 
-       PlayerView aktiv ist, und das Video den gesamten Flex-Raum ausnutzt. */
-    padding-top: 0; /* Ursprünglich keine Füllung hier */
+    padding-top: 0;
 }
 
 .hidden {
@@ -758,91 +753,80 @@ body {
     to {
         opacity: 1;
         transform: translateY(0) scale(1) translateZ(0);
-}
+    }
 }
 
-/* ✅ KORRIGIERTES VIDEO-LAYOUT */
+/* === OPTIMIERUNG VIDEO LAYOUT (3:4) === */
+
 .player-video-layout {
     flex: 1;
     width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
-    align-items: stretch; /* Stretch für volle Breite */
-    justify-content: center;
-    padding: 0;
+    /* Auffüllen des Raums zwischen Header und Bottom Bar */
+    padding-top: calc(var(--header-height) + var(--safe-top));
     background: #000;
-    overflow: hidden;
-    contain: layout style;
-    
-    /* Hinzufügen von Padding oben, um den fixierten Header zu kompensieren und das Video nach unten zu schieben, 
-       sodass es nicht von der Header-Transparenz überlappt oder abgeschnitten wird. */
-    padding-top: calc(var(--header-height) + var(--safe-top)); 
-    /* Padding unten wird von der .video-external-controls und .player-bottom-bar abgedeckt */
+    position: relative;
+    contain: layout size;
 }
 
 .video-flex-container {
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     width: 100%;
     height: 100%;
-    max-width: 1000px;
-    margin: 0 auto; /* Zentrierung des Containers */
+    overflow: hidden;
+    gap: 0;
 }
 
-/* ✅ PERFEKTE VIDEO-ZENTRIERUNG */
 .video-wrapper {
-    flex: 1;
-    width: 100%;
-    min-height: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #000;
+    /* STRICT 3:4 ASPECT RADIO */
+    aspect-ratio: 3 / 4 !important;
+    /* Positionierung */
     position: relative;
-    overflow: hidden;
+    /* Zentrierung */
+    margin: auto;
+    /* Größenlogik: Maximale Ausnutzung */
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    /* Flex-Verhalten: Kann schrumpfen, aber nicht wachsen über Aspect Ratio hinaus */
+    flex: 0 1 auto;
+    /* Verhindert Overflow */
+    min-height: 0;
+    min-width: 0;
+    background: #000;
+    /* Optional: Schatten für klare Abgrenzung */
+    box-shadow: 0 0 30px rgba(0,0,0,0.8);
     contain: layout style paint;
-    /* Präzise Zentrierung */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
 }
 
 #videoPlayer {
-    /* Exakte Zentrierung mit proportionaler Skalierung */
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
+    width: 100%;
+    height: 100%;
+    /* Inhalt vollständig sichtbar */
     object-fit: contain;
     background: #000;
-    will-change: transform;
-    /* Perfekte Zentrierung: Abhängig von Flexbox-Zentrierung im .video-wrapper */
     display: block;
-    position: static;
-    margin: auto;
-    top: auto;
-    transform: none;
 }
 
+/* Vollbild-Override */
 :fullscreen #videoPlayer,
 :-webkit-full-screen #videoPlayer,
 :-moz-full-screen #videoPlayer,
 :-ms-fullscreen #videoPlayer {
     max-width: 100% !important;
     max-height: 100% !important;
-    width: auto !important;
-    height: auto !important;
+    width: 100% !important;
+    height: 100% !important;
     object-fit: contain !important;
     background: #000;
-    /* Perfekte Zentrierung auch im Fullscreen: Keine Konflikte */
-    position: static !important;
-    top: auto !important;
-    transform: none !important;
-    margin: auto !important;
+    margin: 0 !important;
 }
 
 .video-overlay-controls {
@@ -893,19 +877,16 @@ body {
 }
 
 .video-external-controls {
-    position: relative;
     flex-shrink: 0;
     width: 100%;
-    height: 60px;
+    height: 50px; /* Kompakte Höhe */
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0 16px;
-    padding-left: calc(16px + var(--safe-left));
-    padding-right: calc(16px + var(--safe-right));
+    justify-content: center;
+    gap: 20px;
     background: transparent;
     z-index: 20;
-    margin-bottom: 10px;
+    padding-bottom: 5px;
 }
 
 .video-quality-group {
@@ -952,6 +933,8 @@ body {
     appearance: none;
     touch-action: manipulation;
 }
+
+/* === FOOTER BARS === */
 
 .player-bottom-bar {
     flex: 0 0 auto;
@@ -1501,22 +1484,17 @@ body {
     transform: translate(-50%, -50%) scale(1) translateZ(0);
 }
 
-/* ✅ ERWEITERTE RESPONSIVE STÜTZUNG FÜR VIDEO-LAYOUT */
-/* Für kleinere Tablets und größere Smartphones */
+/* === RESPONSIVE ANPASSUNGEN === */
+
+/* Tablets & größere Smartphones */
 @media (min-width: 480px) {
-    .player-video-layout {
-        padding: 20px;
-        /* Padding oben muss angepasst werden, um den Header bei mobilen Ansichten zu berücksichtigen */
-        padding-top: calc(var(--header-height) + var(--safe-top));
-    }
-    
     .video-external-controls {
-        width: 90%;
-        max-width: 800px;
+        width: 100%;
+        max-width: 600px;
     }
 }
 
-/* Für Desktop und größere Tablets */
+/* Desktop & Landscape Tablets */
 @media (min-width: 768px) {
     .album-layout-grid {
         flex-direction: row;
@@ -1543,14 +1521,12 @@ body {
         min-width: 0;
     }
 
-    /* ✅ AUDIO-LAYOUT GETEILT FÜR KLEINERE BILDSCHIRME */
     .player-audio-layout {
         flex-direction: row;
         gap: 30px;
         max-width: 1000px;
         margin: 0 auto;
         padding: 30px;
-        /* Responsive Schwelle bei 768px für bessere Mobilunterstützung */
     }
 
     .audio-stage-top {
@@ -1583,17 +1559,6 @@ body {
         margin: 10px 0;
     }
 
-    /* ✅ VERBESSERTES VIDEO-LAYOUT FÜR DESKTOP */
-    .player-video-layout {
-        padding: 30px;
-        padding-top: calc(var(--header-height) + 30px); /* Desktop hat 30px Padding oben */
-    }
-
-    .video-external-controls {
-        width: 80%;
-        max-width: 900px;
-    }
-
     .player-bottom-bar {
         height: 100px;
         border-radius: 16px 16px 0 0;
@@ -1614,7 +1579,7 @@ body {
     }
 }
 
-/* Für sehr große Bildschirme */
+/* Large Screens */
 @media (min-width: 1024px) {
     .header-content {
         padding: 0 32px;
@@ -1628,11 +1593,6 @@ body {
         gap: 40px;
         max-width: 1200px;
         padding: 40px;
-    }
-
-    .video-external-controls {
-        width: 70%;
-        max-width: 1000px;
     }
 }
 
@@ -1700,34 +1660,13 @@ body {
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
     }
-
-    .header-track-title {
-        animation: none;
-    }
-
-    .playing-bar {
-        animation: none;
-        height: 60%;
-    }
-
-    .lyric-fade-out,
-    .lyric-fade-in {
-        transition: none !important;
-        animation: none !important;
-    }
+    .header-track-title { animation: none; }
+    .playing-bar { animation: none; height: 60%; }
+    .lyric-fade-out, .lyric-fade-in { transition: none !important; animation: none !important; }
 }
 
 @supports (-webkit-touch-callout: none) {
-    .bar-progress-container {
-        height: 6px;
-    }
-
-    .bar-progress-input {
-        height: 30px;
-        top: -12px;
-    }
-
-    .quality-tag {
-        padding: 8px 12px;
-    }
+    .bar-progress-container { height: 6px; }
+    .bar-progress-input { height: 30px; top: -12px; }
+    .quality-tag { padding: 8px 12px; }
 }

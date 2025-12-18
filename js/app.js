@@ -143,10 +143,13 @@ var App = (function() {
             setupMediaSession();
             renderPlaylist();
             restoreState();
+            
+            // FIX: Set ready flags BEFORE routing to ensure playTrack logic works
+            isInitialized = true;
+            isAppReady = true; 
+            
             handleInitialRoute();
             startVisualUpdateLoop();
-            isInitialized = true;
-            isAppReady = true;
         }
 
         waitForPlayerReady();
@@ -455,6 +458,15 @@ var App = (function() {
         PlayerEngine.play().then(function() {
             playbackRetryCount = 0;
         }).catch(function(e) {
+            // FIX: Robust Autoplay Handling
+            if (e.name === 'NotAllowedError' || (e.message && e.message.includes('play() failed'))) {
+                 // Autoplay blocked: Stop retrying, update UI to show it's ready but paused
+                 showToast('Tippen zum Abspielen');
+                 playbackRetryCount = maxPlaybackRetries; // Stop further retries
+                 updatePlayPauseButtons(false);
+                 return;
+            }
+
             if (playbackRetryCount < maxPlaybackRetries) {
                 playbackRetryCount++;
                 var delayMs = 300 + (playbackRetryCount * 200);
