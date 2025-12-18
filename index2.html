@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="de" class="bg-black text-white antialiased">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Deus ex CT - Spatial WebApp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --gold-glow: rgba(212, 175, 55, 0.4);
+            --safe-top: env(safe-area-inset-top, 20px);
+            --safe-bottom: env(safe-area-inset-bottom, 20px);
+        }
+        * { -webkit-tap-highlight-color: transparent; outline: none; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            overflow: hidden;
+            background: #000;
+            height: 100dvh;
+            width: 100vw;
+        }
+        .spring-transition { transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        .text-gold { color: var(--gold); }
+        .bg-gold { background: var(--gold); }
+        
+        .aura {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            filter: blur(120px) brightness(0.2);
+            opacity: 0;
+            transition: opacity 1.5s ease, background-image 1s ease;
+            z-index: 0;
+        }
+
+        .spatial-card {
+            width: 80vw;
+            max-width: 320px;
+            aspect-ratio: 3/4;
+            flex-shrink: 0;
+            border-radius: 30px;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+            border: 1px solid rgba(255,255,255,0.05);
+            transform: scale(0.9);
+            opacity: 0.5;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .spatial-card.active {
+            transform: scale(1);
+            opacity: 1;
+            border-color: var(--gold);
+            box-shadow: 0 0 50px var(--gold-glow);
+        }
+
+        .hud-dock {
+            position: fixed;
+            bottom: calc(30px + var(--safe-bottom));
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 10px 25px;
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-radius: 100px;
+            border: 1px solid rgba(255,255,255,0.1);
+            z-index: 400;
+            transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .hud-dock.hidden {
+            transform: translate(-50%, 150%);
+            opacity: 0;
+        }
+
+        .stage-3-4 {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-bottom: 20vh;
+            padding-top: var(--safe-top);
+        }
+
+        .media-monolith {
+            height: 70dvh;
+            width: auto;
+            aspect-ratio: 3/4;
+            border-radius: 20px;
+            background: #000;
+            overflow: hidden;
+            box-shadow: 0 0 100px rgba(0,0,0,1);
+            position: relative;
+            z-index: 200;
+            border: 1px solid rgba(255,255,255,0.03);
+            transition: height 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .fullscreen-active .media-monolith {
+            height: 98dvh;
+            border-radius: 0;
+            border: none;
+        }
+
+        .track-info-overlay {
+            position: fixed;
+            top: calc(80px + var(--safe-top));
+            left: 0;
+            right: 0;
+            text-align: center;
+            z-index: 300;
+            pointer-events: none;
+            transition: all 0.5s ease;
+        }
+
+        .fullscreen-active .track-info-overlay {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        .custom-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 1px;
+            cursor: pointer;
+        }
+        .custom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 6px;
+            height: 6px;
+            background: var(--gold);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--gold);
+        }
+
+        .scroller {
+            display: flex;
+            gap: 20px;
+            padding: 0 10vw;
+            scroll-snap-type: x mandatory;
+            overflow-x: auto;
+            height: 100dvh;
+            align-items: center;
+        }
+        .scroller > div { scroll-snap-align: center; }
+
+        .btn-round {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            color: white;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .btn-round:active { transform: scale(0.9); background: var(--gold); color: black; }
+
+        .status-pill {
+            position: fixed;
+            top: calc(20px + var(--safe-top));
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 4px 15px;
+            border-radius: 20px;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            color: var(--gold);
+            font-size: 8px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            z-index: 500;
+        }
+    </style>
+</head>
+<body class="text-white">
+
+    <div id="aura" class="aura"></div>
+
+    <div id="loading" class="fixed inset-0 z-[1000] bg-black flex flex-col items-center justify-center spring-transition">
+        <div class="relative w-16 h-16 mb-8">
+            <div class="absolute inset-0 border-[1px] border-gold/10 rounded-full"></div>
+            <div class="absolute inset-0 border-[1px] border-gold rounded-full border-t-transparent animate-spin"></div>
+        </div>
+        <div class="text-gold font-black uppercase tracking-[1em] text-[10px]">Deus ex CT</div>
+    </div>
+
+    <div id="library-view" class="relative w-full h-full spring-transition">
+        <header class="fixed top-0 w-full z-50 px-8 pt-[var(--safe-top)] flex justify-between items-center h-20">
+            <div class="font-black text-xs uppercase tracking-[0.5em]">Markus Lurz</div>
+            <a href="assets/downloads/Deus_ex_CT_Complete.zip" class="text-gold text-lg active:scale-90 transition-transform"><i class="fa-solid fa-layer-group"></i></a>
+        </header>
+
+        <div id="track-scroller" class="scroller hide-scrollbar"></div>
+
+        <div class="fixed bottom-12 w-full text-center px-8 z-40 pointer-events-none">
+            <p id="lib-title" class="text-2xl font-black italic tracking-tighter uppercase mb-1"></p>
+            <p id="lib-meta" class="text-[9px] text-white/40 uppercase tracking-[0.4em]">Wählen Sie einen Akt</p>
+        </div>
+    </div>
+
+    <div id="player-view" class="fixed inset-0 z-[100] bg-black hidden spring-transition">
+        <div id="status-label" class="status-pill">Spatial Playback</div>
+
+        <div class="player-nav fixed top-[var(--safe-top)] left-8 right-8 z-[500] flex justify-between items-center h-20 transition-opacity duration-500" id="p-nav">
+            <button onclick="ui.closePlayer()" class="btn-round"><i class="fa-solid fa-xmark"></i></button>
+            <div class="flex gap-4">
+                <button id="p-mode-btn" onclick="player.toggleMode()" class="btn-round text-[9px] font-black uppercase">Audio</button>
+                <button id="p-quality-btn" onclick="ui.toggleQuality()" class="btn-round text-[9px] font-black text-gold hidden">MID</button>
+            </div>
+        </div>
+
+        <div id="track-info" class="track-info-overlay">
+            <h2 id="p-title" class="text-3xl font-black italic tracking-tighter uppercase text-gold"></h2>
+            <p class="text-[9px] text-white/30 uppercase tracking-[0.6em] mt-2">Dr. med. Placzek • Leitender Oberarzt</p>
+        </div>
+
+        <div id="stage" class="stage-3-4" onclick="ui.userActivity()">
+            <div id="monolith" class="media-monolith">
+                <div id="audio-container" class="w-full h-full flex items-center justify-center p-12">
+                    <img id="p-artwork" src="" class="w-full aspect-square object-cover rounded-3xl shadow-2xl border border-white/5">
+                </div>
+                <div id="video-container" class="hidden w-full h-full">
+                    <video id="p-video" class="w-full h-full object-contain" playsinline></video>
+                </div>
+                <div id="p-overlay" class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 active:opacity-100 transition-opacity">
+                    <button onclick="event.stopPropagation(); player.togglePlay()" class="w-20 h-20 rounded-full border border-white/20 backdrop-blur-xl flex items-center justify-center text-3xl"><i class="fa-solid fa-play ml-1"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <div id="hud" class="hud-dock">
+            <button onclick="player.prev()" class="btn-round !bg-transparent !border-none text-lg"><i class="fa-solid fa-backward-step"></i></button>
+            <button id="hud-play" onclick="player.togglePlay()" class="w-14 h-14 bg-white text-black rounded-full flex items-center justify-center text-xl shadow-2xl"><i class="fa-solid fa-play ml-0.5"></i></button>
+            <button onclick="player.next()" class="btn-round !bg-transparent !border-none text-lg"><i class="fa-solid fa-forward-step"></i></button>
+            
+            <div class="h-8 w-[1px] bg-white/10 mx-2"></div>
+
+            <div class="flex flex-col gap-3 w-32 sm:w-48">
+                <input type="range" id="p-slider" class="custom-slider" value="0" step="0.001">
+                <div class="flex justify-between text-[7px] font-black font-mono text-white/30 uppercase tracking-widest leading-none">
+                    <span id="t-cur">0:00</span>
+                    <span id="t-dur">0:00</span>
+                </div>
+            </div>
+
+            <div class="h-8 w-[1px] bg-white/10 mx-2"></div>
+
+            <button id="p-dl-btn" class="btn-round !bg-transparent !border-none text-gold"><i class="fa-solid fa-cloud-arrow-down"></i></button>
+        </div>
+    </div>
+
+    <div id="quality-menu" class="fixed inset-0 z-[600] bg-black/95 backdrop-blur-3xl hidden flex flex-col items-center justify-center p-12 spring-transition">
+        <h3 class="text-gold font-black uppercase tracking-[0.5em] text-[10px] mb-12">Stream Bitrate Selection</h3>
+        <div class="flex flex-col gap-6 w-full max-w-xs">
+            <button onclick="player.setQuality('low')" class="w-full py-6 rounded-3xl bg-white/5 border border-white/5 font-black text-[10px] uppercase tracking-widest active:bg-gold active:text-black">Low Density</button>
+            <button onclick="player.setQuality('mid')" class="w-full py-6 rounded-3xl bg-white/5 border border-white/5 font-black text-[10px] uppercase tracking-widest active:bg-gold active:text-black">Standard Mid</button>
+            <button onclick="player.setQuality('high')" class="w-full py-8 rounded-3xl bg-white/5 border border-gold/40 font-black text-[10px] uppercase tracking-widest active:bg-gold active:text-black text-gold shadow-2xl">High Fidelity (HQ)</button>
+        </div>
+        <button onclick="ui.toggleQuality()" class="mt-20 text-white/20 font-black uppercase tracking-[0.4em] text-[9px]">Cancel</button>
+    </div>
+
+    <audio id="p-audio" preload="auto"></audio>
+
+    <script>
+        const tracks = [
+            { id: "01", title: "Oberarzt Dr. med. Placzek", slug: "oberarzt-dr-med-placzek", dur: "2:12", f: "01-Oberarzt_Dr_med_Placzek" },
+            { id: "02", title: "Oberarzt der Herzen", slug: "oberarzt-der-herzen", dur: "3:32", f: "02-Oberarzt_der_Herzen" },
+            { id: "03", title: "Vier-Eins-Neun-Zwei", slug: "vier-eins-neun-zwei", dur: "4:14", f: "03-Vier-Eins-Neun-Zwei" },
+            { id: "04", title: "Pilot im Pixelmeer", slug: "pilot-im-pixelmeer", dur: "3:59", f: "04-Pilot_im_Pixelmeer" },
+            { id: "05", title: "Drei Gebote", slug: "drei-gebote", dur: "3:54", f: "05-Drei_Gebote" },
+            { id: "06", title: "Kunst der Diagnostik", slug: "kunst-der-diagnostik", dur: "3:26", f: "06-Kunst_der_Diagnostik" },
+            { id: "07", title: "Mit harter Hand und Charme", slug: "mit-harter-hand-und-charme", dur: "3:46", f: "07-Mit_harter_Hand_und_Charme" },
+            { id: "08", title: "Durch Feuer und Eis", slug: "durch-feuer-und-eis", dur: "3:09", f: "08-Durch_Feuer_und_Eis" },
+            { id: "09", title: "Held und Idol", slug: "held-und-idol", dur: "4:02", f: "09-Held_und_Idol" },
+            { id: "10", title: "Messerscharf und Legendär", slug: "messerscharf-und-legendaer", dur: "3:19", f: "10-Messerscharf_und_Legendaer" },
+            { id: "11", title: "Oberärztlicher Glanz", slug: "oberaerztlicher-glanz", dur: "3:14", f: "11-Oberaerztlicher_Glanz" },
+            { id: "12", title: "Götterdämmerung", slug: "goetterdaemmerung", dur: "5:03", f: "12-Goetterdaemmerung" }
+        ];
+
+        const state = {
+            idx: 0,
+            playing: false,
+            mode: 'audio', // audio or video
+            quality: 'mid',
+            idleTimer: null,
+            lastInteraction: Date.now()
+        };
+
+        const dom = {
+            scroller: document.getElementById('track-scroller'),
+            aura: document.getElementById('aura'),
+            player: document.getElementById('player-view'),
+            lib: document.getElementById('library-view'),
+            audio: document.getElementById('p-audio'),
+            video: document.getElementById('p-video'),
+            artwork: document.getElementById('p-artwork'),
+            slider: document.getElementById('p-slider'),
+            hud: document.getElementById('hud'),
+            playIcon: document.querySelector('#hud-play i'),
+            title: document.getElementById('p-title'),
+            status: document.getElementById('status-label'),
+            qualityMenu: document.getElementById('quality-menu'),
+            root: document.getElementById('player-root-el')
+        };
+
+        const player = {
+            init() {
+                this.renderLibrary();
+                this.setupListeners();
+                this.handleDeepLink();
+                setTimeout(() => document.getElementById('loading').classList.add('opacity-0'), 1500);
+                setTimeout(() => document.getElementById('loading').remove(), 2200);
+            },
+
+            renderLibrary() {
+                dom.scroller.innerHTML = tracks.map((t, i) => `
+                    <div id="card-${i}" class="spatial-card" 
+                         style="background-image: url('assets/images/${t.f}.webp')"
+                         onclick="player.loadTrack(${i})">
+                    </div>
+                `).join('');
+                this.updateFocus();
+            },
+
+            setupListeners() {
+                dom.scroller.onscroll = () => this.updateFocus();
+                dom.audio.ontimeupdate = () => this.sync();
+                dom.video.ontimeupdate = () => this.sync();
+                dom.audio.onended = () => this.next();
+                dom.video.onended = () => this.next();
+                dom.slider.oninput = (e) => {
+                    ui.userActivity();
+                    const el = state.mode === 'audio' ? dom.audio : dom.video;
+                    el.currentTime = e.target.value * el.duration;
+                };
+            },
+
+            updateFocus() {
+                const centerX = dom.scroller.scrollLeft + window.innerWidth / 2;
+                tracks.forEach((_, i) => {
+                    const el = document.getElementById(`card-${i}`);
+                    const rect = el.getBoundingClientRect();
+                    const cardCenter = rect.left + rect.width / 2;
+                    const dist = Math.abs(cardCenter - window.innerWidth / 2);
+                    
+                    if (dist < 100) {
+                        el.classList.add('active');
+                        document.getElementById('lib-title').innerText = tracks[i].title;
+                        dom.aura.style.backgroundImage = `url('assets/images/${tracks[i].f}.webp')`;
+                        dom.aura.style.opacity = "0.6";
+                    } else {
+                        el.classList.remove('active');
+                    }
+                });
+            },
+
+            async loadTrack(i, start = true) {
+                state.idx = i;
+                const t = tracks[i];
+                
+                dom.audio.src = `assets/audio/${t.f}.mp3`;
+                this.updateVideoSrc();
+                dom.artwork.src = `assets/images/${t.f}.webp`;
+                dom.title.innerText = t.title;
+
+                document.getElementById('p-dl-btn').onclick = () => {
+                    window.open(`assets/video/high/${t.f}_Lyrics_hq.mp4`, '_blank');
+                };
+
+                // Strict Reset Logic: 0:00
+                dom.audio.currentTime = 0;
+                dom.video.currentTime = 0;
+
+                dom.lib.classList.add('opacity-0');
+                dom.player.classList.remove('hidden');
+                setTimeout(() => dom.player.classList.remove('translate-y-full'), 10);
+                
+                if (start) this.play();
+                this.updateSession();
+                window.location.hash = `/track/${t.slug}`;
+            },
+
+            updateVideoSrc() {
+                const t = tracks[state.idx];
+                const suffix = state.quality === 'high' ? 'hq' : state.quality;
+                dom.video.src = `assets/video/${state.quality}/${t.f}_Lyrics_${suffix}.mp4`;
+            },
+
+            togglePlay() { state.playing ? this.pause() : this.play(); },
+
+            play() {
+                const el = state.mode === 'audio' ? dom.audio : dom.video;
+                el.play();
+                state.playing = true;
+                dom.playIcon.className = "fa-solid fa-pause";
+                dom.status.innerText = "Synchronized";
+                ui.userActivity();
+            },
+
+            pause() {
+                dom.audio.pause();
+                dom.video.pause();
+                state.playing = false;
+                dom.playIcon.className = "fa-solid fa-play ml-0.5";
+                dom.status.innerText = "Paused";
+                ui.userActivity();
+            },
+
+            next() { this.loadTrack((state.idx + 1) % tracks.length); },
+            prev() { this.loadTrack((state.idx - 1 + tracks.length) % tracks.length); },
+
+            toggleMode() {
+                const time = state.mode === 'audio' ? dom.audio.currentTime : dom.video.currentTime;
+                state.mode = state.mode === 'audio' ? 'video' : 'audio';
+                
+                document.getElementById('audio-container').classList.toggle('hidden', state.mode === 'video');
+                document.getElementById('video-container').classList.toggle('hidden', state.mode === 'audio');
+                document.getElementById('p-quality-btn').classList.toggle('hidden', state.mode === 'audio');
+                document.getElementById('p-mode-btn').innerText = state.mode.charAt(0).toUpperCase() + state.mode.slice(1);
+
+                if (state.mode === 'video') dom.audio.pause(); else dom.video.pause();
+                
+                const el = state.mode === 'audio' ? dom.audio : dom.video;
+                el.currentTime = time;
+                if (state.playing) el.play();
+                ui.userActivity();
+            },
+
+            setQuality(q) {
+                const time = dom.video.currentTime;
+                state.quality = q;
+                document.getElementById('p-quality-btn').innerText = q.toUpperCase() === 'HIGH' ? 'HQ' : q.toUpperCase();
+                this.updateVideoSrc();
+                dom.video.currentTime = time;
+                if (state.playing) dom.video.play();
+                ui.toggleQuality();
+            },
+
+            sync() {
+                const el = state.mode === 'audio' ? dom.audio : dom.video;
+                if (!el.duration) return;
+                const progress = el.currentTime / el.duration;
+                dom.slider.value = progress;
+                document.getElementById('t-cur').innerText = this.fmt(el.currentTime);
+                document.getElementById('t-dur').innerText = this.fmt(el.duration);
+            },
+
+            fmt(s) {
+                if (!isFinite(s)) return "0:00";
+                const m = Math.floor(s / 60);
+                const r = Math.floor(s % 60);
+                return `${m}:${r < 10 ? '0' : ''}${r}`;
+            },
+
+            updateSession() {
+                if (!navigator.mediaSession) return;
+                const t = tracks[state.idx];
+                let art = `assets/images/${t.f}.webp`;
+                const base = window.location.href.split('#')[0];
+                try { art = new URL(art, base).href; } catch(e){}
+                
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: t.title, artist: 'Dr. med. Placzek', album: 'Deus ex CT',
+                    artwork: [{ src: art, sizes: '512x512', type: 'image/webp' }]
+                });
+                navigator.mediaSession.setActionHandler('play', () => this.play());
+                navigator.mediaSession.setActionHandler('pause', () => this.pause());
+                navigator.mediaSession.setActionHandler('previoustrack', () => this.prev());
+                navigator.mediaSession.setActionHandler('nexttrack', () => this.next());
+            },
+
+            handleDeepLink() {
+                const h = window.location.hash;
+                if (h.startsWith('#/track/')) {
+                    const slug = h.replace('#/track/', '');
+                    const i = tracks.findIndex(t => t.slug === slug);
+                    if (i !== -1) this.loadTrack(i, false);
+                }
+            }
+        };
+
+        const ui = {
+            closePlayer() {
+                player.pause();
+                dom.player.classList.add('translate-y-full');
+                setTimeout(() => {
+                    dom.player.classList.add('hidden');
+                    dom.lib.classList.remove('opacity-0');
+                }, 600);
+                window.location.hash = "";
+            },
+
+            toggleQuality() {
+                dom.qualityMenu.classList.toggle('hidden');
+            },
+
+            toggleFS() {
+                if (dom.video.requestFullscreen) dom.video.requestFullscreen();
+                else if (dom.video.webkitRequestFullscreen) dom.video.webkitRequestFullscreen();
+            },
+
+            userActivity() {
+                state.lastInteraction = Date.now();
+                dom.hud.classList.remove('hidden');
+                document.body.classList.remove('fullscreen-active');
+                document.getElementById('p-nav').style.opacity = "1";
+                
+                if (state.idleTimer) clearTimeout(state.idleTimer);
+                
+                state.idleTimer = setTimeout(() => {
+                    if (state.playing) {
+                        dom.hud.classList.add('hidden');
+                        document.body.classList.add('fullscreen-active');
+                        document.getElementById('p-nav').style.opacity = "0";
+                    }
+                }, 3500);
+            }
+        };
+
+        window.onload = () => player.init();
+    </script>
+</body>
+</html>
