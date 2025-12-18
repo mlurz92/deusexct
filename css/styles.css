@@ -311,6 +311,12 @@ body {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
     contain: content;
+    /* Ergänzung für korrekten Startpunkt unter dem Header */
+    /* Die Höhe des Headers muss kompensiert werden, da der Header im Flex-Flow ist (flex: 0 0 auto) und nicht fixiert. 
+       Da #app ein flex-column ist, und der Header (fixed height) und main-content (flex: 1) Geschwister sind, 
+       sollte dies das Problem beheben, dass der obere Bereich des Videos unter dem Header verschwindet, wenn der 
+       PlayerView aktiv ist, und das Video den gesamten Flex-Raum ausnutzt. */
+    padding-top: 0; /* Ursprünglich keine Füllung hier */
 }
 
 .hidden {
@@ -752,7 +758,7 @@ body {
     to {
         opacity: 1;
         transform: translateY(0) scale(1) translateZ(0);
-    }
+}
 }
 
 /* ✅ KORRIGIERTES VIDEO-LAYOUT */
@@ -768,6 +774,11 @@ body {
     background: #000;
     overflow: hidden;
     contain: layout style;
+    
+    /* Hinzufügen von Padding oben, um den fixierten Header zu kompensieren und das Video nach unten zu schieben, 
+       sodass es nicht von der Header-Transparenz überlappt oder abgeschnitten wird. */
+    padding-top: calc(var(--header-height) + var(--safe-top)); 
+    /* Padding unten wird von der .video-external-controls und .player-bottom-bar abgedeckt */
 }
 
 .video-flex-container {
@@ -809,15 +820,12 @@ body {
     object-fit: contain;
     background: #000;
     will-change: transform;
-    /* Perfekte Zentrierung */
+    /* Perfekte Zentrierung: Abhängig von Flexbox-Zentrierung im .video-wrapper */
     display: block;
-    position: relative;
-    /* Horizontale Zentrierung */
-    margin-left: auto;
-    margin-right: auto;
-    /* Vertikale Zentrierung */
-    top: 50%;
-    transform: translateY(-50%);
+    position: static;
+    margin: auto;
+    top: auto;
+    transform: none;
 }
 
 :fullscreen #videoPlayer,
@@ -830,12 +838,11 @@ body {
     height: auto !important;
     object-fit: contain !important;
     background: #000;
-    /* Perfekte Zentrierung auch im Fullscreen */
-    position: relative !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
+    /* Perfekte Zentrierung auch im Fullscreen: Keine Konflikte */
+    position: static !important;
+    top: auto !important;
+    transform: none !important;
+    margin: auto !important;
 }
 
 .video-overlay-controls {
@@ -1499,6 +1506,8 @@ body {
 @media (min-width: 480px) {
     .player-video-layout {
         padding: 20px;
+        /* Padding oben muss angepasst werden, um den Header bei mobilen Ansichten zu berücksichtigen */
+        padding-top: calc(var(--header-height) + var(--safe-top));
     }
     
     .video-external-controls {
@@ -1577,6 +1586,7 @@ body {
     /* ✅ VERBESSERTES VIDEO-LAYOUT FÜR DESKTOP */
     .player-video-layout {
         padding: 30px;
+        padding-top: calc(var(--header-height) + 30px); /* Desktop hat 30px Padding oben */
     }
 
     .video-external-controls {
