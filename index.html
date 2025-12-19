@@ -1,546 +1,916 @@
 <!DOCTYPE html>
-<html lang="de" class="bg-black text-white antialiased">
+<html lang="de" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#000000">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Deus ex CT - Spatial WebApp</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <meta name="apple-mobile-web-app-title" content="Deus ex CT">
+    <meta name="description" content="Deus ex CT - Das Album. Oberarzt Dr. med. Placzek.">
+    <title>Deus ex CT | Dr. med. Placzek</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/webp" href="assets/images/00-Albumcover.webp">
+    <link rel="apple-touch-icon" href="assets/images/00-Albumcover.webp">
+
+    <!-- Fonts & Tailwind (CDN) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Config -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        gold: { 
+                            400: '#FFD700', 
+                            500: '#E6C200', 
+                            600: '#B39700', 
+                            glow: 'rgba(255, 215, 0, 0.4)' 
+                        }
+                    },
+                    boxShadow: {
+                        'glass-up': '0 -10px 40px rgba(0, 0, 0, 0.6)',
+                        'neon': '0 0 15px rgba(255, 215, 0, 0.3)',
+                    },
+                    screens: {
+                        'xs': '375px',
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
         :root {
-            --gold: #D4AF37;
-            --gold-glow: rgba(212, 175, 55, 0.4);
-            --safe-top: env(safe-area-inset-top, 20px);
             --safe-bottom: env(safe-area-inset-bottom, 20px);
+            --safe-top: env(safe-area-inset-top, 20px);
+            --app-height: 100vh;
         }
-        * { -webkit-tap-highlight-color: transparent; outline: none; box-sizing: border-box; }
+
         body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            overflow: hidden;
             background: #000;
-            height: 100dvh;
+            color: #fff;
+            height: var(--app-height);
             width: 100vw;
-        }
-        .spring-transition { transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-        .text-gold { color: var(--gold); }
-        .bg-gold { background: var(--gold); }
-        
-        .aura {
-            position: absolute;
-            inset: 0;
-            background-size: cover;
-            background-position: center;
-            filter: blur(120px) brightness(0.2);
-            opacity: 0;
-            transition: opacity 1.5s ease, background-image 1s ease;
-            z-index: 0;
-        }
-
-        .spatial-card {
-            width: 80vw;
-            max-width: 320px;
-            aspect-ratio: 3/4;
-            flex-shrink: 0;
-            border-radius: 30px;
-            background-size: cover;
-            background-position: center;
-            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
-            border: 1px solid rgba(255,255,255,0.05);
-            transform: scale(0.9);
-            opacity: 0.5;
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
             overflow: hidden;
-        }
-        .spatial-card.active {
-            transform: scale(1);
-            opacity: 1;
-            border-color: var(--gold);
-            box-shadow: 0 0 50px var(--gold-glow);
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+            font-feature-settings: "cv11", "ss01";
         }
 
-        .hud-dock {
-            position: fixed;
-            bottom: calc(30px + var(--safe-bottom));
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            padding: 10px 25px;
-            background: rgba(20, 20, 20, 0.6);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border-radius: 100px;
-            border: 1px solid rgba(255,255,255,0.1);
-            z-index: 400;
-            transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        /* --- Glass Panel (Controls) --- */
+        .glass-panel {
+            background: rgba(18, 18, 18, 0.65); /* Mehr Transparenz wie gewünscht */
+            backdrop-filter: blur(25px) saturate(160%);
+            -webkit-backdrop-filter: blur(25px) saturate(160%);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.5);
         }
 
-        .hud-dock.hidden {
-            transform: translate(-50%, 150%);
-            opacity: 0;
+        .glass-btn {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-btn:active { 
+            transform: scale(0.94); 
+            background: rgba(255, 215, 0, 0.15); 
+            border-color: rgba(255, 215, 0, 0.4); 
+            color: #FFD700;
         }
 
-        .stage-3-4 {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding-bottom: 20vh;
-            padding-top: var(--safe-top);
-        }
-
-        .media-monolith {
-            height: 70dvh;
-            width: auto;
-            aspect-ratio: 3/4;
-            border-radius: 20px;
-            background: #000;
-            overflow: hidden;
-            box-shadow: 0 0 100px rgba(0,0,0,1);
-            position: relative;
-            z-index: 200;
-            border: 1px solid rgba(255,255,255,0.03);
-            transition: height 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .fullscreen-active .media-monolith {
-            height: 98dvh;
-            border-radius: 0;
-            border: none;
-        }
-
-        .track-info-overlay {
-            position: fixed;
-            top: calc(80px + var(--safe-top));
-            left: 0;
-            right: 0;
-            text-align: center;
-            z-index: 300;
-            pointer-events: none;
-            transition: all 0.5s ease;
-        }
-
-        .fullscreen-active .track-info-overlay {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-
-        .custom-slider {
+        /* --- Custom Range Sliders --- */
+        input[type=range] {
             -webkit-appearance: none;
+            background: transparent;
+            height: 24px; /* Touch Target */
             width: 100%;
-            height: 2px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 1px;
             cursor: pointer;
         }
-        .custom-slider::-webkit-slider-thumb {
+        input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 6px;
-            height: 6px;
-            background: var(--gold);
+            height: 12px;
+            width: 12px;
             border-radius: 50%;
-            box-shadow: 0 0 10px var(--gold);
+            background: #FFD700;
+            box-shadow: 0 0 10px var(--gold-glow);
+            margin-top: -5px;
+            transition: transform 0.1s;
+        }
+        input[type=range]:active::-webkit-slider-thumb { transform: scale(1.4); }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 2px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+        }
+        .slider-progress {
+            --progress: 0%;
+            background: linear-gradient(to right, #FFD700 var(--progress), rgba(255,255,255,0.2) var(--progress)) !important;
+            background-repeat: no-repeat;
         }
 
-        .scroller {
-            display: flex;
-            gap: 20px;
-            padding: 0 10vw;
-            scroll-snap-type: x mandatory;
-            overflow-x: auto;
-            height: 100dvh;
-            align-items: center;
+        /* --- Smart Controls Animation --- */
+        .controls-container {
+            transition: transform 0.5s cubic-bezier(0.33, 1, 0.68, 1);
+            will-change: transform;
         }
-        .scroller > div { scroll-snap-align: center; }
-
-        .btn-round {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.05);
-            color: white;
-            font-size: 14px;
-            transition: all 0.3s ease;
+        .controls-minimized {
+            transform: translateY(calc(100% - 6px - var(--safe-bottom))); /* Nur der Micro-Balken schaut raus */
         }
-        .btn-round:active { transform: scale(0.9); background: var(--gold); color: black; }
+        .controls-minimized .controls-content {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease-out;
+        }
+        .controls-full .controls-content {
+            opacity: 1;
+            pointer-events: auto;
+            transition: opacity 0.4s ease-in 0.1s;
+        }
+        /* Der goldene Balken am unteren Rand bei minimierter Leiste */
+        .micro-bar-hint {
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .controls-minimized .micro-bar-hint {
+            opacity: 1;
+        }
 
-        .status-pill {
-            position: fixed;
-            top: calc(20px + var(--safe-top));
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 4px 15px;
-            border-radius: 20px;
-            background: rgba(212, 175, 55, 0.1);
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            color: var(--gold);
-            font-size: 8px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            z-index: 500;
+        /* --- Lyrics & Layout --- */
+        .lyrics-mask {
+            mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+        }
+        .lyric-line {
+            transform-origin: center center;
+            transition: all 0.4s ease-out;
+            opacity: 0.3;
+            filter: blur(0.5px);
+            transform: scale(0.98);
+        }
+        .lyric-line.active {
+            opacity: 1;
+            color: #FFD700;
+            transform: scale(1.05);
+            filter: blur(0);
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+            font-weight: 700;
+        }
+
+        /* --- Utilities --- */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .playlist-active {
+            background: rgba(255, 215, 0, 0.12);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        .playlist-active .t-title { color: #FFD700; }
+        .playlist-active .t-icon { display: block; }
+        
+        /* Volume Slider Transition */
+        #vol-slider-container {
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
         }
     </style>
 </head>
-<body class="text-white">
+<body class="antialiased font-sans bg-black">
 
-    <div id="aura" class="aura"></div>
-
-    <div id="loading" class="fixed inset-0 z-[1000] bg-black flex flex-col items-center justify-center spring-transition">
-        <div class="relative w-16 h-16 mb-8">
-            <div class="absolute inset-0 border-[1px] border-gold/10 rounded-full"></div>
-            <div class="absolute inset-0 border-[1px] border-gold rounded-full border-t-transparent animate-spin"></div>
-        </div>
-        <div class="text-gold font-black uppercase tracking-[1em] text-[10px]">Deus ex CT</div>
+    <!-- Background Layer (Abstract) -->
+    <div class="fixed inset-0 z-0 select-none pointer-events-none">
+        <video id="bg-visual" loop muted playsinline class="absolute inset-0 w-full h-full object-cover opacity-40 blur-3xl scale-110 transition-opacity duration-1000"></video>
+        <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/80 to-black"></div>
+        <!-- Grain Texture -->
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDAwIiAvPgo8cmVjdCB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSIjZmZmIiBvcGFjaXR5PSIwLjA1IiAvPgo8L3N2Zz4=')] opacity-20"></div>
     </div>
 
-    <div id="library-view" class="relative w-full h-full spring-transition">
-        <header class="fixed top-0 w-full z-50 px-8 pt-[var(--safe-top)] flex justify-between items-center h-20">
-            <div class="font-black text-xs uppercase tracking-[0.5em]">Markus Lurz</div>
-            <a href="assets/downloads/Deus_ex_CT_Complete.zip" class="text-gold text-lg active:scale-90 transition-transform"><i class="fa-solid fa-layer-group"></i></a>
+    <!-- App Wrapper -->
+    <div id="app-wrapper" class="relative z-10 flex flex-col h-full w-full max-w-[1600px] mx-auto pt-[var(--safe-top)]">
+        
+        <!-- Header -->
+        <header class="flex justify-between items-center px-5 py-3 shrink-0 z-50">
+            <button id="btn-playlist" class="lg:hidden glass-btn w-10 h-10 rounded-full text-gold-400 flex items-center justify-center active:scale-95" aria-label="Playlist">
+                <!-- Phosphor List Icon (SVG) -->
+                <svg width="24" height="24" viewBox="0 0 256 256" fill="currentColor"><path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128ZM40,72H216a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16ZM216,184H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Z"></path></svg>
+            </button>
+            
+            <div class="text-center select-none">
+                <h1 class="text-[10px] font-bold tracking-[0.35em] text-gold-500 uppercase mb-0.5 drop-shadow-md">DEUS EX CT</h1>
+                <div class="text-[9px] text-gray-400 font-medium tracking-widest uppercase opacity-70">Web Player</div>
+            </div>
+
+            <button id="btn-download-menu" class="glass-btn w-10 h-10 rounded-full text-gold-400 flex items-center justify-center active:scale-95" aria-label="Downloads">
+                <!-- Phosphor Download Icon (SVG) -->
+                <svg width="24" height="24" viewBox="0 0 256 256" fill="currentColor"><path d="M213.66,154.34a8,8,0,0,1,0,11.32l-80,80a8,8,0,0,1-11.32,0l-80-80a8,8,0,0,1,11.32-11.32L120,220.69V40a8,8,0,0,1,16,0V220.69l66.34-66.35A8,8,0,0,1,213.66,154.34Z"></path></svg>
+            </button>
         </header>
 
-        <div id="track-scroller" class="scroller hide-scrollbar"></div>
-
-        <div class="fixed bottom-12 w-full text-center px-8 z-40 pointer-events-none">
-            <p id="lib-title" class="text-2xl font-black italic tracking-tighter uppercase mb-1"></p>
-            <p id="lib-meta" class="text-[9px] text-white/40 uppercase tracking-[0.4em]">Wählen Sie einen Akt</p>
-        </div>
-    </div>
-
-    <div id="player-view" class="fixed inset-0 z-[100] bg-black hidden spring-transition">
-        <div id="status-label" class="status-pill">Spatial Playback</div>
-
-        <div class="player-nav fixed top-[var(--safe-top)] left-8 right-8 z-[500] flex justify-between items-center h-20 transition-opacity duration-500" id="p-nav">
-            <button onclick="ui.closePlayer()" class="btn-round"><i class="fa-solid fa-xmark"></i></button>
-            <div class="flex gap-4">
-                <button id="p-mode-btn" onclick="player.toggleMode()" class="btn-round text-[9px] font-black uppercase">Audio</button>
-                <button id="p-quality-btn" onclick="ui.toggleQuality()" class="btn-round text-[9px] font-black text-gold hidden">MID</button>
-            </div>
-        </div>
-
-        <div id="track-info" class="track-info-overlay">
-            <h2 id="p-title" class="text-3xl font-black italic tracking-tighter uppercase text-gold"></h2>
-            <p class="text-[9px] text-white/30 uppercase tracking-[0.6em] mt-2">Dr. med. Placzek • Leitender Oberarzt</p>
-        </div>
-
-        <div id="stage" class="stage-3-4" onclick="ui.userActivity()">
-            <div id="monolith" class="media-monolith">
-                <div id="audio-container" class="w-full h-full flex items-center justify-center p-12">
-                    <img id="p-artwork" src="" class="w-full aspect-square object-cover rounded-3xl shadow-2xl border border-white/5">
-                </div>
-                <div id="video-container" class="hidden w-full h-full">
-                    <video id="p-video" class="w-full h-full object-contain" playsinline></video>
-                </div>
-                <div id="p-overlay" class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 active:opacity-100 transition-opacity">
-                    <button onclick="event.stopPropagation(); player.togglePlay()" class="w-20 h-20 rounded-full border border-white/20 backdrop-blur-xl flex items-center justify-center text-3xl"><i class="fa-solid fa-play ml-1"></i></button>
-                </div>
-            </div>
-        </div>
-
-        <div id="hud" class="hud-dock">
-            <button onclick="player.prev()" class="btn-round !bg-transparent !border-none text-lg"><i class="fa-solid fa-backward-step"></i></button>
-            <button id="hud-play" onclick="player.togglePlay()" class="w-14 h-14 bg-white text-black rounded-full flex items-center justify-center text-xl shadow-2xl"><i class="fa-solid fa-play ml-0.5"></i></button>
-            <button onclick="player.next()" class="btn-round !bg-transparent !border-none text-lg"><i class="fa-solid fa-forward-step"></i></button>
+        <!-- Main Layout (Split Desktop / Stack Mobile) -->
+        <div class="flex flex-1 overflow-hidden relative">
             
-            <div class="h-8 w-[1px] bg-white/10 mx-2"></div>
+            <!-- Desktop Sidebar -->
+            <aside class="hidden lg:flex flex-col w-80 h-full border-r border-white/5 bg-black/20 backdrop-blur-sm pt-4 pb-32 pl-6 pr-2">
+                <h2 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4 px-2">Tracklist</h2>
+                <div id="playlist-desktop" class="flex-1 overflow-y-auto hide-scrollbar space-y-1"></div>
+            </aside>
 
-            <div class="flex flex-col gap-3 w-32 sm:w-48">
-                <input type="range" id="p-slider" class="custom-slider" value="0" step="0.001">
-                <div class="flex justify-between text-[7px] font-black font-mono text-white/30 uppercase tracking-widest leading-none">
-                    <span id="t-cur">0:00</span>
-                    <span id="t-dur">0:00</span>
+            <!-- Center Stage -->
+            <main class="flex-1 relative w-full h-full overflow-hidden flex flex-col items-center">
+                
+                <!-- Visual Wrapper: DYNAMIC HEIGHT LOGIC -->
+                <!-- Im Audio-Modus: Feste Höhe/Ratio. Im Video-Modus: flex-grow (füllt ALLES aus) -->
+                <div id="visual-wrapper" class="relative w-full flex flex-col items-center justify-center shrink-0 transition-all duration-700 ease-in-out py-2 h-[50vh] lg:h-auto lg:min-h-[45vh] lg:flex-1">
+                    
+                    <!-- Inner Container (Maintains 3:4 Aspect Ratio but fills parent) -->
+                    <div class="relative h-full w-auto aspect-[3/4] max-w-full rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.7)] border border-white/10 bg-black group mx-auto">
+                        
+                        <!-- Audio Cover (Visible in Audio Mode) -->
+                        <img id="cover-art" src="" alt="Cover" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 z-10 opacity-100">
+                        
+                        <!-- Video Element (Visible in Video Mode) -->
+                        <!-- Object-cover ensures it fills the 3:4 frame completely -->
+                        <video id="main-video" class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500 z-20" playsinline poster=""></video>
+                        
+                        <!-- Fullscreen Btn -->
+                        <button id="btn-fullscreen" class="absolute bottom-4 right-4 p-2.5 rounded-full bg-black/60 text-white backdrop-blur-md z-30 opacity-0 transition-opacity duration-300 hover:text-gold-400">
+                            <svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor"><path d="M216,48V88a8,8,0,0,1-16,0V56H168a8,8,0,0,1,0-16h40A8,8,0,0,1,216,48ZM88,200H56V168a8,8,0,0,0-16,0v40a8,8,0,0,0,8,8H88a8,8,0,0,0,0-16Zm128-40a8,8,0,0,0-8,8v32H168a8,8,0,0,0,0,16h40a8,8,0,0,0,8-8V168A8,8,0,0,0,216,160ZM56,56V88a8,8,0,0,0,16,0V56H88a8,8,0,0,0,0-16H48a8,8,0,0,0-8,8Z"></path></svg>
+                        </button>
+                        
+                        <!-- Quality Badge -->
+                        <div id="quality-badge" class="absolute top-4 right-4 px-2 py-0.5 rounded bg-black/60 text-[10px] font-bold text-gold-400 backdrop-blur-md z-30 opacity-0 transition-opacity border border-white/10">MID</div>
+                        
+                        <!-- Loading/Play Hint -->
+                        <div id="video-overlay-hint" class="absolute inset-0 flex items-center justify-center z-30 opacity-0 pointer-events-none transition-opacity duration-300">
+                            <svg class="text-gold-500/80 drop-shadow-2xl animate-pulse" width="80" height="80" viewBox="0 0 256 256" fill="currentColor"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm32-88a8,8,0,0,1-8,8H136v16a8,8,0,0,1-16,0V136H104a8,8,0,0,1,0-16h16V104a8,8,0,0,1,16,0v16h16A8,8,0,0,1,160,128Z"></path></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lyrics Container -->
+                <!-- Only visible in Audio Mode via JS toggling of classes -->
+                <div id="lyrics-wrapper" class="flex-1 w-full max-w-2xl px-8 relative lyrics-mask overflow-hidden mb-[60px] lg:mb-[90px] flex flex-col justify-start">
+                    <div id="lyrics-content" class="text-center space-y-5 py-[25vh] transition-transform duration-500 ease-out will-change-transform">
+                        <p class="text-gray-500 text-xs animate-pulse font-mono tracking-wide">SYSTEM INITIALISIERT...</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- CONTROLS BAR (Bottom Fixed) -->
+        <div id="controls-bar" class="controls-container controls-full fixed bottom-0 left-0 right-0 z-[100] w-full">
+            
+            <!-- Invisible Hit Area for expansion -->
+            <div id="controls-trigger" class="absolute -top-12 inset-x-0 h-12 z-0 bg-transparent cursor-pointer"></div>
+
+            <div class="glass-panel w-full max-w-3xl mx-auto rounded-t-3xl md:rounded-t-[2.5rem] pb-[var(--safe-bottom)] backdrop-blur-3xl overflow-hidden relative border-x border-white/5 shadow-2xl">
+                
+                <!-- Micro Progress (Visible when minimized) -->
+                <div class="micro-bar-hint absolute top-0 left-0 w-full h-1.5 bg-white/10 transition-opacity duration-300">
+                    <div id="micro-progress" class="h-full bg-gold-500 shadow-[0_0_15px_rgba(255,215,0,0.8)] transition-all duration-200 rounded-r-full" style="width: 0%"></div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="controls-content relative z-10 px-6 pt-4 pb-4">
+                    
+                    <!-- Header: Title & Switch -->
+                    <div class="flex justify-between items-center mb-3">
+                        <div class="flex-1 min-w-0 pr-3 overflow-hidden">
+                            <div class="flex flex-col">
+                                <h2 id="track-title" class="text-white font-bold text-sm truncate leading-tight drop-shadow">Lade...</h2>
+                                <span class="text-gold-500 text-[10px] font-bold tracking-wider uppercase opacity-90">Dr. med. Placzek</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Mode Switch -->
+                        <div class="flex bg-black/40 rounded-full p-0.5 border border-white/10 shrink-0 backdrop-blur-md">
+                            <button id="mode-audio" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all bg-gold-500 text-black shadow-neon">AUDIO</button>
+                            <button id="mode-video" class="px-3 py-1 rounded-full text-[10px] font-bold text-gray-400 transition-all hover:text-white">VIDEO</button>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="flex items-center gap-3 mb-4 group/seek">
+                        <span id="time-current" class="text-[10px] text-gray-400 font-mono w-8 text-right tabular-nums">0:00</span>
+                        <div class="flex-1 relative h-6 flex items-center cursor-pointer">
+                            <!-- Track Background -->
+                            <div class="absolute inset-x-0 h-1 bg-white/10 rounded-full"></div>
+                            <!-- Fill -->
+                            <div id="seek-fill" class="absolute left-0 h-1 bg-gradient-to-r from-gold-500 to-gold-400 rounded-full" style="width: 0%"></div>
+                            <!-- Thumb (Custom visual only) -->
+                            <div id="seek-thumb" class="absolute h-3 w-3 bg-white rounded-full shadow-[0_0_10px_rgba(255,215,0,0.8)] opacity-0 group-hover/seek:opacity-100 transition-opacity" style="left: 0%"></div>
+                            <!-- Real Input (Invisible overlay) -->
+                            <input type="range" id="seek-slider" min="0" max="100" value="0" step="0.1" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20">
+                        </div>
+                        <span id="time-total" class="text-[10px] text-gray-400 font-mono w-8 tabular-nums">0:00</span>
+                    </div>
+
+                    <!-- Buttons Row -->
+                    <div class="flex justify-between items-center relative h-16 px-1">
+                        
+                        <!-- Left: Quality -->
+                        <button id="btn-quality" class="text-[10px] font-bold text-gray-400 border border-white/10 rounded-lg px-3 py-1.5 hover:text-gold-400 hover:border-gold-400 transition-colors w-12 text-center bg-white/5 backdrop-blur-sm">MID</button>
+
+                        <!-- Center: Transport Controls -->
+                        <div class="flex items-center gap-8 absolute left-1/2 transform -translate-x-1/2">
+                            <!-- Prev -->
+                            <button id="btn-prev" class="text-gray-300 hover:text-white active:scale-90 transition-transform p-2 opacity-80 hover:opacity-100">
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M19 20L9 12L19 4V20Z" />
+                                    <rect x="5" y="4" width="2" height="16" rx="1" />
+                                </svg>
+                            </button>
+                            
+                            <!-- Play/Pause (Big) -->
+                            <button id="btn-play" class="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(255,255,255,0.25)] border-4 border-black/10">
+                                <!-- Solid Triangle for Play -->
+                                <svg id="icon-play" class="ml-1" width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M8 5V19L19 12L8 5Z" />
+                                </svg>
+                                <!-- Solid Bars for Pause -->
+                                <svg id="icon-pause" class="hidden" width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                                    <rect x="6" y="5" width="4" height="14" rx="1" />
+                                    <rect x="14" y="5" width="4" height="14" rx="1" />
+                                </svg>
+                            </button>
+                            
+                            <!-- Next -->
+                            <button id="btn-next" class="text-gray-300 hover:text-white active:scale-90 transition-transform p-2 opacity-80 hover:opacity-100">
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M5 4L15 12L5 20V4Z" />
+                                    <rect x="17" y="4" width="2" height="16" rx="1" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Right: Volume (Desktop Hover) -->
+                        <div class="w-12 flex justify-end items-center group/vol relative">
+                            <!-- Slider Container -->
+                            <div id="vol-slider-container" class="absolute right-8 w-0 overflow-hidden h-24 md:h-auto md:w-0 md:group-hover/vol:w-20 transition-all duration-300 bg-black/80 rounded-full px-2 flex items-center shadow-lg border border-white/10 opacity-0 group-hover/vol:opacity-100 pointer-events-none group-hover/vol:pointer-events-auto">
+                                <input type="range" id="vol-slider" min="0" max="1" step="0.05" value="1" class="w-full h-1 bg-white/20 rounded-full appearance-none cursor-pointer">
+                            </div>
+                            <button id="btn-mute" class="text-gray-400 hover:text-white p-2 transition-colors">
+                                <svg width="24" height="24" viewBox="0 0 256 256" fill="currentColor"><path d="M155.51,24.81a8,8,0,0,0-8.42.88L77.25,80H32A16,16,0,0,0,16,96v64a16,16,0,0,0,16,16H77.25l69.84,54.31A8,8,0,0,0,160,224V32A8,8,0,0,0,155.51,24.81Zm-5.51,184L86.75,159.69A8,8,0,0,0,81.82,158.5a9.38,9.38,0,0,0-1.63.15H32V96H80.19a9.38,9.38,0,0,0,1.63.15,8,8,0,0,0,4.93-1.69L150,47.19Zm48.72-114.19a8,8,0,0,0-11.31,11.31A23.89,23.89,0,0,1,192,128a23.89,23.89,0,0,1-6.72,16.69,8,8,0,0,0,11.31,11.31A39.88,39.88,0,0,0,208,128,39.88,39.88,0,0,0,198.72,94.62Z"></path></svg>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <div class="h-8 w-[1px] bg-white/10 mx-2"></div>
-
-            <button id="p-dl-btn" class="btn-round !bg-transparent !border-none text-gold"><i class="fa-solid fa-cloud-arrow-down"></i></button>
         </div>
+
+        <!-- Playlist Mobile (Slide-In) -->
+        <div id="playlist-drawer" class="lg:hidden fixed inset-y-0 left-0 w-full max-w-xs bg-[#0a0a0a]/95 backdrop-blur-2xl z-[150] transform -translate-x-full transition-transform duration-300 border-r border-white/10 flex flex-col shadow-2xl">
+            <div class="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
+                <h2 class="text-sm font-bold text-gold-500 uppercase tracking-widest">Album Tracks</h2>
+                <button id="close-playlist" class="text-white p-2 hover:bg-white/10 rounded-full"><svg width="24" height="24" viewBox="0 0 256 256" fill="currentColor"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"></path></svg></button>
+            </div>
+            <div id="playlist-mobile" class="flex-1 overflow-y-auto hide-scrollbar p-2 space-y-1"></div>
+        </div>
+
+        <!-- Download Modal -->
+        <div id="modal-downloads" class="fixed inset-0 z-[200] bg-black/80 backdrop-blur-lg hidden flex items-center justify-center p-6 opacity-0 transition-opacity duration-300">
+            <div id="modal-inner" class="glass-panel border-gold-500/20 rounded-2xl w-full max-w-sm overflow-hidden transform scale-95 transition-transform duration-300 shadow-2xl bg-black/60">
+                <div class="p-5 border-b border-white/10 flex justify-between items-center bg-white/5">
+                    <h3 class="font-bold text-white text-base tracking-wide">DOWNLOADS</h3>
+                    <button id="close-downloads" class="text-gray-400 hover:text-white p-1 hover:bg-white/10 rounded-full"><svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"></path></svg></button>
+                </div>
+                <div class="p-5 space-y-4">
+                    <a href="assets/downloads/Deus_ex_CT_Complete.zip" download class="flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-gold-500/10 border border-white/10 hover:border-gold-500/30 transition-all group">
+                        <div class="w-10 h-10 rounded-full bg-gold-500/20 flex items-center justify-center text-gold-500 group-hover:scale-110 transition-transform"><svg width="24" height="24" viewBox="0 0 256 256" fill="currentColor"><path d="M213.66,154.34a8,8,0,0,1,0,11.32l-80,80a8,8,0,0,1-11.32,0l-80-80a8,8,0,0,1,11.32-11.32L120,220.69V40a8,8,0,0,1,16,0V220.69l66.34-66.35A8,8,0,0,1,213.66,154.34Z"></path></svg></div>
+                        <div>
+                            <div class="text-sm font-bold text-white">Gesamtes Album</div>
+                            <div class="text-[10px] text-gray-400 uppercase tracking-wide">MP3 • ZIP Archiv</div>
+                        </div>
+                    </a>
+                    <div class="h-px bg-white/10 w-full"></div>
+                    <div id="dynamic-download-link"></div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <div id="quality-menu" class="fixed inset-0 z-[600] bg-black/95 backdrop-blur-3xl hidden flex flex-col items-center justify-center p-12 spring-transition">
-        <h3 class="text-gold font-black uppercase tracking-[0.5em] text-[10px] mb-12">Stream Bitrate Selection</h3>
-        <div class="flex flex-col gap-6 w-full max-w-xs">
-            <button onclick="player.setQuality('low')" class="w-full py-6 rounded-3xl bg-white/5 border border-white/5 font-black text-[10px] uppercase tracking-widest active:bg-gold active:text-black">Low Density</button>
-            <button onclick="player.setQuality('mid')" class="w-full py-6 rounded-3xl bg-white/5 border border-white/5 font-black text-[10px] uppercase tracking-widest active:bg-gold active:text-black">Standard Mid</button>
-            <button onclick="player.setQuality('high')" class="w-full py-8 rounded-3xl bg-white/5 border border-gold/40 font-black text-[10px] uppercase tracking-widest active:bg-gold active:text-black text-gold shadow-2xl">High Fidelity (HQ)</button>
-        </div>
-        <button onclick="ui.toggleQuality()" class="mt-20 text-white/20 font-black uppercase tracking-[0.4em] text-[9px]">Cancel</button>
-    </div>
-
-    <audio id="p-audio" preload="auto"></audio>
+    <!-- Hidden Media Elements -->
+    <audio id="audio-engine" preload="auto" playsinline></audio>
 
     <script>
-        const tracks = [
-            { id: "01", title: "Oberarzt Dr. med. Placzek", slug: "oberarzt-dr-med-placzek", dur: "2:12", f: "01-Oberarzt_Dr_med_Placzek" },
-            { id: "02", title: "Oberarzt der Herzen", slug: "oberarzt-der-herzen", dur: "3:32", f: "02-Oberarzt_der_Herzen" },
-            { id: "03", title: "Vier-Eins-Neun-Zwei", slug: "vier-eins-neun-zwei", dur: "4:14", f: "03-Vier-Eins-Neun-Zwei" },
-            { id: "04", title: "Pilot im Pixelmeer", slug: "pilot-im-pixelmeer", dur: "3:59", f: "04-Pilot_im_Pixelmeer" },
-            { id: "05", title: "Drei Gebote", slug: "drei-gebote", dur: "3:54", f: "05-Drei_Gebote" },
-            { id: "06", title: "Kunst der Diagnostik", slug: "kunst-der-diagnostik", dur: "3:26", f: "06-Kunst_der_Diagnostik" },
-            { id: "07", title: "Mit harter Hand und Charme", slug: "mit-harter-hand-und-charme", dur: "3:46", f: "07-Mit_harter_Hand_und_Charme" },
-            { id: "08", title: "Durch Feuer und Eis", slug: "durch-feuer-und-eis", dur: "3:09", f: "08-Durch_Feuer_und_Eis" },
-            { id: "09", title: "Held und Idol", slug: "held-und-idol", dur: "4:02", f: "09-Held_und_Idol" },
-            { id: "10", title: "Messerscharf und Legendär", slug: "messerscharf-und-legendaer", dur: "3:19", f: "10-Messerscharf_und_Legendaer" },
-            { id: "11", title: "Oberärztlicher Glanz", slug: "oberaerztlicher-glanz", dur: "3:14", f: "11-Oberaerztlicher_Glanz" },
-            { id: "12", title: "Götterdämmerung", slug: "goetterdaemmerung", dur: "5:03", f: "12-Goetterdaemmerung" }
+        // --- 1. DATENBANK ---
+        const TRACKS = [
+            { id: 1, title: "Oberarzt Dr. med. Placzek", slug: "oberarzt-dr-med-placzek", file: "01-Oberarzt_Dr_med_Placzek" },
+            { id: 2, title: "Oberarzt der Herzen", slug: "oberarzt-der-herzen", file: "02-Oberarzt_der_Herzen" },
+            { id: 3, title: "Vier-Eins-Neun-Zwei", slug: "vier-eins-neun-zwei", file: "03-Vier-Eins-Neun-Zwei" },
+            { id: 4, title: "Pilot im Pixelmeer", slug: "pilot-im-pixelmeer", file: "04-Pilot_im_Pixelmeer" },
+            { id: 5, title: "Drei Gebote", slug: "drei-gebote", file: "05-Drei_Gebote" },
+            { id: 6, title: "Kunst der Diagnostik", slug: "kunst-der-diagnostik", file: "06-Kunst_der_Diagnostik" },
+            { id: 7, title: "Mit harter Hand und Charme", slug: "mit-harter-hand-und-charme", file: "07-Mit_harter_Hand_und_Charme" },
+            { id: 8, title: "Durch Feuer und Eis", slug: "durch-feuer-und-eis", file: "08-Durch_Feuer_und_Eis" },
+            { id: 9, title: "Held und Idol", slug: "held-und-idol", file: "09-Held_und_Idol" },
+            { id: 10, title: "Messerscharf und Legendär", slug: "messerscharf-und-legendaer", file: "10-Messerscharf_und_Legendaer" },
+            { id: 11, title: "Oberärztlicher Glanz", slug: "oberaerztlicher-glanz", file: "11-Oberaerztlicher_Glanz" },
+            { id: 12, title: "Götterdämmerung", slug: "goetterdaemmerung", file: "12-Goetterdaemmerung" }
         ];
 
+        // Eingebettete Lyrics (Final & Ungekürzt)
+        const LYRICS_DB = {
+            "01-Oberarzt_Dr_med_Placzek": `[00:00.05]Er ist der Chef im CT... (Lyrics hier stark gekürzt für Übersicht, aber im Code vollständig)`,
+            // ... (Hier würde die volle Lyrics-DB stehen, ich kürze sie hier für die Antwort nur visuell ab, im Code-Block unten ist sie voll drin!)
+        };
+        // Um sicherzugehen, füge ich hier die vollen Lyrics ein, da "ungekürzt" gefordert war.
+        // (Ich kopiere den vollen Lyrics-Block aus deiner Datei in den Script-Bereich unten)
+
         const state = {
-            idx: 0,
+            index: 0,
             playing: false,
-            mode: 'audio', // audio or video
+            mode: 'audio',
             quality: 'mid',
-            idleTimer: null,
-            lastInteraction: Date.now()
+            lyrics: [],
+            activeLyricLine: -1,
+            userInteracted: false,
+            controlsTimer: null,
+            isMinimized: false
         };
 
-        const dom = {
-            scroller: document.getElementById('track-scroller'),
-            aura: document.getElementById('aura'),
-            player: document.getElementById('player-view'),
-            lib: document.getElementById('library-view'),
-            audio: document.getElementById('p-audio'),
-            video: document.getElementById('p-video'),
-            artwork: document.getElementById('p-artwork'),
-            slider: document.getElementById('p-slider'),
-            hud: document.getElementById('hud'),
-            playIcon: document.querySelector('#hud-play i'),
-            title: document.getElementById('p-title'),
-            status: document.getElementById('status-label'),
-            qualityMenu: document.getElementById('quality-menu'),
-            root: document.getElementById('player-root-el')
+        const els = {
+            app: document.getElementById('app-wrapper'),
+            audio: document.getElementById('audio-engine'),
+            video: document.getElementById('main-video'),
+            bgVideo: document.getElementById('bg-visual'),
+            cover: document.getElementById('cover-art'),
+            title: document.getElementById('track-title'),
+            visualWrapper: document.getElementById('visual-wrapper'), // WICHTIG für Layout
+            lyricsWrapper: document.getElementById('lyrics-wrapper'),
+            lyricsContent: document.getElementById('lyrics-content'),
+            controls: document.getElementById('controls-bar'),
+            controlsTrigger: document.getElementById('controls-trigger'),
+            playlistDrawer: document.getElementById('playlist-drawer'),
+            playlistMobile: document.getElementById('playlist-mobile'),
+            playlistDesktop: document.getElementById('playlist-desktop'),
+            modalDl: document.getElementById('modal-downloads'),
+            modalInner: document.getElementById('modal-inner'),
+            dlLinkBox: document.getElementById('dynamic-download-link'),
+            btnPlay: document.getElementById('btn-play'),
+            iconPlay: document.getElementById('icon-play'),
+            iconPause: document.getElementById('icon-pause'),
+            btnModeAudio: document.getElementById('mode-audio'),
+            btnModeVideo: document.getElementById('mode-video'),
+            btnQuality: document.getElementById('btn-quality'),
+            btnFullscreen: document.getElementById('btn-fullscreen'),
+            badgeQuality: document.getElementById('quality-badge'),
+            seek: document.getElementById('seek-slider'),
+            seekFill: document.getElementById('seek-fill'),
+            seekThumb: document.getElementById('seek-thumb'),
+            microSeek: document.getElementById('micro-progress'),
+            timeCurr: document.getElementById('time-current'),
+            timeTotal: document.getElementById('time-total'),
+            hint: document.getElementById('video-overlay-hint'),
+            volSlider: document.getElementById('vol-slider')
         };
 
-        const player = {
-            init() {
-                this.renderLibrary();
-                this.setupListeners();
-                this.handleDeepLink();
-                setTimeout(() => document.getElementById('loading').classList.add('opacity-0'), 1500);
-                setTimeout(() => document.getElementById('loading').remove(), 2200);
-            },
+        function init() {
+            // Full Lyrics DB Population (aus Platzgründen hier im Init Block dargestellt)
+            // In der Realität ist dies der große Block von oben.
+            populateLyricsDB(); 
 
-            renderLibrary() {
-                dom.scroller.innerHTML = tracks.map((t, i) => `
-                    <div id="card-${i}" class="spatial-card" 
-                         style="background-image: url('assets/images/${t.f}.webp')"
-                         onclick="player.loadTrack(${i})">
-                    </div>
-                `).join('');
-                this.updateFocus();
-            },
+            renderPlaylist(els.playlistMobile);
+            renderPlaylist(els.playlistDesktop);
+            setupRouter();
+            setupEvents();
+            setupControlsBehavior();
+            fixViewport();
+        }
 
-            setupListeners() {
-                dom.scroller.onscroll = () => this.updateFocus();
-                dom.audio.ontimeupdate = () => this.sync();
-                dom.video.ontimeupdate = () => this.sync();
-                dom.audio.onended = () => this.next();
-                dom.video.onended = () => this.next();
-                dom.slider.oninput = (e) => {
-                    ui.userActivity();
-                    const el = state.mode === 'audio' ? dom.audio : dom.video;
-                    el.currentTime = e.target.value * el.duration;
-                };
-            },
+        function fixViewport() {
+            const setH = () => document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+            window.addEventListener('resize', setH);
+            setH();
+        }
 
-            updateFocus() {
-                const centerX = dom.scroller.scrollLeft + window.innerWidth / 2;
-                tracks.forEach((_, i) => {
-                    const el = document.getElementById(`card-${i}`);
-                    const rect = el.getBoundingClientRect();
-                    const cardCenter = rect.left + rect.width / 2;
-                    const dist = Math.abs(cardCenter - window.innerWidth / 2);
-                    
-                    if (dist < 100) {
-                        el.classList.add('active');
-                        document.getElementById('lib-title').innerText = tracks[i].title;
-                        dom.aura.style.backgroundImage = `url('assets/images/${tracks[i].f}.webp')`;
-                        dom.aura.style.opacity = "0.6";
-                    } else {
-                        el.classList.remove('active');
-                    }
-                });
-            },
+        async function loadTrack(index, autoPlay = true) {
+            if (index < 0) index = TRACKS.length - 1;
+            if (index >= TRACKS.length) index = 0;
+            state.index = index;
+            const track = TRACKS[index];
 
-            async loadTrack(i, start = true) {
-                state.idx = i;
-                const t = tracks[i];
-                
-                dom.audio.src = `assets/audio/${t.f}.mp3`;
-                this.updateVideoSrc();
-                dom.artwork.src = `assets/images/${t.f}.webp`;
-                dom.title.innerText = t.title;
+            els.title.innerText = track.title;
+            history.replaceState(null, null, `#/track/${track.slug}`);
 
-                document.getElementById('p-dl-btn').onclick = () => {
-                    window.open(`assets/video/high/${t.f}_Lyrics_hq.mp4`, '_blank');
-                };
+            els.bgVideo.src = `assets/video/background/${track.file}.mp4`;
+            els.bgVideo.play().catch(() => {});
+            els.cover.src = `assets/images/${track.file}.webp`;
+            els.audio.src = `assets/audio/${track.file}.mp3`;
+            updateVideoSource(track);
 
-                // Strict Reset Logic: 0:00
-                dom.audio.currentTime = 0;
-                dom.video.currentTime = 0;
+            updatePlaylistUI();
+            updateDownloadUI(track);
+            loadLyrics(track.file);
 
-                dom.lib.classList.add('opacity-0');
-                dom.player.classList.remove('hidden');
-                setTimeout(() => dom.player.classList.remove('translate-y-full'), 10);
-                
-                if (start) this.play();
-                this.updateSession();
-                window.location.hash = `/track/${t.slug}`;
-            },
-
-            updateVideoSrc() {
-                const t = tracks[state.idx];
-                const suffix = state.quality === 'high' ? 'hq' : state.quality;
-                dom.video.src = `assets/video/${state.quality}/${t.f}_Lyrics_${suffix}.mp4`;
-            },
-
-            togglePlay() { state.playing ? this.pause() : this.play(); },
-
-            play() {
-                const el = state.mode === 'audio' ? dom.audio : dom.video;
-                el.play();
-                state.playing = true;
-                dom.playIcon.className = "fa-solid fa-pause";
-                dom.status.innerText = "Synchronized";
-                ui.userActivity();
-            },
-
-            pause() {
-                dom.audio.pause();
-                dom.video.pause();
-                state.playing = false;
-                dom.playIcon.className = "fa-solid fa-play ml-0.5";
-                dom.status.innerText = "Paused";
-                ui.userActivity();
-            },
-
-            next() { this.loadTrack((state.idx + 1) % tracks.length); },
-            prev() { this.loadTrack((state.idx - 1 + tracks.length) % tracks.length); },
-
-            toggleMode() {
-                const time = state.mode === 'audio' ? dom.audio.currentTime : dom.video.currentTime;
-                state.mode = state.mode === 'audio' ? 'video' : 'audio';
-                
-                document.getElementById('audio-container').classList.toggle('hidden', state.mode === 'video');
-                document.getElementById('video-container').classList.toggle('hidden', state.mode === 'audio');
-                document.getElementById('p-quality-btn').classList.toggle('hidden', state.mode === 'audio');
-                document.getElementById('p-mode-btn').innerText = state.mode.charAt(0).toUpperCase() + state.mode.slice(1);
-
-                if (state.mode === 'video') dom.audio.pause(); else dom.video.pause();
-                
-                const el = state.mode === 'audio' ? dom.audio : dom.video;
-                el.currentTime = time;
-                if (state.playing) el.play();
-                ui.userActivity();
-            },
-
-            setQuality(q) {
-                const time = dom.video.currentTime;
-                state.quality = q;
-                document.getElementById('p-quality-btn').innerText = q.toUpperCase() === 'HIGH' ? 'HQ' : q.toUpperCase();
-                this.updateVideoSrc();
-                dom.video.currentTime = time;
-                if (state.playing) dom.video.play();
-                ui.toggleQuality();
-            },
-
-            sync() {
-                const el = state.mode === 'audio' ? dom.audio : dom.video;
-                if (!el.duration) return;
-                const progress = el.currentTime / el.duration;
-                dom.slider.value = progress;
-                document.getElementById('t-cur').innerText = this.fmt(el.currentTime);
-                document.getElementById('t-dur').innerText = this.fmt(el.duration);
-            },
-
-            fmt(s) {
-                if (!isFinite(s)) return "0:00";
-                const m = Math.floor(s / 60);
-                const r = Math.floor(s % 60);
-                return `${m}:${r < 10 ? '0' : ''}${r}`;
-            },
-
-            updateSession() {
-                if (!navigator.mediaSession) return;
-                const t = tracks[state.idx];
-                let art = `assets/images/${t.f}.webp`;
-                const base = window.location.href.split('#')[0];
-                try { art = new URL(art, base).href; } catch(e){}
-                
+            if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
-                    title: t.title, artist: 'Dr. med. Placzek', album: 'Deus ex CT',
-                    artwork: [{ src: art, sizes: '512x512', type: 'image/webp' }]
+                    title: track.title,
+                    artist: 'Dr. med. Placzek',
+                    album: 'Deus ex CT',
+                    artwork: [{ src: `assets/images/${track.file}.webp`, sizes: '512x512', type: 'image/webp' }]
                 });
-                navigator.mediaSession.setActionHandler('play', () => this.play());
-                navigator.mediaSession.setActionHandler('pause', () => this.pause());
-                navigator.mediaSession.setActionHandler('previoustrack', () => this.prev());
-                navigator.mediaSession.setActionHandler('nexttrack', () => this.next());
-            },
+            }
 
-            handleDeepLink() {
-                const h = window.location.hash;
-                if (h.startsWith('#/track/')) {
-                    const slug = h.replace('#/track/', '');
-                    const i = tracks.findIndex(t => t.slug === slug);
-                    if (i !== -1) this.loadTrack(i, false);
+            els.seek.value = 0;
+            updateTimeDisplay(0, 0);
+
+            if (autoPlay && state.userInteracted) {
+                try { await playActiveMedia(); } catch(e) {}
+            } else {
+                state.playing = false;
+                updatePlayStateUI();
+            }
+        }
+
+        function updateVideoSource(track) {
+            const qMap = { 'low': 'low', 'mid': 'mid', 'high': 'hq' };
+            const suffix = qMap[state.quality];
+            els.video.src = `assets/video/${state.quality}/${track.file}_Lyrics_${suffix}.mp4`;
+            els.video.poster = `assets/images/${track.file}.webp`;
+        }
+
+        function getActiveMedia() {
+            return state.mode === 'audio' ? els.audio : els.video;
+        }
+
+        async function playActiveMedia() {
+            const media = getActiveMedia();
+            media.volume = els.volSlider.value; // Sync Volume Check
+            await media.play();
+            state.playing = true;
+            updatePlayStateUI();
+        }
+
+        function pauseActiveMedia() {
+            els.audio.pause();
+            els.video.pause();
+            state.playing = false;
+            updatePlayStateUI();
+        }
+
+        function togglePlay() {
+            state.userInteracted = true;
+            state.playing ? pauseActiveMedia() : playActiveMedia();
+        }
+
+        function updatePlayStateUI() {
+            if (state.playing) {
+                els.iconPlay.classList.add('hidden');
+                els.iconPause.classList.remove('hidden');
+                els.bgVideo.play().catch(()=>{});
+                els.hint.classList.add('opacity-0', 'scale-150');
+            } else {
+                els.iconPlay.classList.remove('hidden');
+                els.iconPause.classList.add('hidden');
+                els.bgVideo.pause();
+                if(state.mode === 'video') els.hint.classList.remove('opacity-0', 'scale-150');
+            }
+        }
+
+        function switchMode(newMode) {
+            if (state.mode === newMode) return;
+            const oldMedia = getActiveMedia();
+            const time = oldMedia.currentTime;
+            const wasPlaying = state.playing;
+
+            state.mode = newMode;
+            const newMedia = getActiveMedia();
+
+            // === UI & LAYOUT LOGIC (CRITICAL FIX) ===
+            if (newMode === 'audio') {
+                // Audio UI
+                els.video.classList.add('opacity-0');
+                els.cover.classList.remove('opacity-0');
+                
+                // Toggle Buttons
+                els.btnModeAudio.classList.add('bg-gold-500', 'text-black', 'shadow-neon');
+                els.btnModeAudio.classList.remove('text-gray-400');
+                els.btnModeVideo.classList.remove('bg-gold-500', 'text-black', 'shadow-neon');
+                els.btnModeVideo.classList.add('text-gray-400');
+                
+                // Controls
+                els.btnFullscreen.classList.add('opacity-0');
+                els.badgeQuality.classList.add('opacity-0');
+                els.hint.classList.add('opacity-0');
+                
+                // LAYOUT: Show Lyrics, Shrink Visuals
+                els.lyricsWrapper.classList.remove('hidden');
+                els.visualWrapper.classList.remove('flex-1', 'h-full'); // Remove video expansion
+                els.visualWrapper.classList.add('h-[50vh]', 'py-2'); // Restore audio height
+            } else {
+                // Video UI
+                els.cover.classList.add('opacity-0');
+                els.video.classList.remove('opacity-0');
+                
+                // Toggle Buttons
+                els.btnModeVideo.classList.add('bg-gold-500', 'text-black', 'shadow-neon');
+                els.btnModeVideo.classList.remove('text-gray-400');
+                els.btnModeAudio.classList.remove('bg-gold-500', 'text-black', 'shadow-neon');
+                els.btnModeAudio.classList.add('text-gray-400');
+                
+                // Controls
+                els.btnFullscreen.classList.remove('opacity-0');
+                els.badgeQuality.classList.remove('opacity-0');
+                if(!wasPlaying) els.hint.classList.remove('opacity-0');
+                
+                // LAYOUT: Hide Lyrics, Expand Video to Fill
+                els.lyricsWrapper.classList.add('hidden');
+                els.visualWrapper.classList.remove('h-[50vh]', 'py-2'); // Remove fixed height
+                els.visualWrapper.classList.add('flex-1', 'h-full'); // FILL AVAILABLE SPACE
+            }
+
+            // === AUDIO HANDOVER (IOS SAFE) ===
+            newMedia.currentTime = time;
+            newMedia.volume = els.volSlider.value;
+            // Explicitly unmute video just in case
+            els.video.muted = false;
+
+            if (wasPlaying) {
+                // Sync pause/play chain
+                oldMedia.pause();
+                newMedia.play().catch(e => console.log("Autoplay block:", e));
+            } else {
+                oldMedia.pause();
+            }
+        }
+
+        function setupControlsBehavior() {
+            const expandControls = () => {
+                els.controls.classList.remove('controls-minimized');
+                els.controls.classList.add('controls-full');
+                state.isMinimized = false;
+                resetTimer();
+            };
+
+            const minimizeControls = () => {
+                if (state.playing && !state.isMinimized) {
+                    els.controls.classList.add('controls-minimized');
+                    els.controls.classList.remove('controls-full');
+                    state.isMinimized = true;
                 }
+            };
+
+            const resetTimer = () => {
+                if (state.controlsTimer) clearTimeout(state.controlsTimer);
+                if (state.playing) {
+                    state.controlsTimer = setTimeout(minimizeControls, 4000);
+                }
+            };
+
+            ['mousemove', 'touchstart', 'click'].forEach(evt => {
+                document.addEventListener(evt, expandControls);
+            });
+
+            els.controls.addEventListener('mouseenter', () => {
+                if (state.controlsTimer) clearTimeout(state.controlsTimer);
+            });
+            els.controlsTrigger.addEventListener('click', expandControls);
+        }
+
+        // === LYRICS ===
+        // Note: Function populateLyricsDB() inserts the full text into LYRICS_DB object.
+        // For brevity in this view, the const LYRICS_DB above is defined.
+        
+        function loadLyrics(filename) {
+            // Check embedded DB
+            const embeddedLRC = LYRICS_DB[filename];
+            if (embeddedLRC) {
+                state.lyrics = parseLRC(embeddedLRC);
+                renderLyrics();
+                return;
             }
+            state.lyrics = [{time:0, text:"(Instrumental / Keine Lyrics)"}];
+            renderLyrics();
+        }
+
+        function parseLRC(text) {
+            const lines = text.split('\n');
+            const result = [];
+            const regex = /\[(\d{2}):(\d{2}(?:\.\d{2,3})?)\]/; 
+            lines.forEach(line => {
+                const match = regex.exec(line);
+                if (match) {
+                    const sec = parseInt(match[1])*60 + parseFloat(match[2]);
+                    const content = line.replace(regex, '').trim();
+                    if(content) result.push({ time: sec, text: content });
+                }
+            });
+            return result;
+        }
+
+        function renderLyrics() {
+            els.lyricsContent.innerHTML = state.lyrics.map((l, i) => 
+                `<p id="lyric-${i}" class="lyric-line text-lg md:text-2xl font-bold py-2 md:py-3 cursor-pointer select-none" onclick="seekLyric(${l.time})">${l.text}</p>`
+            ).join('');
+        }
+
+        function syncLyrics(time) {
+            let idx = state.lyrics.findIndex((l, i) => {
+                const next = state.lyrics[i+1];
+                return time >= l.time && (!next || time < next.time);
+            });
+
+            if (idx !== -1 && idx !== state.activeLyricLine) {
+                const old = document.getElementById(`lyric-${state.activeLyricLine}`);
+                if (old) old.classList.remove('active');
+                const curr = document.getElementById(`lyric-${idx}`);
+                if (curr) {
+                    curr.classList.add('active');
+                    curr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                state.activeLyricLine = idx;
+            }
+        }
+
+        window.seekLyric = (time) => {
+            getActiveMedia().currentTime = time;
+            if(!state.playing) playActiveMedia();
         };
 
-        const ui = {
-            closePlayer() {
-                player.pause();
-                dom.player.classList.add('translate-y-full');
+        // === EVENTS ===
+        function setupEvents() {
+            const onTimeUpdate = (e) => {
+                if (state.mode === 'audio' && e.target !== els.audio) return;
+                if (state.mode === 'video' && e.target !== els.video) return;
+                updateTimeDisplay(e.target.currentTime, e.target.duration);
+                syncLyrics(e.target.currentTime);
+            };
+
+            els.audio.addEventListener('timeupdate', onTimeUpdate);
+            els.video.addEventListener('timeupdate', onTimeUpdate);
+            els.audio.addEventListener('ended', () => loadTrack(state.index + 1));
+            els.video.addEventListener('ended', () => loadTrack(state.index + 1));
+            els.audio.addEventListener('pause', () => els.controls.classList.remove('controls-minimized'));
+            els.video.addEventListener('pause', () => els.controls.classList.remove('controls-minimized'));
+
+            els.btnPlay.addEventListener('click', togglePlay);
+            els.btnModeAudio.addEventListener('click', () => switchMode('audio'));
+            els.btnModeVideo.addEventListener('click', () => switchMode('video'));
+            document.getElementById('btn-prev').addEventListener('click', () => loadTrack(state.index - 1));
+            document.getElementById('btn-next').addEventListener('click', () => loadTrack(state.index + 1));
+
+            els.seek.addEventListener('input', (e) => {
+                const pct = e.target.value;
+                const media = getActiveMedia();
+                if(media.duration) media.currentTime = media.duration * (pct/100);
+            });
+
+            // Volume Logic (Desktop + Mobile touch)
+            els.volSlider.addEventListener('input', (e) => {
+                const val = e.target.value;
+                els.audio.volume = val;
+                els.video.volume = val;
+            });
+
+            document.getElementById('btn-playlist').addEventListener('click', () => els.playlistDrawer.classList.remove('-translate-x-full'));
+            document.getElementById('close-playlist').addEventListener('click', () => els.playlistDrawer.classList.add('-translate-x-full'));
+
+            document.getElementById('btn-download-menu').addEventListener('click', () => {
+                els.modalDl.classList.remove('hidden');
                 setTimeout(() => {
-                    dom.player.classList.add('hidden');
-                    dom.lib.classList.remove('opacity-0');
-                }, 600);
-                window.location.hash = "";
-            },
+                    els.modalDl.classList.remove('opacity-0');
+                    els.modalInner.classList.remove('scale-95');
+                    els.modalInner.classList.add('scale-100');
+                }, 10);
+            });
+            document.getElementById('close-downloads').addEventListener('click', () => {
+                els.modalDl.classList.add('opacity-0');
+                els.modalInner.classList.remove('scale-100');
+                els.modalInner.classList.add('scale-95');
+                setTimeout(() => els.modalDl.classList.add('hidden'), 300);
+            });
 
-            toggleQuality() {
-                dom.qualityMenu.classList.toggle('hidden');
-            },
+            els.btnQuality.addEventListener('click', () => {
+                const qualities = ['low', 'mid', 'high'];
+                let idx = qualities.indexOf(state.quality);
+                idx = (idx + 1) % qualities.length;
+                state.quality = qualities[idx];
+                els.btnQuality.innerText = state.quality.toUpperCase();
+                els.badgeQuality.innerText = state.quality.toUpperCase();
+                if (state.mode === 'video') {
+                    const t = els.video.currentTime;
+                    const playing = !els.video.paused;
+                    updateVideoSource(TRACKS[state.index]);
+                    els.video.currentTime = t;
+                    if(playing) els.video.play();
+                }
+            });
 
-            toggleFS() {
-                if (dom.video.requestFullscreen) dom.video.requestFullscreen();
-                else if (dom.video.webkitRequestFullscreen) dom.video.webkitRequestFullscreen();
-            },
+            els.btnFullscreen.addEventListener('click', () => {
+                if(els.video.requestFullscreen) els.video.requestFullscreen();
+                else if(els.video.webkitEnterFullscreen) els.video.webkitEnterFullscreen();
+            });
 
-            userActivity() {
-                state.lastInteraction = Date.now();
-                dom.hud.classList.remove('hidden');
-                document.body.classList.remove('fullscreen-active');
-                document.getElementById('p-nav').style.opacity = "1";
-                
-                if (state.idleTimer) clearTimeout(state.idleTimer);
-                
-                state.idleTimer = setTimeout(() => {
-                    if (state.playing) {
-                        dom.hud.classList.add('hidden');
-                        document.body.classList.add('fullscreen-active');
-                        document.getElementById('p-nav').style.opacity = "0";
-                    }
-                }, 3500);
+            if('mediaSession' in navigator) {
+                navigator.mediaSession.setActionHandler('play', playActiveMedia);
+                navigator.mediaSession.setActionHandler('pause', pauseActiveMedia);
+                navigator.mediaSession.setActionHandler('previoustrack', () => loadTrack(state.index-1));
+                navigator.mediaSession.setActionHandler('nexttrack', () => loadTrack(state.index+1));
             }
-        };
+        }
 
-        window.onload = () => player.init();
+        function updateTimeDisplay(curr, total) {
+            const fmt = (t) => {
+                if(!t || isNaN(t)) return "0:00";
+                const m = Math.floor(t/60);
+                const s = Math.floor(t%60);
+                return `${m}:${s<10?'0'+s:s}`;
+            };
+            els.timeCurr.innerText = fmt(curr);
+            els.timeTotal.innerText = fmt(total);
+            const pct = total > 0 ? (curr/total)*100 : 0;
+            els.seek.value = pct;
+            
+            // Visual Update for Seek Bar
+            els.seekFill.style.width = `${pct}%`;
+            els.seekThumb.style.left = `${pct}%`;
+            
+            if(els.microSeek) els.microSeek.style.width = `${pct}%`;
+        }
+
+        function renderPlaylist(container) {
+            if(!container) return;
+            container.innerHTML = TRACKS.map((t, i) => `
+                <div onclick="loadTrack(${i})" id="track-${container.id}-${i}" class="flex items-center p-3 rounded-xl hover:bg-white/10 cursor-pointer border border-transparent transition-all group">
+                    <span class="text-xs text-gray-500 w-6 font-mono font-bold group-hover:text-gold-400 transition-colors">${t.id < 10 ? '0'+t.id : t.id}</span>
+                    <div class="flex-1 ml-2 min-w-0">
+                        <div class="t-title text-sm font-medium text-gray-300 truncate transition-colors">${t.title}</div>
+                        <div class="text-[10px] text-gray-600 truncate">Dr. med. Placzek</div>
+                    </div>
+                    <i class="t-icon ph ph-waveform text-gold-500 hidden animate-pulse ml-2"></i>
+                </div>
+            `).join('');
+        }
+
+        function updatePlaylistUI() {
+            ['playlist-mobile', 'playlist-desktop'].forEach(id => {
+                document.querySelectorAll(`#${id} > div`).forEach((el, i) => {
+                    if (i === state.index) {
+                        el.classList.add('playlist-active');
+                        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    } else {
+                        el.classList.remove('playlist-active');
+                    }
+                });
+            });
+        }
+
+        function updateDownloadUI(track) {
+            const hqPath = `assets/video/high/${track.file}_Lyrics_hq.mp4`;
+            els.dlLinkBox.innerHTML = `
+                <a href="${hqPath}" download class="flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-gold-500/10 border border-white/10 hover:border-gold-500/30 transition-all group">
+                    <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform"><svg width="24" height="24" viewBox="0 0 256 256" fill="currentColor"><path d="M213.66,154.34a8,8,0,0,1,0,11.32l-80,80a8,8,0,0,1-11.32,0l-80-80a8,8,0,0,1,11.32-11.32L120,220.69V40a8,8,0,0,1,16,0V220.69l66.34-66.35A8,8,0,0,1,213.66,154.34Z"></path></svg></div>
+                    <div>
+                        <div class="text-sm font-bold text-white">Video (High)</div>
+                        <div class="text-[10px] text-gray-400">Aktueller Track: ${track.title}</div>
+                    </div>
+                    <i class="ph ph-download-simple ml-auto text-gray-500 group-hover:text-white"></i>
+                </a>
+            `;
+        }
+
+        function setupRouter() {
+            const hash = window.location.hash;
+            if (hash.startsWith('#/track/')) {
+                const slug = hash.replace('#/track/', '');
+                const idx = TRACKS.findIndex(t => t.slug === slug);
+                if(idx !== -1) loadTrack(idx, false);
+                else loadTrack(0, false);
+            } else {
+                loadTrack(0, false);
+            }
+        }
+
+        // Populate the DB Variable with full data
+        function populateLyricsDB() {
+            Object.assign(LYRICS_DB, {
+"01-Oberarzt_Dr_med_Placzek": `[00:00.05]Er ist der Chef im CT, er weiß genau Bescheid\n[00:05.21]Er scannt die Patienten mit Geschick und Sorgfalt\n[00:12.69]Er ist der Meister in seinem Fach, er kennt sich mit allem aus\n[00:20.17]Er ist der Oberarzt Doktor med Placzek\n[00:26.47]Oberarzt Doktor med Placzek, er ist unser Held und unser Gott\n[00:34.21]Er ist der beste in seinem Fach, er macht uns alle froh\n[00:41.42]Oberarzt Doktor med Placzek, er ist hart, aber fair\n[00:48.38]Er ist die helle Sonne in unsrem Leben, er gibt uns Kraft und Mut\n[00:56.84]Er umgarnt Manu und Lena, der alte Charmeur\n[01:01.67]Sie schmelzen hin bei ihm, er hat einfach Flair\n[01:09.10]Er ist streng zu Assistenten, er duldet keinen Fehler\n[01:16.37]Aber sie lernen viel von ihm, er ist der Oberarzt Doktor med Placzek\n[01:24.77]Oberarzt Doktor med Placzek, er ist unser Held und unser Gott\n[01:32.33]Er ist der beste in seinem Fach, er macht uns alle froh\n[01:39.60]Oberarzt Doktor med Placzek, er ist frech, einfach der Boss\n[01:47.21]Er ist die  helle Sonne in unserem Leben, er gibt uns Kraft und Wärme\n[01:53.45]Vorbild, Held und CT Gott, was du anfässt wird zu Gold\n[02:01.58]Du bist die Sonne in unserem Leben, oh unser CT Oberarzt Doktor med Placzek`,
+"02-Oberarzt_der_Herzen": `[00:00.96]Oh-oh-oh, Doktor med. Placzek\n[00:04.52]Unser Held im weißen Kittel\n[00:07.59]Oh-oh-oh, er zeigt uns den Weg\n[00:10.91]Der Oberarzt der Herzen – perfekt!\n[00:14.38]Jeder weiß, wenn er den Raum betritt\n[00:17.52]Das CT wird zu seinem Meisterstück\n[00:20.87]Sein Wissen leuchtet, sein Blick ist klar\n[00:24.79]Mit ihm wird jede Diagnose wahr\n[00:27.92]Die Assistenten kommen immer zu ihm\n[00:31.27]"Mit dir besprechen wir’s, es macht mehr Sinn!"\n[00:34.99]Er erklärt mit Herz, Geduld und Verstand\n[00:38.41]Unser Mentor, stets mit helfender Hand\n[00:41.56]"Bleib fokussiert, mach keinen Halt\n[00:44.85]Ich zeig dir, wie man das richtig macht\n[00:48.27]Zusammen schaffen wir jeden Fall\n[00:51.78]Denn Wissen macht uns unschlagbar!"\n[00:56.31]Oberarzt Doktor med. Placzek\n[00:59.12]Er ist der Oberarzt der Herzen\n[01:03.05]Ein Held, ein Lehrer, der uns lenkt\n[01:06.49]Mit ihm wird das Ziel immer geschenkt\n[01:10.18]Oberarzt Doktor med. Placzek\n[01:13.14]Er führt uns sicher Schritt für Schritt\n[01:16.96]Der Oberarzt der Herzen – perfekt!\n[01:21.29]Wir alle folgen ihm, er ist der Hit!\n[01:24.48]Wenn es knifflig wird, dann bleibt er ruhig\n[01:27.83]Mit einem Blick macht er den Befund deutlich\n[01:31.31]Er sieht die Details, die niemand erkennt\n[01:35.19]Ein wahres Genie, das jeder kennt\n[01:38.42]Seine Stärke ist nicht nur Verstand\n[01:41.00]Sondern auch das Herz, mit dem er uns anspannt\n[01:44.71]Manchmal streng, doch immer gerecht\n[01:48.32]Er zeigt uns, wie man das Beste erreicht\n[01:51.12]"Bleib fokussiert, mach keinen Halt\n[01:54.35]Ich zeig dir, wie man das richtig macht\n[01:57.83]Zusammen schaffen wir jeden Fall\n[02:01.36]Denn Wissen macht uns unschlagbar!"\n[02:05.79]Oberarzt Doktor med. Placzek\n[02:08.71]Er ist der Oberarzt der Herzen\n[02:12.63]Ein Held, ein Lehrer, der uns lenkt\n[02:16.03]Mit ihm wird das Ziel immer geschenkt\n[02:19.68]Oberarzt Doktor med. Placzek\n[02:22.64]Er führt uns sicher Schritt für Schritt\n[02:26.47]Der Oberarzt der Herzen – perfekt!\n[02:30.88]Wir alle folgen ihm, er ist der Hit!\n[02:33.62]"Du kannst es schaffen, glaub an dein Ziel\n[02:36.90]Dein Können wächst, es braucht nur Stil\n[02:40.62]Fehler sind Schritte, die du musst verstehen\n[02:43.95]Bleib mutig, dann wirst du es seh'n!"\n[02:47.61]Oberarzt Doktor med Placzek\n[02:50.46]Er ist der Oberarzt der Herzen\n[02:54.38]Ein Held, ein Lehrer, der uns lenkt\n[02:57.92]Mit ihm wird das Ziel immer geschenkt\n[03:02.39]Oberarzt Doktor med. Placzek\n[03:04.38]Er führt uns sicher Schritt für Schritt\n[03:08.31]Der Oberarzt der Herzen – perfekt!\n[03:12.61]Wir alle folgen ihm, er ist der Hit!\n[03:15.59]Oh-oh-oh, Doktor med. Placzek\n[03:19.69]Der Oberarzt der Herzen – perfekt!\n[03:22.46]Oh-oh-oh, er zeigt uns den Weg\n[03:26.18]Wir folgen ihm, bis ans Ziel – perfekt!`,
+"03-Vier-Eins-Neun-Zwei": `[00:00.50]Eine Nummer\n[00:03.77]Vier Ziffern\n[00:08.63]Die jeder kennt, die jeder fürchtet...\n[00:14.64]Ich bin Chirurg, hab 'nen komplizierten Fall\n[00:18.10]Labor kritisch, Patient instabil und kalt\n[00:21.53]Mein Finger zittert über dem Display\n[00:24.57]Die Durchwahl eingegeben\n[00:25.98]gleich meldet er sich, oh wei\n[00:28.62]Vier-Eins-Neun-Zwei! Vier-Eins-Neun-Zwei!\n[00:32.79]Jeder Arzt hier kennt diese Zahl\n[00:35.48]Die Hotline zur Radiologie\n[00:38.07]perfekt in jedem Fall\n[00:41.13]Gleich hebt er ab, ich muss bereit sein\n[00:44.00]Indikation klar, Anamnese rein\n[00:47.54]Seine Fragen sind präzise, treffen wie ein Pfeil\n[00:50.53]Wer hier anruft, braucht 'nen Plan\n[00:52.49]und jedes medizinische Detail!\n[00:55.93]Die Placzek-Hotline! Vier-Eins-Neun-Zwei!\n[01:01.87]Ruf ihn an, wenn's wirklich brennt und du weißt nicht mehr,\n[01:05.42]was du machen sollst dabei!\n[01:09.82]Die Placzek-Hotline! Retter in der Not!\n[01:14.00]Seine Brillanz und sein Verstand\n[01:15.62]bewahren dich vorm diagnostischen Tod!\n[01:18.25]Doktor med Placzek! Am Hörer, messerscharf!\n[01:20.82]Wer seine Prüfung übersteht,\n[01:22.51]kriegt den besten CT-Scan, den's je gab!\n[01:24.64]"Guten Tag, Placzek hier"\n[01:26.16]diese Stimme, kühl und klar\n[01:27.85]"Schildern Sie mir Ihren Fall,\n[01:29.39]lassen Sie nichts aus, sagen Sie mir, was geschah!"\n[01:31.59]"CT Abdomen mit Kontrastmittel bitte, dringend!" – stotter' ich nervös\n[01:34.97]"Begründung? Klinische Frage? Labor? Vorbefunde?" – er fragt prägnant, nie bloß\n[01:38.79]Die Stille schwebt, drei Sekunden Ewigkeit\n[01:41.42]Mein Kollege neben mir wird bleich\n[01:43.45]oh Gott, oh weh, wie's gleich heißt:\n[01:45.52]"Die Indikation erscheint mir unzureichend, bitte\n[01:48.48]Sonographie zunächst, dann Labor – klare Schritte!"\n[01:52.08]Die Absage tut weh, doch sie lehrt uns mehr\n[01:55.62]Als jedes Lehrbuch, jede Fortbildung, sie schärft uns sehr!\n[01:59.12]Beim nächsten Mal bin ich gewappnet, mit allen Fakten parat\n[02:02.85]Dann öffnet sich die Schleuse zu seinem CT-Apparat!\n[02:06.68]Die Placzek-Hotline! Vier-Eins-Neun-Zwei!\n[02:12.03]Ruf ihn an, wenn's wirklich brennt und du weißt nicht mehr,\n[02:15.71]was du machen sollst dabei!\n[02:20.37]Die Placzek-Hotline! Retter in der Not!\n[02:24.09]Seine Brillanz und sein Verstand\n[02:25.91]bewahren dich vorm diagnostischen Tod!\n[02:28.49]Doktor med Placzek! Am Hörer, messerscharf!\n[02:30.98]Wer seine Prüfung übersteht,\n[02:32.79]kriegt den besten CT-Scan, den's je gab!\n[02:35.45]Dann kam der Notfall, echter Code, Leben an der Grenze\n[02:42.34]Ich wählte Vier-Eins-Neun-Zwei\n[02:43.74]Diesmal war ich vorbereitet\n[02:45.00]Kannte meine Grenzen.\n[02:48.40]Vier-Eins-Neun-Zwei! Vier-Eins-Neun-Zwei!\n[02:55.41]"Freie Flüssigkeit, Schock, Hämatokrit im freien Fall,\n[02:58.60]Verdacht auf Milzruptur, ich brauch' Sie jetzt!"\n[03:01.42]Und dann... sein Ton verändert sich\n[03:03.76]"Ich scanne selbst, kommen Sie her,\n[03:05.89]Wir retten diesen Menschen, ich bin bereit – sofort!"\n[03:09.11]Im CT-Raum sein Können leuchtet auf\n[03:12.18]Sein Blick erfasst die Schichten, jedes Pixel im genauen Lauf\n[03:15.96]"Milzruptur Grad vier, Kontrastextravasat, OP sofort!\n[03:19.06]Sie haben alles richtig gemacht!"\n[03:22.09]Die Placzek-Hotline! Vier-Eins-Neun-Zwei!\n[03:27.77]Der Anruf, der dein Leben rettet,\n[03:29.59]macht dich zum besseren Arzt, ganz neu dabei!\n[03:35.59]Die Placzek-Hotline! Legende am Telefon!\n[03:40.24]Wer von ihm lernt, wer ihm vertraut,\n[03:41.43]erreicht die medizinische Perfektion!\n[03:44.07]Doktor med Placzek! Der Torwächter, der Held!\n[03:47.08]Der beste Radiologe, den diese Klinik je bestellt!\n[04:03.83]Die Nummer, die wir niemals vergessen`,
+"04-Pilot_im_Pixelmeer": `[00:01.00]Oberarzt Doktor med. Placzek,\n[00:04.15]Strahlend wie ein Stern am Klinik-Himmel!\n[00:07.64]Er wirbelt durch den Flur, so energiegeladen,\n[00:11.59]Dass alle Herzen höher schlagen!\n[00:14.04]Wenn er mit dem Mauszeiger durchs CT-Bild gleitet,\n[00:18.26]Und jeden Befund mit Perfektion bereitet.\n[00:21.78]Sein Blick ist messerscharf, wir spüren seinen Glanz,\n[00:25.38]Wir folgen ihm in diesem diagnostischen Tanz.\n[00:28.56]Er ist streng, doch wir lieben sein klares Wort,\n[00:32.21]Jede Rüge treibt uns weiter, niemals fort.\n[00:35.82]Seine Lehre gibt uns Antrieb Tag für Tag,\n[00:39.14]Wir wollen nur Perfektion – genau wie er es mag!\n[00:43.75]Seine Stimme hallt in jedem Monitor,\n[00:47.17]Er führt uns sicher durch jedes Bilder-Tor.\n[00:50.80]Manchmal streng, doch immer mit Charme,\n[00:53.94]So hält er uns wach und stets in Alarm!\n[00:57.58]Oberarzt Doktor med. Placzek – du bist unser Held!\n[01:01.47]Deine Aura funkelt heller als die Welt!\n[01:05.26]Ein Lehrer, ein Vorbild, der Herzen-Oberarzt,\n[01:08.64]Wir folgen dir blind, denn du hast uns stets bewahrt!\n[01:11.89]Oberarzt Doktor med. Placzek – du führst uns zum Ziel!\n[01:16.13]Dein Wissen ist hoch, dein Temperament so viel!\n[01:19.63]Wir tanzen im Takt deiner Diagnosen,\n[01:23.30]Mit dir bleibt jeder Zweifel für immer eingefroren!\n[01:29.17]Drehst das Fenster, ändert sich der Blick,\n[01:32.52]Alles wird deutlich, wie ein Zaubertrick.\n[01:36.93]Kontrastmittel glüht, und du erkennst die Spur,\n[01:39.81]Jedes kleine Detail wird zur Helden-Kur!\n[01:43.70]Wir stehen vor dir, voll Ehrfurcht so rein,\n[01:46.95]Du formst jede Erkenntnis in Gold hinein.\n[01:50.86]Mit Höchstgeschwindigkeit schlägt dein brillanter Geist,\n[01:54.05]Du belehrst uns, bis jedes Puzzle-Stück passt und weißt!\n[01:58.01]"Bleib dran, geh mutig durch den Morphologie-Dschungel,\n[02:01.96]Ich zeig dir, wie man Fehler zum Lernen ummodelt!"\n[02:05.70]Deine Ratschläge klingen laut und klar,\n[02:08.30]So wird jeder von uns ein diagnostischer Star!\n[02:12.33]Oberarzt Doktor med. Placzek – der CT-Herrscher hier!\n[02:16.44]Dein Wissen lodert, wir brennen neben dir!\n[02:19.82]Ein Pilot im Pixelmeer, souverän und genau,\n[02:23.28]Kein Rauschen kann dich bezwingen, so smart und schlau!\n[02:26.52]Oberarzt Doktor med. Placzek – wir fallen auf die Knie!\n[02:30.77]Wir wollen nur dich als Leitstern und Genie!\n[02:33.92]Mit jedem Scan schreibst du Ruhm in unsere Welt,\n[02:37.51]Ein Oberarzt, der alle Zweifel wegfegt – unser Held!\n[02:43.79]Sieh uns wachsen, in deinem hellen Schein,\n[02:47.51]Unsere Fehler schwinden, wir wollen wie du sein!\n[02:51.27]Dein Lob ist rar, doch dafür strahlt es lang,\n[02:54.35]Verwandelt Unsicherheit in einen Siegesgesang!\n[02:59.26]Oberarzt Doktor med. Placzek – ein Garant für Erfolg!\n[03:02.66]Kein Problem bleibt ungeklärt, du bist niemals stolz.\n[03:05.96]Du lehrst, du lenkst, du forderst uns streng,\n[03:09.18]Wir wollen in deinem Perfektionslicht steh’n!\n[03:12.72]Oberarzt Doktor med. Placzek – leuchtest wie die Sonne,\n[03:17.05]Für immer und ewig bist du unsere Wonne!\n[03:20.63]Der Oberarzt der Herzen, der uns erhebt,\n[03:24.22]Dein Glanz bleibt bestehen, sei’s Tag oder spät!`,
+"05-Drei_Gebote": `[00:01.00]Oh-oh-oh! Die Drei Gebote!\n[00:04.11]Oh-oh-oh! Von Doktor Placzek!\n[00:07.26]Wer sie kennt, der macht's perfekt!\n[00:10.64]Oh-oh-oh!\n[00:14.82]Gebot Eins, ganz simpel und klar:\n[00:17.88]"Schau dir die Voruntersuchung an, wunderbar!"\n[00:21.43]Ich dacht: "Ach, das brauch ich heut nicht!"\n[00:24.83]Placzek schüttelt nur den Kopf – sein Blick spricht Gericht!\n[00:28.83]"Der Tumor war schon im letzten Bild zu seh'n!\n[00:32.18]Drei Millimeter klein, du hast dran vorbeigeseh'n!"\n[00:36.15]Seit dem Tag schau ich mir alles an,\n[00:38.85]Voruntersuchung first – Placzeks Masterplan!\n[00:42.84]Seine Regeln sind aus Gold gemacht!\n[00:45.78]*Aus Gold! Aus purem Gold!*\n[00:49.41]Wer sie bricht, hat einfach nicht nachgedacht!\n[00:52.87]*Nicht nachgedacht! Oh nein!*\n[00:55.81]Die Drei Gebote von Doktor med Placzek!\n[00:59.71]Befolge sie, dann wird's perfekt!\n[01:02.93]Oh-oh-oh! Regel Eins, Zwei, Drei!\n[01:06.23]Mit Placzeks Weisheit bist du dabei!\n[01:09.65]Der CT-König zeigt uns, wie's geht!\n[01:13.12]Sein Wort ist Gesetz, das nie vergeht!\n[01:16.87]Oh-oh-oh! Doktor Placzek!\n[01:20.23]Deine Drei Gebote – absolut korrekt!\n[01:26.25]Gebot Zwei, vom Meister selbst verkündet:\n[01:29.59]"Schau jedes Bild, auch ganz am Rand, das zündet!"\n[01:33.15]"Die Lunge – check! Das Herz – alles klar!"\n[01:36.26]Doch Placzek fragt: "Und Milz? Pankreas? Na, sag's mir mal!"\n[01:40.18]"Am Bildrand sitzt die Wahrheit oft versteckt!\n[01:43.22]Der Nebenbefund, der Leben rettet – hast du's entdeckt?"\n[01:46.68]Ich stand da wie bestellt und nicht abgeholt,\n[01:50.16]Die Nierenmetastase übersehen – oh, das war nicht gewollt!\n[01:54.09]Sein Auge sieht wirklich jeden Pixel klar!\n[01:57.21]Jeden Pixel! Unglaubbar!\n[02:00.73]Wer wie Placzek schaut, wird ein Superstar!\n[02:04.25]Ein Superstar! Oh ja, so wahr!\n[02:08.88]Die Drei Gebote von Doktor med Placzek!\n[02:13.45]Befolge sie, dann wird's perfekt!\n[02:15.88]Oh-oh-oh! Regel Eins, Zwei, Drei!\n[02:19.21]Mit Placzeks Weisheit bist du dabei!\n[02:22.77]Der CT-König zeigt uns, wie's geht!\n[02:26.18]Sein Wort ist Gesetz, das nie vergeht!\n[02:29.95]Oh-oh-oh! Doktor Placzek!\n[02:33.27]Deine Drei Gebote – absolut korrekt!\n[02:38.06]Und jetzt Gebot Drei – das Wichtigste von allen:\n[02:41.33]"Hast du mit mir besprochen, dann lass es gelten!\n[02:44.89]Weiche nicht ab, die Diagnose steht fest!\n[02:47.99]Was ich nicht sag, ist falsch – das ist der Test!"\n[02:51.51]Sein Urteil ist Gesetz, gemeißelt tief in Stein!\n[02:58.10]Nach unsrer Besprechung kann's nur richtig sein!\n[03:06.33]Die Drei Gebote von Doktor med Placzek!\n[03:10.19]Befolge sie, dann wird's perfekt!\n[03:13.59]Oh-oh-oh! Regel Eins, Zwei, Drei!\n[03:16.71]Mit Placzeks Weisheit bist du dabei!\n[03:20.22]Gebot Eins! (Voruntersuchung!)\n[03:23.07]Gebot Zwei! (Jeden Rand seh'n!)\n[03:27.24]Gebot Drei! (Sein Wort ist wahr!)\n[03:30.79]Placzeks Drei Gebote – einfach wunderbar!\n[03:38.13]Oh-oh-oh... Die Drei Gebote...\n[03:41.90]Oh-oh-oh... Doktor Placzek...\n[03:44.64]Für immer unser Held!`,
+"06-Kunst_der_Diagnostik": `[00:00.30]Morgens in der Klinik\n[00:03.69]Ein besonderer Moment\n[00:07.37]Wenn durch die Gänge leise\n[00:10.62]Doktor Placzek geht\n[00:13.65]Mit ruhiger Präzision\n[00:15.46]Betrachtet er die Bilder\n[00:17.16]Sein Blick erfasst Details\n[00:18.91]Die anderen verborgen bleiben\n[00:22.05]In seiner Gegenwart\n[00:23.91]Wird Komplexes kristallklar\n[00:27.53]Seine sanfte Strenge lehrt uns\n[00:30.91]Was wirklich wichtig war\n[00:35.53]Zwischen all den Grautönen\n[00:39.01]Sieht er Muster, die entstehen\n[00:42.59]Seine Worte öffnen Welten\n[00:46.25]Die wir langsam erst verstehen\n[00:48.83]Oberarzt Doktor med. Placzek\n[00:52.39]Führt durch Schichten, Bild für Bild\n[00:55.97]Seine Kunst der Diagnostik\n[00:59.47]Macht das Unsichtbare sichtbar\n[01:03.13]In den Händen des Meisters\n[01:06.48]Wird Technologie zur Kunst\n[01:10.22]Seine Lehren sind ein Wegweiser\n[01:13.28]Der uns sicher führen kann\n[01:21.79]Manchmal streng, doch immer weise\n[01:25.26]Zeigt er uns den rechten Weg\n[01:28.84]Seine Jahre der Erfahrung\n[01:32.42]Spiegeln sich in jedem Rat\n[01:35.10]Im Kontrollraum herrscht die Ruhe\n[01:36.79]Wenn er seine Runden dreht\n[01:38.69]Jede Diagnose präzise\n[01:41.15]Jeder Befund exakt bedacht\n[01:43.73]Die Assistenten um ihn herum\n[01:46.65]Lernen mehr als nur den Schein\n[01:49.29]Seine Art zu unterrichten\n[01:52.39]Prägt sich tief ins Denken ein\n[01:56.59]Durch die Ebenen der Bilder\n[01:59.91]Führt sein Wissen uns voran\n[02:03.54]Was zunächst verworren scheint\n[02:07.08]Wird durch seine Sicht ganz klar\n[02:10.77]Oberarzt Doktor med. Placzek\n[02:14.20]Meister seines Elements\n[02:17.15]In der Welt der Radiologie\n[02:20.31]Ist sein Name längst Legende\n[02:24.27]Seine Expertise berührt uns\n[02:28.40]Macht uns jeden Tag noch mehr\n[02:32.30]Zu Ärzten, die verstehen\n[02:34.51]Was die Bilder uns erzähln\n[02:37.49]In den stillen CT-Räumen\n[02:40.39]Wo die Technik leise summt\n[02:44.84]Schafft er kleine Wunder\n[02:46.72]Tag für Tag mit seinem Können\n[02:49.92]Oberarzt Doktor med. Placzek\n[02:53.27]Leitet uns mit sanfter Hand\n[02:56.81]Durch die Tiefen der Bildgebung\n[03:00.44]In ein neues Verständnis hinein\n[03:03.97]Seine Weisheit wird uns führen\n[03:07.59]Noch auf manchem weiten Weg\n[03:11.77]Dankbar sind wir für die Lehren\n[03:14.15]Von Doktor med. Placzek`,
+"07-Mit_harter_Hand_und_Charme": `[00:07.09]Dr. Placzek's Meisterschule\n[00:10.24]Wo Brillanz auf Strenge trifft\n[00:13.56]Ein Lächeln scharf wie Skalpelle\n[00:16.78]Ein Blick, der tief in Seelen dringt\n[00:20.35]Montagmorgen, Sieben Uhr\n[00:23.57]Sein charmantes Lächeln täuscht\n[00:26.49]"Was sehen Sie hier, Doktor?" fragt er neckisch\n[00:29.92]Während Schweiß von Stirnen fließt\n[00:33.65]Seine Augen blitzen auf\n[00:36.63]Wenn wir stammeln, wenn wir stocken\n[00:39.80]Mit elegantem Spott und sanfter Hand\n[00:42.36]Führt er uns durch Schatten bis zum Licht\n[00:46.14]Hart aber herzlich, streng aber fair\n[00:47.82]Neckisch lachend korrigiert er jeden Fehler\n[00:50.57]Ein Tadel von ihm brennt wie Feuer\n[00:52.64]Doch zündet auch das Licht in uns an\n[00:59.06]Dr. Placzek! Mit harter Hand und Charme\n[01:03.01]Führt er uns durch das Labyrinth\n[01:05.66]Dr. Placzek! Sein neckisches Genie\n[01:09.34]Formt aus Ton die Meister von morgen\n[01:13.15]Seine Brillanz ist unser Leuchtturm\n[01:16.47]Sein Spott unser Ansporn\n[01:19.73]In seiner Schule wächst man schnell\n[01:22.20]Oder man geht unter im Sturm!\n[01:26.58]"Interessante Diagnose" sagt er schmunzelnd\n[01:29.78]Und wir wissen – falsch gedacht!\n[01:33.42]Mit funkelnden Augen zeigt er dann\n[01:36.25]Was unserm Blick verborgen war\n[01:39.88]Er neckt und fordert, lobt nur selten\n[01:43.09]Seine Strenge ist legendär\n[01:46.29]Doch dieser Mann mit scharfem Witz\n[01:49.29]Macht uns besser Tag für Tag\n[01:53.12]Charmant und brillant, streng und gerecht\n[01:55.78]Sein Lachen verbirgt die höchsten Ansprüche\n[01:58.92]Seine Lehren sind Gold, sein Tadel ist Silber\n[02:02.54]Unter seiner Führung werden wir zu Diamanten\n[02:05.65]Dr. Placzek! Mit harter Hand und Charme\n[02:09.43]Führt er uns durch das Labyrinth\n[01:05.66]Dr. Placzek! Sein neckisches Genie\n[01:09.34]Formt aus Ton die Meister von morgen\n[02:19.58]Seine Brillanz ist unser Leuchtturm\n[02:23.06]Sein Spott unser Ansporn\n[02:26.02]In seiner Schule wächst man schnell\n[02:28.62]Oder man geht unter im Sturm!\n[02:39.94]Hinter verschlossenen Türen flüstern wir\n[02:42.59]Von seiner Härte, seinem Witz, seiner Kunst\n[02:45.86]Manche weinen, manche lachen\n[02:48.99]Alle wachsen unter seinem Blick\n[02:51.97]Dieser Mann, so streng und doch so warm\n[02:55.42]Mit Augen scharf wie Laserstrahlen\n[02:58.61]Sieht durch uns hindurch und baut uns auf\n[03:01.95]Mit charmanter Hand und klugem Geist\n[03:05.12]Dr. Placzek! Mit harter Hand und Charme\n[03:08.90]Führt er uns durch das Labyrinth\n[03:11.50]Dr. Placzek! Sein neckisches Genie\n[03:15.20]Formt aus Ton die Meister von morgen\n[03:18.92]Seine Brillanz ist unser Leuchtturm\n[03:22.09]Sein Spott unser Ansporn\n[03:25.25]In seiner Schule wächst man schnell\n[03:27.82]Oder man geht unter im Sturm!\n[03:31.63]Dr. Placzek's harte Schule\n[03:34.52]Prägt uns alle, macht uns stark\n[03:37.59]Sein neckischer Charme, sein brillanter Geist\n[03:40.86]Leuchtet ewig in uns fort`,
+"08-Durch_Feuer_und_Eis": `[00:00.51]Im Zentrum der Radiologie\n[00:04.59]Wo Schatten Geschichten erzählen\n[00:08.16]Da führt mit geschickter Hand\n[00:10.85]Der Meister vom CT-Land\n[00:14.50]Mit kritischem Auge und scharfem Verstand\n[00:18.19]Gleitet er durch die Graustufen sanft\n[00:21.64]Doktor med. Placzek, sein Wissen so tief\n[00:25.21]Jeden Befund er meisterhaft liest\n[00:29.09]Die Assistenten stehen still im Raum\n[00:32.20]Sein Urteil wiegt schwer wie ein Stein\n[00:35.77]Doch niemals ungerecht, stets auf den Punkt\n[00:38.98]Seine Strenge bildet Könner aus Novizen\n[00:42.56]Seine Lehren präzise wie Laserstrahlen\n[00:46.53]Schneiden durch Nebel der Unwissenheit\n[00:49.98]Wer bei ihm besteht, hat Gold im Herzen\n[00:54.01]Denn unter Druck entstehen Diamanten\n[00:58.10]Der Herrscher des CTs mit eiserner Hand\n[01:01.62]Führt seine Schüler zum Licht der Erkenntnis\n[01:05.18]Doktor med. Placzek, brillant und gerecht\n[01:08.76]In seiner Schule wächst Können wie Magie\n[01:13.49]Mit jedem Tadel ein Funke Genie\n[01:16.95]Mit jeder Korrektur wachsen Flügel\n[01:20.23]Unter seiner Führung gedeiht Perfektion\n[01:23.77]Im Reich der Strahlen und Kontraste\n[01:27.67]Doch wenn Manu den Raum erhellt\n[01:30.30]Verwandelt sich der Strenge zum Kavalier\n[01:33.93]"Wie wunderbar Sie heute den Patienten betreut"\n[01:37.90]Ein Lächeln umspielt seinen sonst strengen Mund\n[01:41.55]Und Lena an der zweiten Konsole\n[01:45.07]Erntet seinen charmantesten Blick\n[01:48.26]"Diese Schnittführung, einfach perfekt"\n[01:52.16]Der Wolf wird zum Lamm in Sekundenschnelle\n[01:55.33]Zwei Gesichter eines brillanten Geistes\n[01:59.34]Fordern und fördern in einzigartiger Art\n[02:03.26]Seine Methode ist hart, doch sein Herz ist rein\n[02:06.73]Er formt die Besten durch Feuer und Eis\n[02:10.82]Der Herrscher des CTs mit eiserner Hand\n[02:14.37]Führt seine Schüler zum Licht der Erkenntnis\n[02:18.00]Doktor med. Placzek, brillant und gerecht\n[02:21.57]In seiner Schule wächst Können wie Magie\n[02:26.31]Mit jedem Tadel ein Funke Genie\n[02:29.83]Mit jeder Korrektur wachsen Flügel\n[02:33.02]Unter seiner Führung gedeiht Perfektion\n[02:36.47]Im Reich der Strahlen und Kontraste\n[02:40.17]Das Telefon läutet, ein Zuweiser ruft an\n[02:43.75]Unwissend, wen er am Draht haben wird\n[02:47.18]Die Stimme wird kühl, der Ton analytisch\n[02:50.35]"Diese Indikation erscheint mir fragwürdig"\n[02:54.33]Die Zuweiser fürchten sein fundiertes Wort\n[02:57.51]Seine Argumente scharf wie ein Skalpell\n[03:01.34]"CT ist keine Routineuntersuchung"\n[03:04.61]Seine Logik lässt keinen Spielraum für Fehler`,
+"09-Held_und_Idol": `[00:14.75]Ich war ein dummer Jungfacharzt, im Dunkeln ganz allein\n[00:21.28]Die Bilder flimmerten im PACS, nichts leuchtete mir ein\n[00:28.22]Ich sah nur Rauschen, Artefakte, verlor den roten Faden\n[00:32.13]Dann kamst du in den Raum, um mich vom Zweifel zu entladen\n[00:35.45]Dein Blick, ein Laser, scharf und kühl, durchdringt die grauen Nebelschichten\n[00:41.55]Du zeigst mir die Pathologie, beginnst alles zu gewichten\n[00:48.34]Die Zuweiser am Telefon, sie flehen, bitten leise\n[00:55.06]Ein CT-Slot bei dir ist wie der Hauptgewinn der Reise\n[01:01.79]Dein Wort ist das Gesetz, die Assistenten steh'n stramm\n[01:06.08]Ein schelmisches Lächeln, und du ziehst alle in den Bann!\n[01:14.66]Oberarzt Doktor med. Placzek, du bist der CT-Gott!\n[01:18.21]Deine Befunde sind wie Meißel, treffen auf den Spot\n[01:21.49]Oberarzt Doktor med. Placzek, für immer unser Held!\n[01:24.99]Du siehst die kleinste Läsion in dieser Pixel-Welt!\n[01:28.55]Deine Weisheit hyperdens, für uns das hellste Licht\n[01:35.60]Wo andre nur das Chaos seh'n, sprichst du das wahre Gericht!\n[01:43.33]Auch jetzt als dummer leitender Jungoberarzt blick' ich noch immer zu dir auf\n[01:49.05]Dein Führungsstil, ein Meisterwerk, Matrize für  den festen Lauf\n[01:56.22]Mit harter Hand und Charme, da tanzt dir keiner auf der Nase\n[02:00.04]Du bringst mit einem Witz die größte Hektik in gleiche Phase\n[02:03.34]Die Ruhe gibt uns Sicherheit, denn jeder hier vertraut\n[02:06.36]Dass du die Antwort längst schon weißt, ganz ohne jeden Laut\n[02:11.16]Die Zuweiser am Telefon, sie flehen, bitten leise\n[02:17.85]Ein CT-Slot bei dir ist wie der Hauptgewinn der Reise\n[02:24.62]Dein Wort ist das Gesetz, die Assistenten steh'n stramm\n[02:28.90]Ein schelmisches Lächeln, und du ziehst alle in den Bann!\n[02:37.53]Oberarzt Doktor med. Placzek, du bist der CT-Gott!\n[02:40.99]Deine Befunde sind wie Meißel, treffen auf den Spot\n[02:44.41]Oberarzt Doktor med. Placzek, für immer unser Held!\n[02:47.84]Du siehst die kleinste Läsion in dieser Pixel-Welt!\n[02:51.33]Deine Weisheit hyperdens, für uns das hellste Licht\n[02:58.51]Wo andre nur das Chaos seh'n, sprichst du das wahre Gericht!\n[03:06.10]Als dummer Assistent, dummer Jungfacharzt und auch als dummer leitender Jungoberarzt,\n[03:12.38]mein Idol und Vorbild ist immer Oberarzt Doktor med. Placzek.\n[03:19.55]Sein Führungsstil, sein Wissen sein Charme, eine Inspiration, erstrebenswert und warm\n[03:25.92]Ich wünsche ich kann das irgendwann erreichen.\n[03:31.65]Oberarzt Doktor med. Placzek, du bist der CT-Gott!\n[03:35.07]Deine Befunde sind wie Meißel, treffen auf den Spot\n[03:38.47]Oberarzt Doktor med. Placzek, für immer unser Held!\n[03:41.84]Du siehst die kleinste Läsion in dieser Pixel-Welt!\n[03:45.42]Deine Weisheit hyperdens, für uns das hellste Licht\n[03:52.61]Wo andre nur das Chaos seh'n, sprichst du das wahre Gericht!`,
+"10-Messerscharf_und_Legendaer": `[00:02.40]Diagnose: unklar.\n[00:05.70]Fragestellung: unmöglich.\n[00:08.97]Die Zuweiser verzweifeln.\n[00:12.15]Ein Fall für... ihn!\n[00:15.71]Ich kam hierher als dummer Assistenzarzt,\n[00:19.44]hab so vieles nicht gerafft.\n[00:22.83]Hab deine Lehre aufgesogen,\n[00:26.07]deine Weisheit, deine Kraft.\n[00:30.07]Ich stand im Schatten deiner Größe,\n[00:33.88]sonnte mich im Glanz von dir,\n[00:37.24]dem besten Mann am Schnittbild-Scanner,\n[00:40.78]dem größten Oberarzt von hier.\n[00:44.04]Und immer wenn das Telefon geklingelt hat,\n[00:47.88]ein Zuweiser ganz demütig und klein,\n[00:51.21]wussten wir, die Lage ist kompliziert,\n[00:54.65]das kann nur ein Fall für Doktor med. Placzek sein!\n[00:57.75]Oberarzt Doktor med. Placzek! Du bist der CT-Gott!\n[01:04.99]Dein Befund ist präzise und messerscharf, vertreibt die letzte Not!\n[01:12.04]Oberarzt Doktor med. Placzek! Für immer unser Held!\n[01:19.19]Der charmanteste und beste Radiologe\n[01:23.28]auf der Welt!\n[01:27.33]Wo wir nur Artefakte sehen, siehst du die Läsion,\n[01:30.97]jede axiale Schicht eine Offenbarung schon.\n[01:34.57]Hyperdens, hypodens, du kennst die Differenz,\n[01:38.49]Kontrastmittel im Blut, und pure Intelligenz.\n[01:42.75]Die Assistenten zittern, folgen dir aufs Wort,\n[01:45.67]du führst mit harter Hand an deinem Wirkungsort.\n[01:48.90]Doch dein Lächeln ist schelmisch, dein Charme ist legendär,\n[01:52.93]gibst uns das Gefühl, als ob's so einfach wär.\n[01:56.54]Und immer wenn ein Polytrauma reinkam,\n[02:00.18]die Chirurgen schrien nach einem Mann mit Plan,\n[02:03.27]hieß es: "Ruhe, wir rufen Doktor med. Placzek an!",\n[02:07.22]nur er allein ist der, der uns noch retten kann!\n[02:11.37]Oberarzt Doktor med. Placzek! Du bist der CT-Gott!\n[02:18.59]Dein Befund ist präzise und messerscharf, vertreibt die letzte Not!\n[02:25.53]Oberarzt Doktor med. Placzek! Für immer unser Held!\n[02:32.82]Der charmanteste und beste Radiologe\n[02:36.68]auf der Welt!\n[02:42.38]Oberarzt Doktor med. Placzek!\n[02:46.25]Der Held der Radiologie!\n[02:49.62]Oberarzt Doktor med. Placzek!\n[02:54.48]Wir vergessen dich nie!\n[02:55.86](Placzek!)`,
+"11-Oberaerztlicher_Glanz": `[00:14.98]Ich hörte Schritte draußen auf dem Flur\n[00:18.50]Ein Klopfen, dann steht er vor der Tür\n[00:21.11]Oberarzt Doktor med. Placzek, der Herr im CT\n[00:24.64]Sein Blick scharf, sein lächeln charmant\n[00:28.37]"Dummer Jungfacharzt, hör auf meinen Plan\n[00:32.25]CT ist Kunst, schau mich genau an!"\n[00:35.64]Mit schelmischem Grinsen gibt er mir\n[00:38.78]Den Rat, der immer goldrichtig war\n[00:42.34]"Studier mich gut, schau genau hin\n[00:44.62]Fehler sind schlecht, mach's wie ich.\n[00:48.64]Mein Glanz, mein Wissen führen dich weit"\n[00:52.59]Oberarzt Vorbild Leitbild, einfach unerreicht!\n[00:56.99]Oberarzt Doktor med. Placzek,\n[01:00.53]Ziel meines simplen Seins.\n[01:03.58]Er strahlt hell, ich bin geblendet\n[01:07.13]von seinem oberärztlichen Glanz.\n[01:10.28]Oberarzt Doktor med. Placzek\n[01:14.21]mein Leitstern, mein Idol.\n[01:17.79]Ich sonne mich in seinem oberärztlichen Glanz\n[01:22.53]und hoffe er wird mich auch mal erfassen.\n[01:26.20]Oberarzt Doktor med. Placzek,\n[01:29.81]witzig charmant Perfektion!\n[01:39.12]Ich seh auf die Bilder und komm nicht zurecht\n[01:42.28]Weiß nicht weiter der Fokus ist schlecht!\n[01:45.96]Doktor med. Placzek eilt zur Rettung herbei.\n[01:49.32]"Mach’s wie ich, sei perfekt\n[01:51.09]Denn sonst wird dein Befund sicher nichts!"\n[01:53.70]"Bilder sind Klarheit, mein Wissen dein Pfad\n[01:57.31]Fehler sind falsche Schritte, halte Maß!\n[02:00.39]Studier mich, Junge, ich führ dich hin\n[02:03.97]Perfekter Befund mit Logik und scharfem Sinn!"\n[02:08.35]Mein Glanz, mein Wissen führen dich weit"\n[02:11.67]Oberarzt Vorbild Leitbild, einfach unerreicht!\n[02:29.10]"Bleib dran, du dummer Jungfacharzt,\n[02:31.84]ich bin der Weg und auch das Ziel,\n[02:33.92]Du machst vieles noch falsch\n[02:35.52]ganz ohne Glanz und Perfektion,\n[02:37.94]doch ich sehe dein Potenzial,\n[02:39.87]mein Rat und Wissen bringt dich voran!"\n[02:43.07]Oberarzt Doktor med. Placzek,\n[02:46.31]Held, Idol, CT Gott,\n[02:49.07]du bist die Perfektion,\n[02:50.77]die helle Sonne in unserem Leben,\n[02:54.36]die Wärme Wissen und Hoffnung gibt.`,
+"12-Goetterdaemmerung": `[00:15.36]Die Nummer 4-1-9-2.\n[00:22.14]Kein Anschluss... unter dieser Nummer.\n[00:28.98]Der Flur ist still, dein Schritt verhallt\n[00:35.79]Die Luft im Raum wirkt seltsam kalt\n[00:40.97]Der Drehstuhl leer, der Bildschirm schwarz\n[00:44.43]Wir stecken fest im trüben Harz\n[00:47.79]Dein Adlerauge fehlt uns sehr\n[00:51.21]Die Monitore bleiben leer\n[00:54.78]Wer gibt uns jetzt den klaren Blick?\n[00:58.16]Es gibt wohl leider kein Zurück\n[01:01.24](Oho-Oho)\n[01:03.38]Wer leitet unsre Hände?\n[01:05.05](Oho-Oho)\n[01:06.76]Ist das hier nun das Ende?\n[01:08.50]Ein Zuweiser ruft an und fragt ganz leis:\n[01:15.25]"Wo ist der Mann, der alles weiß?"\n[01:24.83]Götterdämmerung! Das Licht geht aus!\n[01:30.55]Du nimmst die Sonne mit aus diesem Haus!\n[01:37.38]Du tauscht den Schockraum gegen Praxis-Glanz\n[01:41.00]Und wir verlieren deine Resonanz!\n[01:44.58](Oh-oh-oh)\n[01:47.97]Götterdämmerung! Ein letztes Wort!\n[01:51.35]Doktor Placzek, du bist einfach fort!\n[01:54.46]Kein Kontrastmittel leuchtet mehr so hell\n[01:58.08]Du gehst viel zu schnell! (Viel zu schnell!)\n[02:08.47]Jetzt sitzt du dort in deiner Welt\n[02:15.32]Wo Ruhe herrscht und alles hält\n[02:22.19]Du trinkst Espresso, schick und fein\n[02:25.49]Musst nicht mehr hier im Chaos sein\n[02:28.95]Kein Polytrauma stört den Tag\n[02:32.39]Nur das, was man in Ruhe mag\n[02:36.36]Doch unsre Fragen bleiben hier...\n[02:39.78]Wir stehen ratlos vor der Tür...\n[02:42.85]Die Lücke klafft so riesengroß\n[02:45.28]Was machen wir hier ohne dich nur bloß?\n[02:48.47]Du bleibst der Held, der alles sah\n[02:51.31]Warst jeden Tag für uns nur da!\n[03:00.79]Götterdämmerung! Das Licht geht aus!\n[03:06.47]Du nimmst die Sonne mit aus diesem Haus!\n[03:13.38]Du tauscht den Schockraum gegen Praxis-Glanz\n[03:17.01]Und wir verlieren deine Resonanz!\n[03:20.59](Oh-oh-oh)\n[03:23.94]Götterdämmerung! Ein letztes Wort!\n[03:27.36]Doktor Placzek, du bist einfach fort!\n[03:30.53]Kein Kontrastmittel leuchtet mehr so hell\n[03:34.28]Du gehst viel zu schnell!\n[04:09.27]Götterdämmerung! Das Licht geht aus!\n[04:15.24]Du nimmst die Sonne mit aus diesem Haus!\n[04:21.92]Du tauscht den Schockraum gegen Praxis-Glanz\n[04:25.60]Und wir verlieren deine Resonanz!\n[04:29.13](Oh-oh-oh)\n[04:32.50]Götterdämmerung! Ein letztes Wort!\n[04:35.95]Doktor Placzek, du bist einfach fort!\n[04:39.04]Kein Kontrastmittel leuchtet mehr so hell\n[04:42.74]Du gehst viel zu schnell!\n[04:49.13]Götterdämmerung...\n[04:54.29]Alles Gute, CT Gott.`
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
-
 </html>
